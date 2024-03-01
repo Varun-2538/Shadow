@@ -1,22 +1,30 @@
 import React from 'react';
-import { MapContainer, TileLayer, Circle } from 'react-leaflet';
+import { MapContainer, TileLayer, Circle, useMapEvents } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 
-const center = [15.3173, 75.7139]; // Center on Karnataka
+function MapEvents({ onUpdate }) {
+  useMapEvents({
+    dblclick(e) {
+      onUpdate(e.latlng.lat, e.latlng.lng);
+    },
+  });
+  return null;
+}
 
-const HeatMap = ({ entries }) => {
+const HeatMap = ({ entries, onUpdate }) => {
+  const center = [12.9716, 77.5946]; // Center on Bangalore
+
   return (
-    <MapContainer center={center} zoom={7} style={{ height: '400px', width: '100%' }}>
-      <TileLayer
-        url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-      />
+    <MapContainer center={center} zoom={12} style={{ height: '400px', width: '100%' }}>
+      <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
+      <MapEvents onUpdate={onUpdate} />
       {entries.map((entry, index) => (
         <Circle
           key={index}
           center={[entry.latitude, entry.longitude]}
           fillColor="red"
           color="red"
-          radius={200} // Adjust based on your preference
+          radius={200}
         />
       ))}
     </MapContainer>
