@@ -1,31 +1,92 @@
 import React, { useState } from 'react';
 import './App.css';
-import HeatMap from './HeatMap';
+import { MapContainer, TileLayer, Circle, useMapEvents } from 'react-leaflet';
+import 'leaflet/dist/leaflet.css';
+
+// Define the MapEvents component for handling map events
+function MapEvents({ onUpdate }) {
+  useMapEvents({
+    dblclick(e) {
+      onUpdate(e.latlng.lat, e.latlng.lng);
+    },
+  });
+  return null;
+}
+
+// Define the HeatMap component
+const HeatMap = ({ entries, color, onUpdate }) => {
+  const center = [12.9716, 77.5946]; // Center on Bangalore
+
+  return (
+    <MapContainer center={center} zoom={12} style={{ height: '400px', width: '100%' }}>
+      <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
+      <MapEvents onUpdate={onUpdate} />
+      {entries.map((entry, index) => (
+        <Circle
+          key={index}
+          center={[entry.latitude, entry.longitude]}
+          fillColor={color}
+          color={color}
+          radius={200}
+        />
+      ))}
+    </MapContainer>
+  );
+};
 
 function App() {
-  const [entry, setEntry] = useState({ latitude: '', longitude: '' });
-  const [entries, setEntries] = useState([]);
+  const [allegedEntries, setAllegedEntries] = useState([]);
+  const [provenEntries, setProvenEntries] = useState([]);
+  const [entry, setEntry] = useState({ latitude: '', longitude: '', crime: '', severity: '1', report: '' });
+  const [mapType, setMapType] = useState('alleged');
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (entry.latitude && entry.longitude) {
-      setEntries([...entries, { ...entry }]);
-      setEntry({ latitude: '', longitude: '' }); // Reset form
+    const newEntry = { ...entry };
+    if (mapType === 'alleged') {
+      setAllegedEntries([...allegedEntries, newEntry]);
+    } else {
+      setProvenEntries([...provenEntries, newEntry]);
+    }
+    setEntry({ latitude: '', longitude: '', crime: '', severity: '1', report: '' }); // Reset form
+  };
+
+  const handleDelete = (indexToDelete, type) => {
+    if (type === 'alleged') {
+      setAllegedEntries(allegedEntries.filter((_, index) => index !== indexToDelete));
+    } else {
+      setProvenEntries(provenEntries.filter((_, index) => index !== indexToDelete));
     }
   };
 
   const updateEntry = (lat, lng) => {
-    setEntry({ latitude: lat.toString(), longitude: lng.toString() });
-  };
-
-  const handleDelete = (indexToDelete) => {
-    setEntries(entries.filter((_, index) => index !== indexToDelete));
+    setEntry({ ...entry, latitude: lat.toString(), longitude: lng.toString() });
   };
 
   return (
     <div className="App">
       <h1>Karnataka Heatmap Visualization</h1>
-      <form onSubmit={handleSubmit} style={{margin: '20px'}}>
+      <div>
+        <label>
+          <input
+            type="radio"
+            value="alleged"
+            name="mapType"
+            checked={mapType === 'alleged'}
+            onChange={() => setMapType('alleged')}
+          /> Alleged
+        </label>
+        <label>
+          <input
+            type="radio"
+            value="proven"
+            name="mapType"
+            checked={mapType === 'proven'}
+            onChange={() => setMapType('proven')}
+          /> Proven
+        </label>
+      </div>
+      <form onSubmit={handleSubmit} style={{ margin: '20px' }}>
         <input
           type="text"
           value={entry.latitude}
@@ -40,20 +101,85 @@ function App() {
           placeholder="Longitude"
           required
         />
-        <button type="submit">Update Map</button>
+        {mapType === 'proven' && (
+          <>
+            <input
+              type="text"
+              value={entry.crime}
+              onChange={(e) => setEntry({ ...entry, crime: e.target.value })}
+              placeholder="Crime Type"
+              required
+            />
+            <select
+              value={entry.severity}
+              onChange={(e) => setEntry({ ...entry, severity: e.target.value })}
+              required
+            >
+              <option value="1">1</option>
+              <option value="2">2</option>
+              <option value="3">3</option>
+              <option value="4">4</option>
+              <option value="5">5</option>
+            </select>
+            <textarea
+              value={entry.report}
+              onChange={(e) => setEntry({ ...entry, report: e.target.value })}
+              placeholder="Incident Report"
+              required
+            />
+          </>
+        )}
+        <button type="submit">Add to Map</button>
       </form>
-      <div style={{ width: '60%', margin: '0 auto' }}>
-        <HeatMap entries={entries} onUpdate={updateEntry} />
-      </div>
-      <div>
-        {entries.map((entry, index) => (
-          <div key={index}>
-            Latitude: {entry.latitude}, Longitude: {entry.longitude}
-            <button onClick={() => handleDelete(index)}>Delete</button>
-          </div>
-        ))}
-      </div>
+      {mapType === 'alleged' ? (
+        <>
+          <HeatMap entries={allegedEntries} color="red" onUpdate={updateEntry} />
+          {renderTable(allegedEntries, 'alleged', handleDelete)}
+        </>
+      ) : (
+        <>
+          <HeatMap entries={provenEntries} color="green" onUpdate={updateEntry} />
+          {renderTable(provenEntries, 'proven', handleDelete)}
+        </>
+      )}
     </div>
+  );
+}
+
+function renderTable(entries, type, handleDelete) {
+  return (
+    <table style={{ width: '100%', marginTop: '20px' }}>
+      <thead>
+        <tr>
+          <th>Serial Number</th>
+          <th>Latitude</th>
+          <th>Longitude</th>
+          {type === 'proven' && <>
+            <th>Crime Type</th>
+            <th>Severity</th>
+            <th>Report</th>
+          </>}
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        {entries.map((entry, index) => (
+          <tr key={index}>
+            <td>{index + 1}</td>
+            <td>{entry.latitude}</td>
+            <td>{entry.longitude}</td>
+            {type === 'proven' && <>
+              <td>{entry.crime}</td>
+              <td>{entry.severity}</td>
+              <td>{entry.report}</td>
+            </>}
+            <td>
+              <button onClick={() => handleDelete(index, type)}>Delete</button>
+            </td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
   );
 }
 
