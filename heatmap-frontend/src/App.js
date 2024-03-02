@@ -70,14 +70,28 @@ function App() {
           <HeatMap entries={entries} onUpdate={updateEntry} color="green" />
         )}
       </div>
-      <div>
-        {entries.map((entry, index) => (
-          <div key={index}>
-            Latitude: {entry.latitude}, Longitude: {entry.longitude}
-            <button onClick={() => handleDelete(index)}>Delete</button>
-          </div>
-        ))}
-      </div>
+      <table style={{ width: '60%', margin: '20px auto' }}>
+        <thead>
+          <tr>
+            <th>Serial Number</th>
+            <th>Latitude</th>
+            <th>Longitude</th>
+            <th>Delete</th>
+          </tr>
+        </thead>
+        <tbody>
+          {entries.map((entry, index) => (
+            <tr key={index}>
+              <td>{index + 1}</td>
+              <td>{entry.latitude}</td>
+              <td>{entry.longitude}</td>
+              <td>
+                <button onClick={() => handleDelete(index)}>Delete</button>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
     </div>
   );
 }
