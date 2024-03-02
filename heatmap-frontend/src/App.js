@@ -3,11 +3,10 @@ import './App.css';
 import HeatMap from './HeatMap';
 
 function App() {
-  // Separate state for alleged and proven entries
   const [allegedEntries, setAllegedEntries] = useState([]);
   const [provenEntries, setProvenEntries] = useState([]);
   const [entry, setEntry] = useState({ latitude: '', longitude: '' });
-  const [mapType, setMapType] = useState('alleged'); // State to control which map is active
+  const [mapType, setMapType] = useState('alleged'); // State to control which map and log are active
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -73,32 +72,30 @@ function App() {
         />
         <button type="submit">Add to Map</button>
       </form>
-      {/* Alleged Map and Log */}
-      <div>
-        <h2>Alleged Cases</h2>
-        <HeatMap entries={allegedEntries} onUpdate={updateEntry} color="red" />
-        {renderTable(allegedEntries, 'alleged', handleDelete)}
-      </div>
-      {/* Proven Map and Log */}
-      <div>
-        <h2>Proven Cases</h2>
-        <HeatMap entries={provenEntries} onUpdate={updateEntry} color="green" />
-        {renderTable(provenEntries, 'proven', handleDelete)}
-      </div>
+      {mapType === 'alleged' ? (
+        <>
+          <HeatMap entries={allegedEntries} onUpdate={updateEntry} color="red" />
+          {renderTable(allegedEntries, 'alleged', handleDelete)}
+        </>
+      ) : (
+        <>
+          <HeatMap entries={provenEntries} onUpdate={updateEntry} color="green" />
+          {renderTable(provenEntries, 'proven', handleDelete)}
+        </>
+      )}
     </div>
   );
 }
 
-// Helper function to render table for alleged and proven entries
 function renderTable(entries, type, handleDelete) {
   return (
-    <table style={{ width: '60%', margin: '20px auto' }}>
+    <table style={{ width: '100%', marginTop: '20px' }}>
       <thead>
         <tr>
           <th>Serial Number</th>
           <th>Latitude</th>
           <th>Longitude</th>
-          <th>Delete</th>
+          <th>Action</th>
         </tr>
       </thead>
       <tbody>
