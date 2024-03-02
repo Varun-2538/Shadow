@@ -5,6 +5,7 @@ import HeatMap from './HeatMap';
 function App() {
   const [entry, setEntry] = useState({ latitude: '', longitude: '' });
   const [entries, setEntries] = useState([]);
+  const [mapType, setMapType] = useState('alleged'); // New state for map type
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -25,7 +26,27 @@ function App() {
   return (
     <div className="App">
       <h1>Karnataka Heatmap Visualization</h1>
-      <form onSubmit={handleSubmit} style={{margin: '20px'}}>
+      <div>
+        <label>
+          <input
+            type="radio"
+            value="alleged"
+            name="mapType"
+            checked={mapType === 'alleged'}
+            onChange={(e) => setMapType(e.target.value)}
+          /> Alleged
+        </label>
+        <label>
+          <input
+            type="radio"
+            value="proven"
+            name="mapType"
+            checked={mapType === 'proven'}
+            onChange={(e) => setMapType(e.target.value)}
+          /> Proven
+        </label>
+      </div>
+      <form onSubmit={handleSubmit} style={{ margin: '20px' }}>
         <input
           type="text"
           value={entry.latitude}
@@ -43,7 +64,11 @@ function App() {
         <button type="submit">Update Map</button>
       </form>
       <div style={{ width: '60%', margin: '0 auto' }}>
-        <HeatMap entries={entries} onUpdate={updateEntry} />
+        {mapType === 'alleged' ? (
+          <HeatMap entries={entries} onUpdate={updateEntry} color="red" />
+        ) : (
+          <HeatMap entries={entries} onUpdate={updateEntry} color="green" />
+        )}
       </div>
       <div>
         {entries.map((entry, index) => (

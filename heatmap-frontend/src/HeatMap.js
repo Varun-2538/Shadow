@@ -11,7 +11,7 @@ function MapEvents({ onUpdate }) {
   return null;
 }
 
-const HeatMap = ({ entries, onUpdate }) => {
+const HeatMap = ({ entries, onUpdate, color }) => {
   const center = [12.9716, 77.5946]; // Center on Bangalore
 
   return (
@@ -22,8 +22,8 @@ const HeatMap = ({ entries, onUpdate }) => {
         <Circle
           key={index}
           center={[entry.latitude, entry.longitude]}
-          fillColor="red"
-          color="red"
+          fillColor={color}
+          color={color}
           radius={200}
         />
       ))}
