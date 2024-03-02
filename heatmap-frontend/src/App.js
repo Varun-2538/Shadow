@@ -3,15 +3,21 @@ import './App.css';
 import HeatMap from './HeatMap';
 
 function App() {
+  // Separate state for alleged and proven entries
+  const [allegedEntries, setAllegedEntries] = useState([]);
+  const [provenEntries, setProvenEntries] = useState([]);
   const [entry, setEntry] = useState({ latitude: '', longitude: '' });
-  const [entries, setEntries] = useState([]);
-  const [mapType, setMapType] = useState('alleged'); // New state for map type
+  const [mapType, setMapType] = useState('alleged'); // State to control which map is active
 
   const handleSubmit = (e) => {
     e.preventDefault();
     if (entry.latitude && entry.longitude) {
-      setEntries([...entries, { ...entry }]);
-      setEntry({ latitude: '', longitude: '' }); // Reset form
+      if (mapType === 'alleged') {
+        setAllegedEntries([...allegedEntries, { ...entry }]);
+      } else {
+        setProvenEntries([...provenEntries, { ...entry }]);
+      }
+      setEntry({ latitude: '', longitude: '' }); // Reset form after submission
     }
   };
 
@@ -19,8 +25,12 @@ function App() {
     setEntry({ latitude: lat.toString(), longitude: lng.toString() });
   };
 
-  const handleDelete = (indexToDelete) => {
-    setEntries(entries.filter((_, index) => index !== indexToDelete));
+  const handleDelete = (indexToDelete, type) => {
+    if (type === 'alleged') {
+      setAllegedEntries(allegedEntries.filter((_, index) => index !== indexToDelete));
+    } else {
+      setProvenEntries(provenEntries.filter((_, index) => index !== indexToDelete));
+    }
   };
 
   return (
@@ -61,38 +71,49 @@ function App() {
           placeholder="Longitude"
           required
         />
-        <button type="submit">Update Map</button>
+        <button type="submit">Add to Map</button>
       </form>
-      <div style={{ width: '60%', margin: '0 auto' }}>
-        {mapType === 'alleged' ? (
-          <HeatMap entries={entries} onUpdate={updateEntry} color="red" />
-        ) : (
-          <HeatMap entries={entries} onUpdate={updateEntry} color="green" />
-        )}
+      {/* Alleged Map and Log */}
+      <div>
+        <h2>Alleged Cases</h2>
+        <HeatMap entries={allegedEntries} onUpdate={updateEntry} color="red" />
+        {renderTable(allegedEntries, 'alleged', handleDelete)}
       </div>
-      <table style={{ width: '60%', margin: '20px auto' }}>
-        <thead>
-          <tr>
-            <th>Serial Number</th>
-            <th>Latitude</th>
-            <th>Longitude</th>
-            <th>Delete</th>
-          </tr>
-        </thead>
-        <tbody>
-          {entries.map((entry, index) => (
-            <tr key={index}>
-              <td>{index + 1}</td>
-              <td>{entry.latitude}</td>
-              <td>{entry.longitude}</td>
-              <td>
-                <button onClick={() => handleDelete(index)}>Delete</button>
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+      {/* Proven Map and Log */}
+      <div>
+        <h2>Proven Cases</h2>
+        <HeatMap entries={provenEntries} onUpdate={updateEntry} color="green" />
+        {renderTable(provenEntries, 'proven', handleDelete)}
+      </div>
     </div>
+  );
+}
+
+// Helper function to render table for alleged and proven entries
+function renderTable(entries, type, handleDelete) {
+  return (
+    <table style={{ width: '60%', margin: '20px auto' }}>
+      <thead>
+        <tr>
+          <th>Serial Number</th>
+          <th>Latitude</th>
+          <th>Longitude</th>
+          <th>Delete</th>
+        </tr>
+      </thead>
+      <tbody>
+        {entries.map((entry, index) => (
+          <tr key={index}>
+            <td>{index + 1}</td>
+            <td>{entry.latitude}</td>
+            <td>{entry.longitude}</td>
+            <td>
+              <button onClick={() => handleDelete(index, type)}>Delete</button>
+            </td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
   );
 }
 
