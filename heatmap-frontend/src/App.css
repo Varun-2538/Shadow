@@ -1,47 +1,110 @@
+/* App.css */
+
 .App {
-    text-align: center;
-    font-family: Arial, sans-serif;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  font-family: 'Arial', sans-serif;
+}
+
+.sidebar {
+  width: 200px;
+  height: 100vh;
+  background-color: #f0f0f0;
+  padding: 20px;
+  box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+  position: fixed;
+  left: 0;
+  top: 0;
+}
+
+.sidebar a {
+  display: block;
+  padding: 10px;
+  margin-bottom: 10px;
+  text-decoration: none;
+  color: #333;
+  background-color: #ddd;
+  border-radius: 4px;
+  transition: background-color 0.3s;
+}
+
+.sidebar a:hover {
+  background-color: #ccc;
+}
+
+.sidebar a:focus, .sidebar a:active {
+  background-color: #bbb;
+}
+
+.main-content {
+  margin-left: 220px; /* width of the sidebar + some spacing */
+  padding: 20px;
+  overflow-y: auto;
+}
+
+/* Map component specific styles */
+.map-container {
+  width: calc(100% - 220px); /* account for sidebar */
+  margin: 20px auto;
+}
+
+.map-container h1 {
+  margin-bottom: 30px;
+}
+
+.radio-buttons label {
+  margin-right: 20px;
+}
+
+.form-container {
+  margin-bottom: 20px;
+}
+
+.leaflet-container {
+  margin-bottom: 20px;
+  border: 1px solid #ccc;
+}
+
+.log-table {
+  width: 100%;
+}
+
+.log-table thead {
+  background-color: #f4f4f4;
+}
+
+.log-table th, .log-table td {
+  padding: 10px;
+  text-align: left;
+  border-bottom: 1px solid #eaeaea;
+}
+
+.log-table button {
+  padding: 5px 10px;
+  background-color: #ff4d4d;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.log-table button:hover {
+  background-color: #ff3333;
+}
+
+/* Responsive adjustments for smaller screens */
+@media (max-width: 768px) {
+  .sidebar {
+    width: 100px;
   }
-  
-  h1 {
-    color: #333;
+
+  .main-content, .map-container {
+    margin-left: 120px;
   }
-  
-  form {
-    margin: 20px auto;
-    display: flex;
-    justify-content: center;
-    gap: 10px;
+
+  .map-container {
+    width: calc(100% - 120px);
   }
-  
-  input {
-    padding: 10px;
-    font-size: 16px;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-  }
-  
-  button {
-    padding: 10px 20px;
-    font-size: 16px;
-    color: #fff;
-    background-color: #007bff;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-  }
-  
-  button:hover {
-    background-color: #0056b3;
-  }
-  
-  /* Style adjustments for the map container */
-  .leaflet-container {
-    margin: 20px auto;
-    height: 400px; /* Adjust height as needed */
-    width: 60%; /* Map occupies 60% of the screen width */
-    border: 1px solid #ddd;
-    border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-  }
-  
+}
+
