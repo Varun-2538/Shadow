@@ -105,17 +105,41 @@ const Spatial = () => {
     return rows;
   };
 
+  const renderTopThreeFrequencies = () => {
+    return Object.entries(frequencyData).map(([field, values]) => {
+      // Filter out the fields you don't want to display
+      if (['crime_no', 'district_name', 'unitname'].includes(field)) {
+        return null;
+      }
+  
+      const topThreeValues = Object.entries(values)
+        .sort((a, b) => b[1] - a[1])
+        .slice(0, 3)
+        .map(([value, freq]) => `${value}: ${freq}`)
+        .join(', ');
+  
+      return (
+        <div key={field} className="mt-4">
+          <h3 className="font-bold">{field} Top 3 Frequencies:</h3>
+          <p>{topThreeValues}</p>
+        </div>
+      );
+    }).filter(Boolean); // Filter out any null elements (fields to be excluded)
+  };
+
   return (
     <div className="container mx-auto px-4">
       <h2 className="text-2xl font-bold mb-4">Select District and Unit for Spatial Analysis</h2>
+      
       <div className="mb-4">
-      <label htmlFor="district-select" className="block mb-2 text-sm font-medium text-gray-900">District:</label>
+        <label htmlFor="district-select" className="block mb-2 text-sm font-medium text-gray-900">District:</label>
         <select id="district-select" value={selectedDistrict} onChange={handleDistrictChange} className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5">
           {districts.map(district => (
             <option key={district} value={district}>{district}</option>
           ))}
         </select>
       </div>
+      
       <div className="mb-4">
         <label htmlFor="unit-select" className="block mb-2 text-sm font-medium text-gray-900">Unit:</label>
         <select id="unit-select" value={selectedUnit} onChange={handleUnitChange} disabled={!selectedDistrict} className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5">
@@ -124,12 +148,19 @@ const Spatial = () => {
           ))}
         </select>
       </div>
+      
       <button onClick={handleSubmit} className="text-white bg-blue-500 hover:bg-blue-700 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center">Submit</button>
+      
       <div className="mt-8">
         {Object.keys(frequencyData).length > 0 ? renderCharts() : <p className="text-gray-500">No data to display</p>}
       </div>
+      
+      <div className="mt-8">
+        <h2 className="text-xl font-bold mb-4">Top 3 Frequencies for Each Field</h2>
+        {Object.keys(frequencyData).length > 0 && renderTopThreeFrequencies()}
+      </div>
     </div>
   );
-};
-
+  
+}
 export default Spatial;
