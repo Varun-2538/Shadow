@@ -11,7 +11,7 @@ app.use(express.json());
 const readCSV = (filterColumn = null, filterValue = null) => {
   return new Promise((resolve, reject) => {
     const results = [];
-    fs.createReadStream('C:\\Users\\94252\\Downloads\\ml_model_ready_dataset.csv')
+    fs.createReadStream('D:\\VSCode-Projects\\Gallants-KSP\\dataset\\ml_model_ready_dataset.csv')
       .pipe(csv())
       .on('data', (row) => {
         if (!filterColumn || row[filterColumn] === filterValue) {
