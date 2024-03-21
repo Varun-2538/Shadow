@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { Bar, Pie } from 'react-chartjs-2';
 import 'chart.js/auto';
+import { MapContainer, TileLayer } from 'react-leaflet';
+import 'leaflet/dist/leaflet.css';
 
 const Spatial = () => {
   const [districts, setDistricts] = useState([]);
@@ -9,6 +11,7 @@ const Spatial = () => {
   const [selectedDistrict, setSelectedDistrict] = useState('');
   const [selectedUnit, setSelectedUnit] = useState('');
   const [frequencyData, setFrequencyData] = useState({});
+  const defaultPosition = [14.5204, 75.7224]; // Latitude and Longitude of Karnataka
 
   useEffect(() => {
     axios.get('http://localhost:5000/api/districts')
@@ -38,7 +41,12 @@ const Spatial = () => {
   };
 
   const handleUnitChange = (event) => {
-    setSelectedUnit(event.target.value);
+    const value = event.target.value;
+    if (value === 'All Police Stations') {
+      setSelectedUnit('');
+    } else {
+      setSelectedUnit(value);
+    }
   };
 
   const handleSubmit = () => {
@@ -53,7 +61,6 @@ const Spatial = () => {
     const excludeFields = ['district_name', 'unitname', 'crime_no'];
     const pieChartFields = ['accused_presentaddress', 'victim_presentaddress'];
 
-    // Prepare charts for rendering
     const charts = Object.entries(frequencyData).filter(
       ([field]) => !excludeFields.includes(field)
     ).map(([field, values], index) => {
@@ -92,7 +99,6 @@ const Spatial = () => {
       );
     });
 
-    // Wrap every two charts in a flex row
     const rows = [];
     for (let i = 0; i < charts.length; i += 2) {
       rows.push(
@@ -105,9 +111,16 @@ const Spatial = () => {
     return rows;
   };
 
+  const renderUnitOptions = () => {
+    let options = units.map(unit => (
+      <option key={unit} value={unit}>{unit}</option>
+    ));
+    options.unshift(<option key="All Police Stations" value="All Police Stations">All Police Stations</option>);
+    return options;
+  };
+
   const renderTopThreeFrequencies = () => {
     return Object.entries(frequencyData).map(([field, values]) => {
-      // Filter out the fields you don't want to display
       if (['crime_no', 'district_name', 'unitname'].includes(field)) {
         return null;
       }
@@ -123,12 +136,11 @@ const Spatial = () => {
         <div key={field} className="mt-4">
           <h3 className="font-bold">{field} Top 3 Frequencies:</h3>
           <p>{topThreeText}</p>
-          <p>Most of the {field} in this {selectedDistrict} district and {selectedUnit} unit belongs to {topThreeText} where total {field} number is {total} which makes {percentageText} of the total {field}.</p>
+          <p>Most of the {field} in this {selectedDistrict} district and {selectedUnit || 'entire district'} unit belongs to {topThreeText} where total {field} number is {total} which makes {percentageText} of the total {field}.</p>
         </div>
       );
-    }).filter(Boolean); // Filter out any null elements (fields to be excluded)
+    }).filter(Boolean);
   };
-  
 
   return (
     <div className="container mx-auto px-4">
@@ -146,13 +158,20 @@ const Spatial = () => {
       <div className="mb-4">
         <label htmlFor="unit-select" className="block mb-2 text-sm font-medium text-gray-900">Unit:</label>
         <select id="unit-select" value={selectedUnit} onChange={handleUnitChange} disabled={!selectedDistrict} className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5">
-          {units.map(unit => (
-            <option key={unit} value={unit}>{unit}</option>
-          ))}
+          {renderUnitOptions()}
         </select>
       </div>
       
       <button onClick={handleSubmit} className="text-white bg-blue-500 hover:bg-blue-700 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center">Submit</button>
+      <div className="mt-4" style={{ height: '400px' }}>
+        <MapContainer center={defaultPosition} zoom={7} scrollWheelZoom={true} style={{ height: '100%', width: '100%' }}>
+          <TileLayer
+            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+            attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+          />
+          {/* You can add Markers here if you have specific locations to mark within Karnataka */}
+        </MapContainer>
+      </div>
       
       <div className="mt-8">
         {Object.keys(frequencyData).length > 0 ? renderCharts() : <p className="text-gray-500">No data to display</p>}
@@ -167,4 +186,3 @@ const Spatial = () => {
 };
 
 export default Spatial;
-
