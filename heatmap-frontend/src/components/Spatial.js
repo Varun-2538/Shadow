@@ -112,20 +112,23 @@ const Spatial = () => {
         return null;
       }
   
-      const topThreeValues = Object.entries(values)
-        .sort((a, b) => b[1] - a[1])
-        .slice(0, 3)
-        .map(([value, freq]) => `${value}: ${freq}`)
-        .join(', ');
+      const sortedValues = Object.entries(values).sort((a, b) => b[1] - a[1]);
+      const total = sortedValues.reduce((acc, [_, freq]) => acc + freq, 0);
+      const topThreeValues = sortedValues.slice(0, 3);
+  
+      const topThreeText = topThreeValues.map(([value, freq]) => `${value}: ${freq}`).join(', ');
+      const percentageText = topThreeValues.map(([_, freq]) => `${Math.floor(freq / total * 100)}%`).join(', ');
   
       return (
         <div key={field} className="mt-4">
           <h3 className="font-bold">{field} Top 3 Frequencies:</h3>
-          <p>{topThreeValues}</p>
+          <p>{topThreeText}</p>
+          <p>Most of the {field} in this {selectedDistrict} district and {selectedUnit} unit belongs to {topThreeText} where total {field} number is {total} which makes {percentageText} of the total {field}.</p>
         </div>
       );
     }).filter(Boolean); // Filter out any null elements (fields to be excluded)
   };
+  
 
   return (
     <div className="container mx-auto px-4">
@@ -161,6 +164,7 @@ const Spatial = () => {
       </div>
     </div>
   );
-  
-}
+};
+
 export default Spatial;
+
