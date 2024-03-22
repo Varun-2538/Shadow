@@ -1,8 +1,8 @@
+import os
 import pandas as pd
-import numpy as np  # Not used in this code snippet
 from flask import Flask, request, jsonify
-from flask_cors import CORS  # Enable cross-origin requests
-from analysis_model import generate_crime_analysis  # Presumably for text-based analysis generation
+from flask_cors import CORS
+from analysis_model import generate_crime_analysis
 
 # Create Flask app instance
 app = Flask(__name__)
@@ -10,8 +10,14 @@ app = Flask(__name__)
 # Enable CORS for all routes and domains
 CORS(app)
 
+# Get the project directory
+project_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))  # Get the parent directory
+
+# Construct the file path for the CSV file
+csv_file_path = os.path.join(project_dir, 'dataset', 'updated_ml_model_ready_dataset.csv')
+
 # Load crime data from CSV
-df = pd.read_csv(r"E:\ksp\Gallants-KSP\heatmap-backend\updated_ml_model_ready_dataset.csv")
+df = pd.read_csv(csv_file_path)
 # Filter rows with zero latitude or longitude (optional, adjust for your data)
 df = df[(df['latitude'] != 0) & (df['longitude'] != 0)]
 

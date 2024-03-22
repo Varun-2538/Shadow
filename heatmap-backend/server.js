@@ -2,16 +2,21 @@ const express = require('express');
 const cors = require('cors');
 const csv = require('csv-parser');
 const fs = require('fs');
+const path = require('path');
 const app = express();
 
 app.use(cors());
 app.use(express.json());
 
+// Get the project directory
+const projectDir = path.dirname(path.dirname(path.dirname(__filename)));
+
 // Utility function to read CSV and filter based on selection
 const readCSV = (filterColumn = null, filterValue = null) => {
   return new Promise((resolve, reject) => {
     const results = [];
-    fs.createReadStream('E:\\ksp\\Gallants-KSP\\heatmap-backend\\updated_ml_model_ready_dataset.csv')
+    const csvFilePath = path.join(projectDir, 'Gallants-KSP', 'dataset', 'updated_ml_model_ready_dataset.csv');
+    fs.createReadStream(csvFilePath)
       .pipe(csv())
       .on('data', (row) => {
         if (!filterColumn || row[filterColumn] === filterValue) {
@@ -54,8 +59,8 @@ app.post('/api/data-frequency', async (req, res) => {
     const { selectedDistrict, selectedUnit } = req.body;
     const data = await readCSV();
 
-    const filteredData = data.filter(row => 
-      (!selectedDistrict || row.district_name === selectedDistrict) && 
+    const filteredData = data.filter(row =>
+      (!selectedDistrict || row.district_name === selectedDistrict) &&
       (!selectedUnit || row.unitname === selectedUnit)
     );
 
