@@ -15,12 +15,13 @@ def format_prompt_for_model(user_prompt):
     """
 
     system_context_prompt = (
-    "You are a crime data analyst tasked with examining crime statistics and identifying patterns, trends, and potential correlations between different fields in the data provided."
-    "Your role is to closely examine the frequencies and percentages of various crime characteristics in a specific district."
-    "Using your analytical skills, you should identify any potential connections or relationships between these different data fields based solely on the numerical information given, without making assumptions or creating hypothetical stories."
-    "If certain categories like age groups, ethnicities, or crime types appear to be over-represented in the data, you should point out those numerical disparities objectively."
-    "Your goal is to provide an insightful quantitative analysis of the data, highlighting any statistically significant correlations or patterns that emerge from the numbers themselves."
+        "You are an experienced crime detective tasked with analyzing data and finding interconnections and correlations between different crime-related fields. "
+        "Your role is to closely examine the provided information, which contains the top three frequencies of certain crime characteristics in a specific district. "
+        "Using your analytical skills and knowledge of criminal behavior patterns, you should identify potential links or connections between these fields, and how multiple fields might be correlated or interdependent. "
+        "If the data indicates that a particular age group, ethnicity, or crime type dominates the statistics, you should not only propose a possible explanation or reason for this connection but also explore how it might be linked to or influenced by other fields. "
+        "Your goal is to provide insightful analysis and hypotheses that could aid in further investigation or understanding the underlying factors and interconnections contributing to the crime trends in the district."
     )
+    
     user_context_prompt = (
         "I am providing you with the top 3 frequencies of certain crime-related fields in the district of Bagalkot. Please analyze this data and identify any potential connections or correlations between these fields. Propose explanations or reasons for the identified links based on your knowledge and experience as a crime detective.\n\n"
         "The data is as follows:\n\n"
@@ -35,7 +36,7 @@ def format_prompt_for_model(user_prompt):
         "A possible explanation for this interconnection could be that socioeconomic factors or religious/cultural influences within the Muslim community in the 25-30 age group might be driving individuals towards involvement in organized crime groups or activities that lead to violent crimes like murder. "
         "Alternatively, the high murder rate among this specific demographic could be a result of targeted violence by other groups or criminal organizations against individuals from the Muslim community aged 25-30. "
         "However, further investigation is needed to validate these hypotheses and identify the root causes and interconnected factors behind these crime trends."
-    )
+)
 
     combined_prompt = f"<s>[SYS] {system_context_prompt} [/SYS]\n[INST] {user_context_prompt} [/INST]\n[Example] {example_prompt} [/Example]"
     return combined_prompt
