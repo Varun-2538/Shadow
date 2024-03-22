@@ -15,12 +15,9 @@ const projectDir = path.dirname(path.dirname(path.dirname(__filename)));
 const readCSV = (filterColumn = null, filterValue = null) => {
   return new Promise((resolve, reject) => {
     const results = [];
-<<<<<<< HEAD
-    fs.createReadStream('E:\\hackathon\\New folder (3)\\Gallants-KSP\\dataset\\updated_ml_model_ready_dataset.csv')
-=======
+
     const csvFilePath = path.join(projectDir, 'Gallants-KSP', 'dataset', 'updated_ml_model_ready_dataset.csv');
     fs.createReadStream(csvFilePath)
->>>>>>> main
       .pipe(csv())
       .on('data', (row) => {
         if (!filterColumn || row[filterColumn] === filterValue) {
