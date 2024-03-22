@@ -143,7 +143,7 @@ const Spatial = () => {
   };
 
   return (
-    <div className="container mx-auto px-4">
+    <div className="container mx-auto px-4 ">
       <h2 className="text-2xl font-bold mb-4">Select District and Unit for Spatial Analysis</h2>
       
       <div className="mb-4">

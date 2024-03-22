@@ -1,3 +1,10 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* App.css - Adjusted for Navbar Styling Only */
+
+.App {
+    font-family: 'Arial', sans-serif;
+  }
+  
