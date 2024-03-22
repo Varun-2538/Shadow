@@ -19,7 +19,6 @@ def get_data():
     end = start + per_page
     data = df[start:end].to_dict(orient='records')
 
-    # Replace NaN values with None
     for record in data:
         for key, value in record.items():
             if pd.isnull(value):
