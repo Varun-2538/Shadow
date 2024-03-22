@@ -4,6 +4,7 @@ import { Bar, Pie } from 'react-chartjs-2';
 import 'chart.js/auto';
 import { MapContainer, TileLayer } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
+import HeatmapLayer from './HeatmapLayer';
 
 const Spatial = () => {
   const [districts, setDistricts] = useState([]);
@@ -170,6 +171,7 @@ const Spatial = () => {
             attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
           />
           {/* You can add Markers here if you have specific locations to mark within Karnataka */}
+          <HeatmapLayer />
         </MapContainer>
       </div>
       

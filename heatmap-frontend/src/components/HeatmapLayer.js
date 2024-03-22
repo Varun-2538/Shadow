@@ -16,11 +16,7 @@ const HeatmapLayer = () => {
         // Log points to the console (can be removed after verification)
         console.log(points);
         // Add a heatmap layer to the map with the fetched points
-        const heatLayer = L.heatLayer(points, {
-          radius: 25, // Adjust the radius as needed
-          blur: 15, // Adjust the blur as needed
-          maxZoom: 17, // Adjust maxZoom as needed
-        }).addTo(map);
+        L.heatLayer(points, { radius: 25, blur: 15, maxZoom: 17 }).addTo(map);
 
         // Optional: if you want to remove the heatmap layer later, you can store it in a state and use map.removeLayer(heatLayer)
       } catch (error) {
