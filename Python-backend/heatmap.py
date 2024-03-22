@@ -1,12 +1,13 @@
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 import pandas as pd
+import numpy as np
 
 app = Flask(__name__)
 CORS(app)  # This will enable CORS for all routes and domains
 
 # Load data
-df = pd.read_csv("C:/Users/94252/Downloads/updated_ml_model_ready_dataset.csv")
+df = pd.read_csv(r"E:\ksp\Gallants-KSP\heatmap-backend\updated_ml_model_ready_dataset.csv")
 # Filter rows where either latitude or longitude is zero
 df = df[(df['latitude'] != 0) & (df['longitude'] != 0)]
 
@@ -17,8 +18,14 @@ def get_data():
     start = (page - 1) * per_page
     end = start + per_page
     data = df[start:end].to_dict(orient='records')
+
+    # Replace NaN values with None
+    for record in data:
+        for key, value in record.items():
+            if pd.isnull(value):
+                record[key] = None
+
     return jsonify(data)
 
 if __name__ == '__main__':
     app.run(debug=True, port=8000)
-
