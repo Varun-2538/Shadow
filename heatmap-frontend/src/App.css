@@ -45,8 +45,12 @@
 
 /* Map component specific styles */
 .map-container {
-  width: calc(100% - 220px); /* account for sidebar */
-  margin: 20px auto;
+  flex-grow: 1; /* Ensure that it takes up all available space */
+  height: 400px; /* Fixed height, or use a percentage value if you prefer */
+  width: calc(100% - 240px); /* adjust according to sidebar width */
+  margin-left: 220px; /* same as sidebar width */
+  padding: 20px;
+  box-shadow: 0 0 8px rgba(0,0,0,0.1);
 }
 
 .map-container h1 {
