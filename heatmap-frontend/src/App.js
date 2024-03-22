@@ -1,6 +1,5 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route} from 'react-router-dom';
-import './App.css';
 import Deployment from './components/Deployment.js';
 import Spatial from './components/Spatial.js';
 import Prediction from './components/Prediction.js';
@@ -13,8 +12,6 @@ const App = () => {
   return (
     <>
       <Router>
-          <Sidebar />
-          <Navbar />
           <div className="main-content">
             <Routes>
               <Route path="/" element={<Landing />} />

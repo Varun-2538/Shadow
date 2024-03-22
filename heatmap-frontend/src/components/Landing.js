@@ -11,15 +11,17 @@ export default function Landing() {
   return (
     <>
       <div className="bg-stone-950 min-h-screen w-full">
+        <Navbar />
         <div className="flex-grow flex items-center justify-center flex-col text-white">
           <h1 className="text-7xl font-bold mb-4 mt-56">
-            Streamline. Integrate. Thrive.
+            Predict. Anticipate. Protect.
           </h1>
-          <h2 className="text-3xl font-semibold mb-8">Buildings AI.</h2>
+          <h2 className="text-3xl font-semibold mb-8">
+            Innovating a Safer Tomorrow.
+          </h2>
           <p className="text-center max-w-3xl mb-8">
-            Experience streamlined building management with the Honeywell
-            Buildings App. Effortlessly control and monitor your building'
-            operations. Innovative, user-friendly, and efficient.
+            Advanced Analytical Tool for Data Driven Crime Prediction and
+            Strategic Response in Karnataka.
           </p>
           <div className="flex space-x-4">
             <button
