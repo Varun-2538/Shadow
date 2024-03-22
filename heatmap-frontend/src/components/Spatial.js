@@ -13,6 +13,8 @@ const Spatial = () => {
   const [selectedUnit, setSelectedUnit] = useState('');
   const [frequencyData, setFrequencyData] = useState({});
   const defaultPosition = [14.5204, 75.7224]; // Latitude and Longitude of Karnataka
+  const [crimeGroups, setCrimeGroups] = useState([]);
+  const [selectedCrimeGroup, setSelectedCrimeGroup] = useState('');
 
   useEffect(() => {
     axios.get('http://localhost:5000/api/districts')
@@ -27,12 +29,12 @@ const Spatial = () => {
 
   useEffect(() => {
     if (selectedDistrict) {
-      axios.get(`http://localhost:5000/api/units/${selectedDistrict}`)
+      axios.get(`http://localhost:5000/api/crime-groups/${selectedDistrict}`)
         .then(response => {
-          setUnits(response.data);
-          setSelectedUnit(response.data[0] || '');
+          setCrimeGroups(response.data);
+          setSelectedCrimeGroup(response.data[0] || '');
         })
-        .catch(error => console.error('Error fetching units:', error));
+        .catch(error => console.error('Error fetching crime groups:', error));
     }
   }, [selectedDistrict]);
 
@@ -49,6 +51,9 @@ const Spatial = () => {
       setSelectedUnit(value);
     }
   };
+  const handleCrimeGroupChange = (event) => {
+    setSelectedCrimeGroup(event.target.value);
+  };
 
   const handleSubmit = () => {
     axios.post('http://localhost:5000/api/data-frequency', { selectedDistrict, selectedUnit })
@@ -58,8 +63,21 @@ const Spatial = () => {
       .catch(error => console.error('Error posting data:', error));
   };
 
+  const renderCrimeGroupDropdown = () => {
+    return (
+      <div className="mb-4">
+        <label htmlFor="crimegroup-select" className="block mb-2 text-sm font-medium text-gray-900">Crime Group:</label>
+        <select id="crimegroup-select" value={selectedCrimeGroup} onChange={handleCrimeGroupChange} className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5">
+          {crimeGroups.map(crimeGroup => (
+            <option key={crimeGroup} value={crimeGroup}>{crimeGroup}</option>
+          ))}
+        </select>
+      </div>
+    );
+  };
+
   const renderCharts = () => {
-    const excludeFields = ['district_name', 'unitname', 'crime_no'];
+    const excludeFields = ['district_name', 'unitname', 'crime_no','latitude','longitude'];
     const pieChartFields = ['accused_presentaddress', 'victim_presentaddress'];
 
     const charts = Object.entries(frequencyData).filter(

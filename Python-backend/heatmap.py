@@ -7,7 +7,7 @@ app = Flask(__name__)
 CORS(app)  # This will enable CORS for all routes and domains
 
 # Load data
-df = pd.read_csv(r"E:\ksp\Gallants-KSP\heatmap-backend\updated_ml_model_ready_dataset.csv")
+df = pd.read_csv(r"E:\hackathon\New folder (3)\Gallants-KSP\dataset\updated_ml_model_ready_dataset.csv")
 # Filter rows where either latitude or longitude is zero
 df = df[(df['latitude'] != 0) & (df['longitude'] != 0)]
 
