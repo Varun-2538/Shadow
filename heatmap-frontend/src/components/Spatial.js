@@ -14,8 +14,8 @@ const Spatial = () => {
   const [frequencyData, setFrequencyData] = useState({});
   const [analysisResult, setAnalysisResult] = useState("");
   const [formattedAnalysisText, setFormattedAnalysisText] = useState("");
-  const defaultPosition = [14.5204, 75.7224]; // Adjust as needed
-
+  const defaultPosition = [16.1882, 75.6958]; // Adjust as needed
+  
   useEffect(() => {
     axios.get('http://localhost:5000/api/districts')
       .then(response => {
@@ -192,7 +192,7 @@ const Spatial = () => {
       
       <button onClick={handleSubmit} className="text-white bg-blue-500 hover:bg-blue-700 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center">Submit</button>
       <div className="mt-4" style={{ height: '400px' }}>
-        <MapContainer center={defaultPosition} zoom={7} scrollWheelZoom={true} style={{ height: '100%', width: '100%' }}>
+        <MapContainer center={defaultPosition} zoom={9} scrollWheelZoom={true} style={{ height: '100%', width: '100%' }}>
           <TileLayer
             url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
             attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
