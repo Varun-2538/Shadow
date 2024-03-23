@@ -20,7 +20,7 @@ const HeatMap = ({ entries, color, onUpdate }) => {
     <MapContainer
       center={center}
       zoom={12}
-      style={{ height: "400px", width: "80%" ,  }}
+      style={{ height: "400px", width: "100%" ,  }}
     >
       <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
       <MapEvents onUpdate={onUpdate} />

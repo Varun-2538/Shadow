@@ -24,7 +24,7 @@ const App = () => {
   return (
     <div className="flex">
       {!isLandingPage && <Sidebar />}
-      <div className={`flex-grow ${!isLandingPage ? 'ml-60' : 'w-full'}`}>
+      <div className={`flex-grow ${!isLandingPage ? 'ml-30' : 'w-full'}`}>
         <Navbar />
         <div className="p-4">
           <Routes>

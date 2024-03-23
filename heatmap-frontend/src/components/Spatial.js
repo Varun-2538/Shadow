@@ -12,9 +12,9 @@ const Spatial = () => {
   const [selectedDistrict, setSelectedDistrict] = useState('');
   const [selectedUnit, setSelectedUnit] = useState('');
   const [frequencyData, setFrequencyData] = useState({});
-  const defaultPosition = [14.5204, 75.7224]; // Latitude and Longitude of Karnataka
-  const [crimeGroups, setCrimeGroups] = useState([]);
-  const [selectedCrimeGroup, setSelectedCrimeGroup] = useState('');
+  const [analysisResult, setAnalysisResult] = useState("");
+  const [formattedAnalysisText, setFormattedAnalysisText] = useState("");
+  const defaultPosition = [14.5204, 75.7224]; // Adjust as needed
 
   useEffect(() => {
     axios.get('http://localhost:5000/api/districts')
@@ -29,12 +29,12 @@ const Spatial = () => {
 
   useEffect(() => {
     if (selectedDistrict) {
-      axios.get(`http://localhost:5000/api/crime-groups/${selectedDistrict}`)
+      axios.get(`http://localhost:5000/api/units/${selectedDistrict}`)
         .then(response => {
-          setCrimeGroups(response.data);
-          setSelectedCrimeGroup(response.data[0] || '');
+          setUnits(response.data);
+          setSelectedUnit(response.data[0] || '');
         })
-        .catch(error => console.error('Error fetching crime groups:', error));
+        .catch(error => console.error('Error fetching units:', error));
     }
   }, [selectedDistrict]);
 
@@ -51,29 +51,20 @@ const Spatial = () => {
       setSelectedUnit(value);
     }
   };
-  const handleCrimeGroupChange = (event) => {
-    setSelectedCrimeGroup(event.target.value);
-  };
 
   const handleSubmit = () => {
     axios.post('http://localhost:5000/api/data-frequency', { selectedDistrict, selectedUnit })
       .then(response => {
         setFrequencyData(response.data);
+        const newText = generateAnalysisText(response.data);
+        setFormattedAnalysisText(newText);
       })
       .catch(error => console.error('Error posting data:', error));
   };
 
-  const renderCrimeGroupDropdown = () => {
-    return (
-      <div className="mb-4">
-        <label htmlFor="crimegroup-select" className="block mb-2 text-sm font-medium text-gray-900">Crime Group:</label>
-        <select id="crimegroup-select" value={selectedCrimeGroup} onChange={handleCrimeGroupChange} className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5">
-          {crimeGroups.map(crimeGroup => (
-            <option key={crimeGroup} value={crimeGroup}>{crimeGroup}</option>
-          ))}
-        </select>
-      </div>
-    );
+  // Utility function to format field names
+  const formatFieldName = (fieldName) => {
+    return fieldName.split('_').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
   };
 
   const renderCharts = () => {
@@ -138,47 +129,65 @@ const Spatial = () => {
     return options;
   };
 
-  const renderTopThreeFrequencies = () => {
-    return Object.entries(frequencyData).map(([field, values]) => {
-      if (['crime_no', 'district_name', 'unitname'].includes(field)) {
-        return null;
+
+  const generateAnalysisText = (data = frequencyData) => {
+    let analysisText = "";
+    let customIndex = 0;
+
+    Object.entries(data).forEach(([field, values]) => {
+      if (['crime_no', 'district_name', 'unitname', 'latitude', 'longitude'].includes(field)) {
+        return;
       }
-  
+
+      customIndex++;
+      const formattedField = formatFieldName(field);
       const sortedValues = Object.entries(values).sort((a, b) => b[1] - a[1]);
       const total = sortedValues.reduce((acc, [_, freq]) => acc + freq, 0);
       const topThreeValues = sortedValues.slice(0, 3);
-  
-      const topThreeText = topThreeValues.map(([value, freq]) => `${value}: ${freq}`).join(', ');
-      const percentageText = topThreeValues.map(([_, freq]) => `${Math.floor(freq / total * 100)}%`).join(', ');
-  
-      return (
-        <div key={field} className="mt-4">
-          <h3 className="font-bold">{field} Top 3 Frequencies:</h3>
-          <p>{topThreeText}</p>
-          <p>Most of the {field} in this {selectedDistrict} district and {selectedUnit || 'entire district'} unit belongs to {topThreeText} where total {field} number is {total} which makes {percentageText} of the total {field}.</p>
-        </div>
-      );
-    }).filter(Boolean);
+
+      const topThreeText = topThreeValues.map(([value, freq], index) => {
+        const percentage = Math.floor((freq / total) * 100);
+        return `${index + 1}. ${value}: ${freq} (${percentage}% of total)`;
+      }).join('; ');
+
+      analysisText += `${customIndex}) Most of the ${formattedField} in this ${selectedDistrict} district and ${selectedUnit || 'entire district'} unit belongs to ${topThreeText}.\n`;
+    });
+
+    console.log(analysisText);
+    return analysisText;
   };
+
+  const fetchAndDisplayAnalysis = () => {
+    axios.post('http://localhost:8000/crime_analysis', { analysis_text: formattedAnalysisText })
+      .then(response => {
+        setAnalysisResult(response.data.analysis);
+      })
+      .catch(error => {
+        console.error('Error fetching analysis:', error);
+      });
+  };
+
 
   return (
     <div className="container mx-auto px-4">
       <h2 className="text-2xl font-bold mb-4">Select District and Unit for Spatial Analysis</h2>
       
-      <div className="mb-4">
-        <label htmlFor="district-select" className="block mb-2 text-sm font-medium text-gray-900">District:</label>
-        <select id="district-select" value={selectedDistrict} onChange={handleDistrictChange} className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5">
-          {districts.map(district => (
-            <option key={district} value={district}>{district}</option>
-          ))}
-        </select>
-      </div>
-      
-      <div className="mb-4">
-        <label htmlFor="unit-select" className="block mb-2 text-sm font-medium text-gray-900">Unit:</label>
-        <select id="unit-select" value={selectedUnit} onChange={handleUnitChange} disabled={!selectedDistrict} className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5">
-          {renderUnitOptions()}
-        </select>
+      <div className="flex flex-wrap -mx-2 mb-4"> {/* Added this wrapper with flex */}
+        <div className="w-1/2 px-2"> {/* Adjusted width to half of the container */}
+          <label htmlFor="district-select" className="block mb-2 text-sm font-medium text-gray-900">District:</label>
+          <select id="district-select" value={selectedDistrict} onChange={handleDistrictChange} className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5">
+            {districts.map(district => (
+              <option key={district} value={district}>{district}</option>
+            ))}
+          </select>
+        </div>
+  
+        <div className="w-1/2 px-2"> {/* Adjusted width to half of the container */}
+          <label htmlFor="unit-select" className="block mb-2 text-sm font-medium text-gray-900">Unit:</label>
+          <select id="unit-select" value={selectedUnit} onChange={handleUnitChange} disabled={!selectedDistrict} className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5">
+            {renderUnitOptions()}
+          </select>
+        </div>
       </div>
       
       <button onClick={handleSubmit} className="text-white bg-blue-500 hover:bg-blue-700 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center">Submit</button>
@@ -196,13 +205,24 @@ const Spatial = () => {
       <div className="mt-8">
         {Object.keys(frequencyData).length > 0 ? renderCharts() : <p className="text-gray-500">No data to display</p>}
       </div>
-      
+
       <div className="mt-8">
-        <h2 className="text-xl font-bold mb-4">Top 3 Frequencies for Each Field</h2>
-        {Object.keys(frequencyData).length > 0 && renderTopThreeFrequencies()}
+        <h3 className="text-xl font-bold">Generated Analysis Text:</h3>
+        <pre className="bg-gray-100 border rounded p-3">{formattedAnalysisText || "Submit to generate analysis text."}</pre>
+      </div>
+
+      <button onClick={fetchAndDisplayAnalysis} className="mt-4 text-white bg-green-500 hover:bg-green-700 focus:ring-4 focus:outline-none focus:ring-green-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center">
+        Get Analysis
+      </button>
+      
+      <div className="mt-4">
+        <h3 className="text-lg font-bold">Analysis Result:</h3>
+        <p>{analysisResult || "Click 'Get Analysis' to view the result."}</p>
       </div>
     </div>
   );
+
+  
 };
 
 export default Spatial;

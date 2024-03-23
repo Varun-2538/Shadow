@@ -50,14 +50,20 @@ def crime_analysis():
     try:
         # Get JSON data from the request
         data = request.json
+        app.logger.debug('Received data: %s', data)  # or use print(f"Received data: {data}")
+
 
         # Extract analysis text from JSON (error handling for missing text)
         analysis_text = data.get('analysis_text', '')
         if not analysis_text:
             return jsonify({'error': 'Analysis text is required'}), 400  # Bad Request
-
+        
+        
+        print("Received analysis text:", analysis_text)
         # Generate crime analysis using LLM function
         crime_analysis = generate_crime_analysis(analysis_text)
+        print("Returning analysis result:", crime_analysis)
+        
 
         # Return JSON response containing the generated analysis
         return jsonify({'analysis': crime_analysis}), 200  # Success
