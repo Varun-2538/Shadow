@@ -1,33 +1,43 @@
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
 
-import Deployment from './components/Deployment.js';
-import Spatial from './components/Spatial.js';
-import Prediction from './components/Prediction.js';
-import Map from './components/Map'; // Assuming your Map component is saved in a components folder
-import Sidebar from './components/Sidebar.js';
-import Navbar from './components/Navbar.js';
-import Landing from './components/Landing.js';
+import Deployment from './components/Deployment';
+import Spatial from './components/Spatial';
+import Prediction from './components/Prediction';
+import Map from './components/Map';
+import Sidebar from './components/Sidebar';
+import Navbar from './components/Navbar';
+import Landing from './components/Landing';
+
+const AppWrapper = () => {
+  return (
+    <Router>
+      <App />
+    </Router>
+  );
+};
 
 const App = () => {
-  return (
-    <>
-      <Router>
-          <Sidebar />
-          <Navbar />
-          <div className="main-content">
-            <Routes>
-              <Route path="/" element={<Landing />} />
-              <Route path="/Prediction" element={<Prediction />} />
-              <Route path="/Spatial" element={<Spatial />} />
-              <Route path="/Deployment" element={<Deployment />} />
-              <Route path="/map" element={<Map />} />
-            </Routes>
-          </div>
-        
-      </Router>
-    </>
-  );
-}
+  const location = useLocation();
+  const isLandingPage = location.pathname === "/";
 
-export default App;
+  return (
+    <div className="flex">
+      {!isLandingPage && <Sidebar />}
+      <div className={`flex-grow ${!isLandingPage ? 'ml-30' : 'w-full'}`}>
+        <Navbar />
+        <div className="p-4">
+          <Routes>
+            <Route path="/" element={<Landing />} />
+            <Route path="/Prediction" element={<Prediction />} />
+            <Route path="/Spatial" element={<Spatial />} />
+            <Route path="/Deployment" element={<Deployment />} />
+            <Route path="/map" element={<Map />} />
+          </Routes>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default AppWrapper;
