@@ -48,25 +48,26 @@ def get_data():
 @app.route('/crime_analysis', methods=['POST'])
 def crime_analysis():
     try:
-        # Get JSON data from the request
         data = request.json
         app.logger.debug('Received data: %s', data)  # or use print(f"Received data: {data}")
 
-        # Extract analysis text from JSON (error handling for missing text)
         analysis_text = data.get('analysis_text', '')
-        if not analysis_text:
-            return jsonify({'error': 'Analysis text is required'}), 400  # Bad Request
+        district = data.get('district', '')
+        police_station = data.get('police_station', '')
 
+        if not analysis_text:
+            return jsonify({'error': 'Analysis text is required'}), 400
+        
         print("Received analysis text:", analysis_text)
         # Generate crime analysis using LLM function
-        crime_analysis = generate_crime_analysis(analysis_text)
+
+        crime_analysis = generate_crime_analysis(analysis_text, district, police_station, data)
         print("Returning analysis result:", crime_analysis)
 
-        # Return JSON response containing the generated analysis
-        return jsonify({'analysis': crime_analysis}), 200  # Success
+
+        return jsonify({'analysis': crime_analysis}), 200
     except Exception as e:
-        # Handle unexpected errors
-        return jsonify({'error': str(e)}), 500  # Internal Server Error
+        return jsonify({'error': str(e)}), 500
 
 # Run the Flask app in debug mode on port 8000
 if __name__ == '__main__':

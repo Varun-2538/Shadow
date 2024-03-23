@@ -38,7 +38,7 @@ def format_prompt_for_model(user_prompt, district, police_station, data):
     combined_prompt = f"<s>[SYS] {system_context_prompt} [/SYS]\n[INST] {user_context_prompt} [/INST]"
     return combined_prompt
 
-def generate_crime_analysis(analysis_text):
+def generate_crime_analysis(analysis_text, district, police_station, data):
     """
     Generates text using the loaded model, with options for controlling the output.
 
@@ -47,23 +47,6 @@ def generate_crime_analysis(analysis_text):
 
     Returns:
         The generated text as a string.
-    """
-
-    # Set the district, police station, and data based on your specific use case
-    district = "Belagavi City"
-    police_station = "Belagavi City CEN Crime PS"
-    data = """
-        1) Most of the Accused Presentaddress in this Belagavi City district and Belagavi City CEN Crime PS unit belongs to 1. UNKNOWN,: 13 (8% of total); 2. KULUT SOUTH PASHIMPARA MANTESHWAR BURDWAN,BURDWAN: 3 (2% of total); 3. Doulapur,Rajastan: 3 (2% of total).
-        2) Most of the Victim Presentaddress in this Belagavi City district and Belagavi City CEN Crime PS unit belongs to 1. HONARABLE SECRETARY KPTCL EMPLOYE CO-OP,CREDIT SOC,NEHRU NAGAR: 9 (6% of total); 2. C/O V A GHOBLA B C NO 1 FORT BELAGAVI,BELAGAVI: 7 (4% of total); 3. DIVISIONAL OFFICER KSCCL,SHRINAGAR: 6 (4% of total).
-        3) Most of the Accused Age in this Belagavi City district and Belagavi City CEN Crime PS unit belongs to 1. 0: 87 (57% of total); 2. 45: 10 (6% of total); 3. 42: 6 (4% of total).
-        4) Most of the Accused Caste in this Belagavi City district and Belagavi City CEN Crime PS unit belongs to 1. NULL: 87 (57% of total); 2. MARATHA: 11 (7% of total); 3. MUSLIM: 7 (4% of total).
-        5) Most of the Accused Profession in this Belagavi City district and Belagavi City CEN Crime PS unit belongs to 1. NULL: 84 (56% of total); 2. Others PI Specify: 35 (23% of total); 3. Businessman: 11 (7% of total).
-        6) Most of the Accused Sex in this Belagavi City district and Belagavi City CEN Crime PS unit belongs to 1. MALE: 127 (84% of total); 2. FEMALE: 23 (15% of total).
-        7) Most of the Victim Age in this Belagavi City district and Belagavi City CEN Crime PS unit belongs to 1. 46: 15 (10% of total); 2. 40: 9 (6% of total); 3. 34: 8 (5% of total).
-        8) Most of the Victim Caste in this Belagavi City district and Belagavi City CEN Crime PS unit belongs to 1. MUSLIM: 20 (13% of total); 2. Lingayath: 20 (13% of total); 3. MARATHA: 17 (11% of total).
-        9) Most of the Victim Profession in this Belagavi City district and Belagavi City CEN Crime PS unit belongs to 1. Businessman: 45 (30% of total); 2. Others PI Specify: 23 (15% of total); 3. Housewife: 16 (10% of total).
-        10) Most of the Victim Sex in this Belagavi City district and Belagavi City CEN Crime PS unit belongs to 1. MALE: 119 (79% of total); 2. FEMALE: 31 (20% of total).
-        11) Most of the Crimegroup Name in this Belagavi City district and Belagavi City CEN Crime PS unit belongs to 1. CHEATING: 100 (66% of total); 2. CYBER CRIME: 45 (30% of total); 3. IMMORAL TRAFFIC: 3 (2% of total).
     """
 
     # Set model parameters for text generation
@@ -78,7 +61,7 @@ def generate_crime_analysis(analysis_text):
 
     # Format the prompt for the model
     model_ready_prompt = format_prompt_for_model(analysis_text, district, police_station, data)
-
+    
     # Generate text using the model
     generated_text_stream = text_generation_client.text_generation(
         model_ready_prompt,
