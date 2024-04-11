@@ -15,6 +15,24 @@ const Spatial = () => {
   const [analysisResult, setAnalysisResult] = useState("");
   const [formattedAnalysisText, setFormattedAnalysisText] = useState("");
   const defaultPosition = [16.1882, 75.6958]; // Adjust as needed
+  const [collapsibleState, setCollapsibleState] = useState({});
+
+  useEffect(() => {
+    // Initialize collapsible state for each field when frequencyData is set
+    setCollapsibleState(
+      Object.keys(frequencyData).reduce((acc, field) => {
+        acc[field] = true; // start all as closed
+        return acc;
+      }, {})
+    );
+  }, [frequencyData]);
+
+  const toggleCollapse = (field) => {
+    setCollapsibleState(prevState => ({
+      ...prevState,
+      [field]: !prevState[field]
+    }));
+  };
 
   useEffect(() => {
     axios
@@ -85,10 +103,22 @@ const Spatial = () => {
       "longitude",
     ];
     const pieChartFields = ["accused_presentaddress", "victim_presentaddress"];
-
-    const charts = Object.entries(frequencyData)
+  
+    // Create pairs of fields to be displayed in the same row
+    const fieldPairs = Object.entries(frequencyData)
       .filter(([field]) => !excludeFields.includes(field))
-      .map(([field, values], index) => {
+      .reduce((result, entry, index, array) => {
+        if (index % 2 === 0) {
+          // Pair the current entry with the next one or null if it's the last
+          result.push(array.slice(index, index + 2));
+        }
+        return result;
+      }, []);
+  
+    return fieldPairs.map((pair, rowIndex) => (
+      <div key={rowIndex} className="flex flex-wrap -mx-2">
+        {pair.map(([field, values], index) => {
+        // Data for the chart
         const chartData = {
           labels: Object.keys(values),
           datasets: [
@@ -119,28 +149,26 @@ const Spatial = () => {
         return (
           <div key={index} className="w-full md:w-1/2 p-2">
             <div className="p-5 border border-gray-200 shadow rounded">
-              <h3 className="font-bold text-lg">{field}</h3>
-              {pieChartFields.includes(field) ? (
-                <Pie data={chartData} />
-              ) : (
-                <Bar data={chartData} />
+              <button onClick={() => toggleCollapse(field)} className="flex items-center font-bold text-lg mb-2">
+                {collapsibleState[field] ? '▼' : '►'}
+                <span className="ml-2">{formatFieldName(field)}</span>
+              </button>
+              {collapsibleState[field] && (
+                <div>
+                  {pieChartFields.includes(field) ? (
+                    <Pie data={chartData} />
+                  ) : (
+                    <Bar data={chartData} />
+                  )}
+                </div>
               )}
             </div>
           </div>
         );
-      });
-
-    const rows = [];
-    for (let i = 0; i < charts.length; i += 2) {
-      rows.push(
-        <div key={i} className="flex flex-wrap -mx-2">
-          {charts.slice(i, i + 2)}
-        </div>
-      );
-    }
-
-    return rows;
-  };
+      })}
+    </div>
+  ));
+};
 
   const renderUnitOptions = () => {
     let options = units.map((unit) => (
