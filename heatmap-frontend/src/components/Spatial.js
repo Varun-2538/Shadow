@@ -322,7 +322,7 @@ const Spatial = () => {
 
       <div className="mt-8">
         <h3 className="text-xl font-bold">Generated Analysis Text:</h3>
-        <pre className="bg-gray-100 border rounded p-3">
+        <pre className="bg-gray-100 border rounded p-3 overflow-auto whitespace-pre-wrap">
           {formattedAnalysisText || "Submit to generate analysis text."}
         </pre>
       </div>
