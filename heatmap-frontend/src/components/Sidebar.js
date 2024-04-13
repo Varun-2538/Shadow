@@ -3,6 +3,9 @@ import { Link, useLocation } from "react-router-dom";
 // import "./Sidebar.css"; // This line imports the CSS rules
 
 const Sidebar = () => {
+  if (useLocation().pathname === "/") {
+    return null;
+  } else
   return (
     <div className=" inset-y-0 left-0 w-60 bg-gray-800 shadow-lg">
       <div className="px-6 py-4">

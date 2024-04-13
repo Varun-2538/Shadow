@@ -34,6 +34,7 @@ const App = () => {
       <div className="flex-grow ml-30">
         <Navbar />
         <div className="p-4">
+          {selectedPage === 'Landing' ? null : (
           <div className="radio-buttons">
             <label>
               <input
@@ -62,8 +63,8 @@ const App = () => {
               />
               Temporal Analysis
             </label>
-            {/* Add more radio buttons if necessary */}
           </div>
+          )}
           <Routes>
             <Route path="/" element={<Landing />} />
             <Route path="/prediction" element={<Prediction />} />

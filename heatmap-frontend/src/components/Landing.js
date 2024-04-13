@@ -1,5 +1,4 @@
 import React from "react";
-import Navbar from "./Navbar";
 import { useNavigate } from "react-router-dom";
 
 export default function Landing() {
@@ -8,6 +7,7 @@ export default function Landing() {
   const handleClick = () => {
     navigate("/Spatial");
   };
+
   return (
     <>
       <div className="bg-stone-950 min-h-screen w-full">
@@ -17,7 +17,7 @@ export default function Landing() {
           </h1>
           <h2 className="text-3xl font-semibold mb-8">Buildings AI.</h2>
           <p className="text-center max-w-3xl mb-8">
-            Experience streamlined building management with the Honeywell
+            Experience streamlined building management with the Shadow
             Buildings App. Effortlessly control and monitor your building'
             operations. Innovative, user-friendly, and efficient.
           </p>
