@@ -14,9 +14,9 @@ Shadow is a comprehensive web application that enables law enforcement agencies 
    - Backend: `cd heatmap-backend && npm install`
    - Python: `cd models && pip install -r requirements.txt`
 3. Start the development server:
-   - Frontend: `npm start`
    - Backend: `node server.js`
    - Python: `python app.py`
+   - Frontend: `npm start`
 4. Open your web browser and navigate to `http://localhost:3000` to access the Predictive Crime Analysis application.
 
 ## How the project looks
