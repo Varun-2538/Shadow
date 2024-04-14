@@ -14,7 +14,7 @@ CORS(app)
 project_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))  # Get the parent directory
 
 # Construct the file path for the CSV file
-csv_file_path = os.path.join(project_dir, 'heatmap-frontend', 'dataset', 'updated_ml_model_ready_dataset.csv')
+csv_file_path = os.path.join(project_dir, 'models', 'dataset', 'updated_ml_model_ready_dataset.csv')
 
 # Load crime data from CSV
 df = pd.read_csv(csv_file_path)
