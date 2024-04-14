@@ -21,9 +21,6 @@ Shadow is a comprehensive web application that enables law enforcement agencies 
 
 ## How the project looks
 ![image](https://github.com/Varun-2538/Shadow/assets/110900686/e4cede45-cf83-46aa-8481-a0d9a42b34ec)
-![image](https://github.com/Varun-2538/Shadow/assets/110900686/3be2ce03-8c4a-475f-844a-430043e87b1c)
-![image](https://github.com/Varun-2538/Shadow/assets/110900686/d3cc53ab-715c-4ab2-a472-24307d7d1917)
-![image](https://github.com/Varun-2538/Shadow/assets/110900686/a3ef79ab-d365-46cb-92e9-8bf435e4bed2)
 
 ## Key Features
 
