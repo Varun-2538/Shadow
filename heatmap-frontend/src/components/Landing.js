@@ -13,13 +13,15 @@ export default function Landing() {
       <div className="bg-stone-950 min-h-screen w-full">
         <div className="flex-grow min-h-screen flex items-center justify-center flex-col text-white">
           <h1 className="text-7xl font-bold mb-4 ">
-            Streamline. Integrate. Thrive.
+            Predict. Prevent. Preserve.
           </h1>
-          <h2 className="text-3xl font-semibold mb-8">Buildings AI.</h2>
+          <h2 className="text-3xl font-semibold mb-8">
+            Community Sentinel Suite.
+          </h2>
           <p className="text-center max-w-3xl mb-8">
-            Experience streamlined building management with the Shadow
-            Buildings App. Effortlessly control and monitor your building'
-            operations. Innovative, user-friendly, and efficient.
+            Navigate public safety with precision using the Community Sentinel
+            Suite. Deploy law enforcement where it matters most. Insightful,
+            responsive, and diligent.
           </p>
           <div className="flex space-x-4">
             <button
@@ -28,9 +30,7 @@ export default function Landing() {
             >
               Get Started
             </button>
-            <button className="bg-transparent hover:shadow-glow-white-intense shadow-glow-white text-white px-8 py-3 rounded-xl">
-              Offerings
-            </button>
+            
           </div>
         </div>
       </div>
