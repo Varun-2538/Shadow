@@ -5,6 +5,7 @@ import "chart.js/auto";
 import { MapContainer, TileLayer } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import HeatmapLayer from "./HeatmapLayer";
+import Radio from "./Radio";
 
 const Spatial = () => {
   const [districts, setDistricts] = useState([]);
@@ -239,10 +240,11 @@ const Spatial = () => {
   };
 
   return (
-    <div className="container mx-auto px-4">
+    <div className="container mx-auto px-4 mt-4 ">
       <h2 className="text-2xl font-bold mb-4">
         Select District and Unit for Spatial Analysis
       </h2>
+      <Radio />
 
       <div className="flex flex-wrap -mx-2 mb-4">
         {" "}
@@ -271,7 +273,6 @@ const Spatial = () => {
         </div>
         <div className="w-1/2 px-2">
           {" "}
-          {/* Adjusted width to half of the container */}
           <label
             htmlFor="unit-select"
             className="block mb-2 text-sm font-medium text-gray-900"
@@ -296,7 +297,9 @@ const Spatial = () => {
       >
         Submit
       </button>
-      <div className="mt-4" style={{ height: "400px" }}>
+      <div
+        className="mt-4 shadow-lg rounded-lg border-black" style={{ height: "400px" }}
+      >
         <MapContainer
           center={defaultPosition}
           zoom={9}
