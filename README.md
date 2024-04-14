@@ -6,6 +6,19 @@ Shadow is a comprehensive web application that enables law enforcement agencies 
 ## Demo of project
 [Youtube](https://www.youtube.com/watch?v=7YnW6HfLGhQ)
 
+## Getting Started
+
+1. Clone the repository: `git clone https://github.com/Varun-2538/Shadow`
+2. Install dependencies:
+   - Frontend: `cd heatmap-frontend && npm install`
+   - Backend: `cd heatmap-backend && npm install`
+   - Python: `cd models && pip install -r requirements.txt`
+3. Start the development server:
+   - Frontend: `npm start`
+   - Backend: `node server.js`
+   - Python: `python app.py`
+4. Open your web browser and navigate to `http://localhost:3000` to access the Predictive Crime Analysis application.
+
 ## How the project looks
 ![image](https://github.com/Varun-2538/Shadow/assets/110900686/e4cede45-cf83-46aa-8481-a0d9a42b34ec)
 ![image](https://github.com/Varun-2538/Shadow/assets/110900686/3be2ce03-8c4a-475f-844a-430043e87b1c)
@@ -52,19 +65,6 @@ Shadow is a comprehensive web application that enables law enforcement agencies 
 - NumPy
 - Pandas
 - Mistral LLM
-
-## Getting Started
-
-1. Clone the repository: `git clone https://github.com/Varun-2538/Shadow`
-2. Install dependencies:
-   - Frontend: `cd heatmap-frontend && npm install`
-   - Backend: `cd heatmap-backend && npm install`
-   - Python: `cd models && pip install -r requirements.txt`
-3. Start the development server:
-   - Frontend: `npm start`
-   - Backend: `node server.js`
-   - Python: `python app.py`
-4. Open your web browser and navigate to `http://localhost:3000` to access the Predictive Crime Analysis application.
 
 ## License
 This project is licensed under the [Apache License](https://github.com/Varun-2538/Shadow/blob/main/LICENSE)
