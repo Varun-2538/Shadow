@@ -36,7 +36,7 @@ const Spatial = () => {
 
   useEffect(() => {
     axios
-    .get("https://gallants-ksp-1-6oyx.onrender.com/api/districts")
+      .get("http://localhost:5000/api/districts")
       .then((response) => {
         if (Array.isArray(response.data)) {
           setDistricts(response.data);
@@ -49,7 +49,7 @@ const Spatial = () => {
   useEffect(() => {
     if (selectedDistrict) {
       axios
-      .get(`https://gallants-ksp-1-6oyx.onrender.com/api/units/${selectedDistrict}`)
+        .get(`http://localhost:5000/api/units/${selectedDistrict}`)
         .then((response) => {
           setUnits(response.data);
           setSelectedUnit(response.data[0] || "");
@@ -74,7 +74,7 @@ const Spatial = () => {
 
   const handleSubmit = () => {
     axios
-      .post("https://gallants-ksp-1-6oyx.onrender.com/api/data-frequency", {
+      .post("http://localhost:5000/api/data-frequency", {
         selectedDistrict,
         selectedUnit,
       })
@@ -225,7 +225,7 @@ const Spatial = () => {
 
   const fetchAndDisplayAnalysis = () => {
     axios
-      .post("https://gallants-ksp-3wep.onrender.com/crime_analysis", {
+      .post("http://localhost:8000/crime_analysis", {
         analysis_text: formattedAnalysisText,
         district: selectedDistrict,
         police_station: selectedUnit,
@@ -237,7 +237,6 @@ const Spatial = () => {
         console.error("Error fetching analysis:", error);
       });
   };
-  
 
   return (
     <div className="container mx-auto px-4">
