@@ -3,16 +3,14 @@ import { useNavigate, useLocation } from "react-router-dom";
 
 const Navbar = () => {
   const navigate = useNavigate();
-  const location =  useLocation();
+  const location = useLocation();
 
   const handleOnClick = () => {
     navigate("/Spatial");
   };
-  if(location.pathname === "/ || /Spatial || /Prediction || /Deployment || /map || /beatwise || /temporal" ){
+  if (location.pathname !== "/") {
     return null;
   }
-
-  
 
   return (
     <nav className="flex items-center justify-between px-4 py-2 w-full mt-0  bg-stone-950 text-white pt-4 pr-16 pl-16">
