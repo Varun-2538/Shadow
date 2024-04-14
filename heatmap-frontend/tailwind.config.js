@@ -16,6 +16,7 @@ module.exports = {
       gradientBorderColors: {
         "gradient-red": ["#ff0000", "#ff7f7f"],
       },
+      
     },
   },
   plugins: [],

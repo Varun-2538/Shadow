@@ -1,16 +1,18 @@
 import React from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 
 const Navbar = () => {
   const navigate = useNavigate();
+  const location =  useLocation();
 
   const handleOnClick = () => {
     navigate("/Spatial");
   };
+  if(location.pathname === "/ || /Spatial || /Prediction || /Deployment || /map || /beatwise || /temporal" ){
+    return null;
+  }
 
-  const gharWaapsi = () => {
-    navigate("/home");
-  };
+  
 
   return (
     <nav className="flex items-center justify-between px-4 py-2 w-full mt-0  bg-stone-950 text-white pt-4 pr-16 pl-16">
@@ -26,22 +28,22 @@ const Navbar = () => {
           </a>
         </li>
         <li>
-          <a href="#" className="hover:text-gray-400">
+          <a href="/" className="hover:text-gray-400">
             Services
           </a>
         </li>
         <li>
-          <a href="#" className="hover:text-gray-400">
+          <a href="/" className="hover:text-gray-400">
             FAQs
           </a>
         </li>
         <li>
-          <a href="#" className="hover:text-gray-400">
+          <a href="/" className="hover:text-gray-400">
             Support
           </a>
         </li>
         <li>
-          <a href="#" className="hover:text-gray-400">
+          <a href="/" className="hover:text-gray-400">
             About Us
           </a>
         </li>
