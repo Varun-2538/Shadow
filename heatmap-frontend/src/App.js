@@ -14,7 +14,7 @@ import Navbar from "./components/Navbar";
 import Landing from "./components/Landing";
 import BeatWiseAnalysis from "./components/BeatWiseAnalysis";
 import TemporalAnalysis from "./components/TemporalAnalysis";
-import Radio from "./components/Radio";
+
 
 const AppWrapper = () => {
   return (
@@ -32,7 +32,6 @@ const App = () => {
       <Sidebar />
       <div className="flex-grow ml-30">
         <Navbar />
-          <Radio />
           <Routes>
             <Route path="/" element={<Landing />} />
             <Route path="/prediction" element={<Prediction />} />

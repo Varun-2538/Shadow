@@ -83,8 +83,8 @@ function Map() {
   };
 
   return (
-    <div className="App">
-      <h1>Karnataka Heatmap Visualization</h1>
+    <div className="App ">
+      <h1 className="font-bold text-center text-3xl mb-4">Karnataka Heatmap Visualization</h1>
       <div>
         <label>
           <input

@@ -26,22 +26,21 @@ const Navbar = () => {
           </a>
         </li>
         <li>
-          <a href="/" className="hover:text-gray-400">
-            Services
+          <a
+            href="https://github.com/Varun-2538/Shadow"
+            className="hover:text-gray-400"
+          >
+            Github
           </a>
         </li>
         <li>
-          <a href="/" className="hover:text-gray-400">
+          <a href="#" className="hover:text-gray-400">
             FAQs
           </a>
         </li>
+        
         <li>
-          <a href="/" className="hover:text-gray-400">
-            Support
-          </a>
-        </li>
-        <li>
-          <a href="/" className="hover:text-gray-400">
+          <a href="#" className="hover:text-gray-400">
             About Us
           </a>
         </li>
