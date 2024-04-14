@@ -5,17 +5,25 @@ const fs = require('fs');
 const path = require('path');
 const app = express();
 
-app.use(cors());
+// Configure CORS for production (update your allowed origins as needed)
+const corsOptions = {
+  origin: ['https://gallants-ksp-2.onrender.com'], // Replace with your actual frontend URL for production
+  optionsSuccessStatus: 200 // For legacy browser support
+};
+
+app.use(cors(corsOptions));
 app.use(express.json());
 
-// Get the project directory
-const projectDir = path.dirname(path.dirname(path.dirname(__filename)));
+// Set a fixed port number
+const port = 5000;
+
+// Define the CSV file path directly
+const csvFilePath = path.join(__dirname, 'dataset', 'updated_ml_model_ready_dataset.csv');
 
 // Utility function to read CSV and filter based on selection
 const readCSV = (filterColumn = null, filterValue = null) => {
   return new Promise((resolve, reject) => {
     const results = [];
-    const csvFilePath = path.join(projectDir, 'Gallants-KSP', 'heatmap-backend', 'dataset', 'updated_ml_model_ready_dataset.csv');
     fs.createReadStream(csvFilePath)
       .pipe(csv())
       .on('data', (row) => {
@@ -37,6 +45,7 @@ app.get('/api/districts', async (req, res) => {
     const districts = [...new Set(data.map(item => item.district_name))];
     res.json(districts);
   } catch (error) {
+    console.error('Failed to read districts:', error);
     res.status(500).send('Error reading CSV file');
   }
 });
@@ -49,6 +58,7 @@ app.get('/api/units/:district', async (req, res) => {
     const units = [...new Set(data.map(item => item.unitname))];
     res.json(units);
   } catch (error) {
+    console.error('Failed to read units:', error);
     res.status(500).send('Error reading CSV file');
   }
 });
@@ -79,11 +89,12 @@ app.post('/api/data-frequency', async (req, res) => {
 
     res.json(frequency);
   } catch (error) {
-    console.error(error);
+    console.error('Error processing data:', error);
     res.status(500).send('Server Error');
   }
 });
 
-app.listen(5000, () => {
-  console.log('Server running on port 5000');
+// Start the server
+app.listen(port, () => {
+  console.log(`Server running on port ${port}`);
 });
