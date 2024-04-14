@@ -67,4 +67,4 @@ Shadow is a comprehensive web application that enables law enforcement agencies 
 4. Open your web browser and navigate to `http://localhost:3000` to access the Predictive Crime Analysis application.
 
 ## License
-This project is licensed under the
+This project is licensed under the [Apache License](https://www.apache.org/licenses/LICENSE-2.0.txt)
