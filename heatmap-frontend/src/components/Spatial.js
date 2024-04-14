@@ -21,7 +21,7 @@ const Spatial = () => {
     // Initialize collapsible state for each field when frequencyData is set
     setCollapsibleState(
       Object.keys(frequencyData).reduce((acc, field) => {
-        acc[field] = true; // start all as closed
+        acc[field] = false; // start all as closed
         return acc;
       }, {})
     );

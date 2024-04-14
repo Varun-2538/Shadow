@@ -4,3 +4,4 @@ flask_cors
 pandas
 numpy
 subprocess.run
+gunicorn
