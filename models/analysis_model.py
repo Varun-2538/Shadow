@@ -7,10 +7,10 @@ load_dotenv()
 print("Environment Keys Loaded:", os.getenv('HUGGINGFACE_API_KEY'))  # This should print your API key if loaded correctly
 
 # Load the text generation model from Hugging Face Hub
-hf_api_key = os.getenv('HUGGINFACE_API_KEY')
+hf_api_key = os.getenv('HUGGINGFACE_API_KEY')
 if not hf_api_key:
     raise ValueError("Hugging Face API Key not set in environment variable")
-text_generation_client = InferenceClient(api_token=hf_api_key, model_id = "mistralai/Mixtral-8x7B-Instruct-v0.1")
+text_generation_client = InferenceClient(token=hf_api_key, model= "mistralai/Mixtral-8x7B-Instruct-v0.1")
 
 # Define a function to format prompts for the model
 def format_prompt_for_model(user_prompt, district, police_station, data):
