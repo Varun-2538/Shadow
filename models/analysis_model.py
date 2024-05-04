@@ -1,9 +1,16 @@
-from huggingface_hub import InferenceClient
+from huggingface_hub import InferenceClient # type: ignore
 import os
 import re
+from dotenv import load_dotenv # type: ignore
+
+load_dotenv()
+print("Environment Keys Loaded:", os.getenv('HUGGINGFACE_API_KEY'))  # This should print your API key if loaded correctly
 
 # Load the text generation model from Hugging Face Hub
-text_generation_client = InferenceClient("mistralai/Mixtral-8x7B-Instruct-v0.1")
+hf_api_key = os.getenv('HUGGINFACE_API_KEY')
+if not hf_api_key:
+    raise ValueError("Hugging Face API Key not set in environment variable")
+text_generation_client = InferenceClient(api_token=hf_api_key, model_id = "mistralai/Mixtral-8x7B-Instruct-v0.1")
 
 # Define a function to format prompts for the model
 def format_prompt_for_model(user_prompt, district, police_station, data):
@@ -26,6 +33,7 @@ def format_prompt_for_model(user_prompt, district, police_station, data):
         "For example, if certain age groups are predominantly involved in specific crime types, explore how their profession or location might contribute to this trend. Go beyond surface-level observations to identify complex interdependencies. Consider how socio-economic conditions, cultural dynamics, or enforcement practices could be shaping these patterns. "
         "Weave together these different threads, offering insights that explain why these correlations exist and how they contribute to the overall crime landscape. Your goal is to provide a comprehensive analysis that not only identifies these connections but also proposes hypotheses to understand root causes and facilitate more effective crime prevention strategies. "
         "Pay particular attention to how different sections of the analysis are interconnected. For example, explore how age and crime type relate to location and profession, and vice versa. Reveal the hidden patterns that emerge when these fields are considered in conjunction with one another."
+        "DO NOT EXCEED MORE THAN 300 WORDS"
     )
 
 
@@ -52,7 +60,7 @@ def generate_crime_analysis(analysis_text, district, police_station, data):
     # Set model parameters for text generation
     generation_parameters = dict(
         temperature=0.3,  # Controls randomness of generated text
-        max_new_tokens=1024,  # Maximum number of tokens to generate
+        max_new_tokens=512,  # Maximum number of tokens to generate
         top_p=0.96,  # Likelihood of selecting common words
         repetition_penalty=1.0,  # Discourages repetition
         do_sample=True,
