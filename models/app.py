@@ -3,6 +3,7 @@ import pandas as pd
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 from analysis_model import generate_crime_analysis
+import traceback
 
 # Create Flask app instance
 app = Flask(__name__)
@@ -67,6 +68,7 @@ def crime_analysis():
 
         return jsonify({'analysis': crime_analysis}), 200
     except Exception as e:
+        app.logger.error('Failed to generate analysis: %s\n%s', str(e), traceback.format_exc())
         return jsonify({'error': str(e)}), 500
 
 # Run the Flask app in debug mode on port 8000
