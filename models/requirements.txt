@@ -5,3 +5,4 @@ pandas
 numpy
 subprocess.run
 gunicorn
+python-dotenv
