@@ -3,6 +3,18 @@ module.exports = {
   content: ["./src/components/**/*.{js,ts,jsx,tsx}"],
   theme: {
     extend: {
+      backdropFilter: {
+        none: "none",
+        blur: "blur(20px)",
+      },
+      backgroundImage: {
+        "gradient-radial":
+          "radial-gradient(at top left, var(--tw-gradient-stops))",
+      },
+      backgroundPosition: {
+        "top-left": "left top",
+      },
+
       spacing: {
         7: "1.75rem",
       },
