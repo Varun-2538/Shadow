@@ -3,6 +3,12 @@ module.exports = {
   content: ["./src/components/**/*.{js,ts,jsx,tsx}"],
   theme: {
     extend: {
+      spacing: {
+        7: "1.75rem",
+      },
+      colors: {
+        "sidebar-dark": "#1A202C", // example color
+      },
       boxShadow: {
         "glow-red":
           "0 0 10px rgba(255, 0, 0, 0.6), 0 0 20px rgba(255, 0, 0, 0.6), 0 0 30px rgba(255, 0, 0, 0.6)",
@@ -16,7 +22,6 @@ module.exports = {
       gradientBorderColors: {
         "gradient-red": ["#ff0000", "#ff7f7f"],
       },
-      
     },
   },
   plugins: [],
