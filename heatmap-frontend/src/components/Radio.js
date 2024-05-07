@@ -11,7 +11,7 @@ const Radio = () => {
     navigate(`/${event.target.value}`);
   };
 
-  if (location.pathname === "/") {
+  if (location.pathname === "/" || location.pathname === "/Spatial") {
     return null;
   }
 
