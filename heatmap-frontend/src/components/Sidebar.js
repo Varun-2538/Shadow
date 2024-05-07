@@ -5,7 +5,7 @@ import styled from "styled-components";
 const StyledSidebar = styled.div`
   min-height: 100vh;
   width: 240px;
-  background: #1f2937;
+  background: #0f172a;
   padding: 16px;
   box-shadow: 0 0 8px rgba(0, 0, 0, 0.1);
 `;
@@ -17,7 +17,7 @@ const StyledButton = styled.button`
   border-radius: 5px;
   transition: all 0.2s;
   background-color: ${(props) => (props.open ? "#4b5563" : "transparent")};
-  color: white;
+  color: #f5f5f4;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -29,15 +29,11 @@ const StyledLink = styled.a`
   padding: 10px 15px;
   border-radius: 5px;
   transition: transform 0.5s, background-color 0.2s;
-  color: white;
+  color: #f5f5f4; // Bright cyan color for text
   display: block;
   text-decoration: none;
   &:hover {
-    background-color: #4b5563;
-    &::before {
-      
-      background-color: white;
-    }
+    background-color: #4b5563; // Tailwind gray-700
   }
 `;
 
@@ -52,7 +48,7 @@ const Sidebar = () => {
   return (
     <StyledSidebar>
       <nav>
-        <div className="text-2xl ml-2 mb-8 text-white font-bold font-serif">Shadow</div>
+        <div className="text-2xl ml-4 pl-4 mb-8  text-white  font-bold font-serif">Shadow</div>
         <div className="text-white ml-4 mt-4 pt-4 font-semibold flex flex-col justify-center space-y-4">
           <div>
             <StyledButton

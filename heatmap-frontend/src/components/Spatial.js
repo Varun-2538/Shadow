@@ -239,10 +239,9 @@ const Spatial = () => {
   };
 
   return (
-    <div className="container mx-auto px-4">
-      <h2 className="text-2xl font-bold mb-4">
-        Select District and Unit for Spatial Analysis
-      </h2>
+    <div className="container bg-gradient-to-b  from-indigo-950 via-gray-800 to-stone-950 text-white mx-auto px-4 pt-4" >
+      <h2 className="text-3xl font-bold mb-2">Spatial Analysis</h2>
+      <p className="mb-4 pb-4">Lorem Ipsum hey this is spatial</p>
 
       <div className="flex flex-wrap -mx-2 mb-4">
         {" "}
