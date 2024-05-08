@@ -89,13 +89,18 @@ const BeatWiseAnalysis = () => {
     const fields = ['place_of_offence', 'actsection', 'fir_type', 'latitude', 'longitude', 'crimegroup_name', 'victim_profession', 'victim_caste', 'accused_profession', 'accused_caste'];
     let chartDataSets = fields.map((field) => {
       const countData = data.reduce((acc, curr) => {
+        // Check if the field is latitude or longitude and the value is 0, skip adding to countData
+        if ((field === 'latitude' || field === 'longitude') && curr[field] === 'null') {
+          return acc;
+        }
+  
         acc[curr[field]] = (acc[curr[field]] || 0) + 1;
         return acc;
       }, {});
-
+  
       const labels = Object.keys(countData);
       const colors = labels.map(() => generateColor()); // Generate a unique color for each label
-
+  
       return {
         field: field,
         labels: labels,
@@ -111,9 +116,10 @@ const BeatWiseAnalysis = () => {
         }]
       };
     });
-
+  
     setChartData(chartDataSets);
   };
+  
 
   const chartConfig = (data, chartType = 'bar') => {
     const commonOptions = {
