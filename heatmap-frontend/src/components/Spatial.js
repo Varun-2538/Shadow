@@ -28,9 +28,9 @@ const Spatial = () => {
   }, [frequencyData]);
 
   const toggleCollapse = (field) => {
-    setCollapsibleState(prevState => ({
+    setCollapsibleState((prevState) => ({
       ...prevState,
-      [field]: !prevState[field]
+      [field]: !prevState[field],
     }));
   };
 
@@ -97,14 +97,27 @@ const Spatial = () => {
   const renderCharts = () => {
     const excludeFields = [
       "district_name",
+      "place_of_offence",
+      "beat_name",
+      "ioname",
+      "distance_from_ps",
+      "fir_stage",
+      "actsection",
+      "victim_profession",
+
+      "victim_sex",
+      "accused_presentaddress",
+      "fir_type",
+      "victim_age",
+      "accused_sex",
       "unitname",
       "crime_no",
       "latitude",
       "longitude",
-      "Accused Age"
+      "Accused Age",
     ];
     const pieChartFields = ["accused_presentaddress", "victim_presentaddress"];
-  
+
     // Create pairs of fields to be displayed in the same row
     const fieldPairs = Object.entries(frequencyData)
       .filter(([field]) => !excludeFields.includes(field))
@@ -115,67 +128,64 @@ const Spatial = () => {
         }
         return result;
       }, []);
-  
+
     return fieldPairs.map((pair, rowIndex) => (
       <div key={rowIndex} className="flex flex-wrap -mx-2">
         {pair.map(([field, values], index) => {
-        // Data for the chart
-        const chartData = {
-          labels: Object.keys(values),
-          datasets: [
-            {
-              label: `${field} Values`,
-              data: Object.values(values),
-              backgroundColor: [
-                "rgba(255, 99, 132, 0.5)",
-                "rgba(54, 162, 235, 0.5)",
-                "rgba(255, 206, 86, 0.5)",
-                "rgba(75, 192, 192, 0.5)",
-                "rgba(153, 102, 255, 0.5)",
-                "rgba(255, 159, 64, 0.5)",
-              ],
-              borderColor: [
-                "rgba(255, 99, 132, 1)",
-                "rgba(54, 162, 235, 1)",
-                "rgba(255, 206, 86, 1)",
-                "rgba(75, 192, 192, 1)",
-                "rgba(153, 102, 255, 1)",
-                "rgba(255, 159, 64, 1)",
-              ],
-              borderWidth: 1,
-            },
-          ],
-        };
+          // Data for the chart
+          const chartData = {
+            labels: Object.keys(values),
+            datasets: [
+              {
+                label: `${field} Values`,
+                data: Object.values(values),
+                backgroundColor: [
+                  "rgba(255, 99, 132, 0.5)",
+                  "rgba(54, 162, 235, 0.5)",
+                  "rgba(255, 206, 86, 0.5)",
+                  "rgba(75, 192, 192, 0.5)",
+                  "rgba(153, 102, 255, 0.5)",
+                  "rgba(255, 159, 64, 0.5)",
+                ],
+                borderColor: [
+                  "rgba(255, 99, 132, 1)",
+                  "rgba(54, 162, 235, 1)",
+                  "rgba(255, 206, 86, 1)",
+                  "rgba(75, 192, 192, 1)",
+                  "rgba(153, 102, 255, 1)",
+                  "rgba(255, 159, 64, 1)",
+                ],
+                borderWidth: 1,
+              },
+            ],
+          };
 
-        return (
-          <div
-            key={index}
-            className="w-full  md:w-1/2 p-2"
-          >
-            <div className="p-5 border border-gray-200 shadow rounded">
-              <button
-                onClick={() => toggleCollapse(field)}
-                className="flex items-center font-bold text-lg mb-2"
-              >
-                {collapsibleState[field] ? "▼" : "►"}
-                <span className="ml-2">{formatFieldName(field)}</span>
-              </button>
-              {collapsibleState[field] && (
-                <div>
-                  {pieChartFields.includes(field) ? (
-                    <Pie data={chartData} />
-                  ) : (
-                    <Bar data={chartData} />
-                  )}
-                </div>
-              )}
+          return (
+            <div key={index} className="w-full  md:w-1/2 p-2">
+              <div className="p-5 border border-gray-200 shadow rounded">
+                <button
+                  onClick={() => toggleCollapse(field)}
+                  className="flex items-center font-bold text-lg mb-2"
+                >
+                  {collapsibleState[field] ? "▼" : "►"}
+                  <span className="ml-2">{formatFieldName(field)}</span>
+                </button>
+                {collapsibleState[field] && (
+                  <div>
+                    {pieChartFields.includes(field) ? (
+                      <Pie data={chartData} />
+                    ) : (
+                      <Bar data={chartData} />
+                    )}
+                  </div>
+                )}
+              </div>
             </div>
-          </div>
-        );
-      })}
-    </div>
-  ));
-};
+          );
+        })}
+      </div>
+    ));
+  };
 
   const renderUnitOptions = () => {
     let options = units.map((unit) => (
@@ -246,7 +256,7 @@ const Spatial = () => {
   };
 
   return (
-    <div className="container text-white mx-auto px-4 pt-4 bg-gray-900">
+    <div className="container bg-gradient-to-b from-indigo-950 via-gray-800 to-stone-950 text-white mx-auto px-4 pt-4">
       <h2 className="text-3xl font-bold mb-2">Spatial Analysis</h2>
       <p className="mb-4 pb-4">Lorem Ipsum hey this is spatial</p>
 
