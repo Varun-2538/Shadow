@@ -90,7 +90,7 @@ const BeatWiseAnalysis = () => {
     let chartDataSets = fields.map((field) => {
       const countData = data.reduce((acc, curr) => {
         // Check if the field is latitude or longitude and the value is 0, skip adding to countData
-        if ((field === 'latitude' || field === 'longitude') && curr[field] === 'null') {
+        if ((field === 'latitude' || field === 'longitude' || field === 'place_of_offence' || field === 'actsection' || field === 'crimegroup_name' || field === 'victim_profession' || field === 'victim_caste'  || field === 'accused_caste') && curr[field] === 'null') {
           return acc;
         }
   
