@@ -101,6 +101,7 @@ const Spatial = () => {
       "crime_no",
       "latitude",
       "longitude",
+      "Accused Age"
     ];
     const pieChartFields = ["accused_presentaddress", "victim_presentaddress"];
   
@@ -147,10 +148,16 @@ const Spatial = () => {
         };
 
         return (
-          <div key={index} className="w-full md:w-1/2 p-2">
+          <div
+            key={index}
+            className="w-full  md:w-1/2 p-2"
+          >
             <div className="p-5 border border-gray-200 shadow rounded">
-              <button onClick={() => toggleCollapse(field)} className="flex items-center font-bold text-lg mb-2">
-                {collapsibleState[field] ? '▼' : '►'}
+              <button
+                onClick={() => toggleCollapse(field)}
+                className="flex items-center font-bold text-lg mb-2"
+              >
+                {collapsibleState[field] ? "▼" : "►"}
                 <span className="ml-2">{formatFieldName(field)}</span>
               </button>
               {collapsibleState[field] && (
@@ -239,7 +246,7 @@ const Spatial = () => {
   };
 
   return (
-    <div className="container bg-gradient-to-b  from-indigo-950 via-gray-800 to-stone-950 text-white mx-auto px-4 pt-4" >
+    <div className="container text-white mx-auto px-4 pt-4 bg-gray-900">
       <h2 className="text-3xl font-bold mb-2">Spatial Analysis</h2>
       <p className="mb-4 pb-4">Lorem Ipsum hey this is spatial</p>
 
@@ -251,7 +258,7 @@ const Spatial = () => {
           {/* Adjusted width to half of the container */}
           <label
             htmlFor="district-select"
-            className="block mb-2 text-sm font-medium text-gray-900"
+            className="block mb-2 text-sm text-white font-medium"
           >
             District:
           </label>
@@ -273,7 +280,7 @@ const Spatial = () => {
           {/* Adjusted width to half of the container */}
           <label
             htmlFor="unit-select"
-            className="block mb-2 text-sm font-medium text-gray-900"
+            className="block mb-2 text-sm font-medium text-white"
           >
             Unit:
           </label>
@@ -317,13 +324,6 @@ const Spatial = () => {
         ) : (
           <p className="text-gray-500">No data to display</p>
         )}
-      </div>
-
-      <div className="mt-8">
-        <h3 className="text-xl font-bold">Generated Analysis Text:</h3>
-        <pre className="bg-gray-100 border rounded p-3 overflow-auto whitespace-pre-wrap">
-          {formattedAnalysisText || "Submit to generate analysis text."}
-        </pre>
       </div>
 
       <button

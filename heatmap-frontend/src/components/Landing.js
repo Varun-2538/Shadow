@@ -11,7 +11,7 @@ export default function Landing() {
   return (
     <>
       <div className="bg-stone-950 min-h-screen w-full">
-        <div className=" bg-gradient-radial top-0 left-0 from-gray-900 to-stone-950">
+        <div className=" bg-gradient-radial top-0 left-0 from-slate-900 to-stone-950">
           <div className="flex-grow min-h-screen flex items-center justify-center flex-col text-white">
             <h1 className="text-7xl font-bold mb-4 ">
               Predict. <span className="text-sky-600">Prevent.</span> Preserve.
@@ -25,7 +25,7 @@ export default function Landing() {
               responsive, and diligent.
             </p>
             <div className="flex space-x-4">
-              <button className="bg-transparent no-underline group cursor-pointer relative shadow-2xl shadow-sky-600 rounded-full p-px text-xs font-semibold leading-6 text-white inline-block">
+              <button className="bg-slate-800 no-underline group cursor-pointer relative shadow-2xl shadow-zinc-900 rounded-full p-px text-xs font-semibold leading-6  text-white inline-block">
                 <span className="absolute inset-0 overflow-hidden rounded-full">
                   <span className="absolute inset-0 rounded-full bg-[image:radial-gradient(75%_100%_at_50%_0%,rgba(56,189,248,0.6)_0%,rgba(56,189,248,0)_75%)] opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
                 </span>

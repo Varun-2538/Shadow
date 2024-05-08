@@ -5,7 +5,7 @@ import styled from "styled-components";
 const StyledSidebar = styled.div`
   min-height: 100vh;
   width: 240px;
-  background: #0f172a;
+  background: #18181b;
   padding: 16px;
   box-shadow: 0 0 8px rgba(0, 0, 0, 0.1);
 `;
@@ -17,11 +17,12 @@ const StyledButton = styled.button`
   border-radius: 5px;
   transition: all 0.2s;
   background-color: ${(props) => (props.open ? "#4b5563" : "transparent")};
-  color: #f5f5f4;
+  color: #22d3ee;
   display: flex;
   justify-content: space-between;
   align-items: center;
   cursor: pointer;
+  text-shadow: 0 0 8px rgba(34, 211, 238, 0.75);
 `;
 
 const StyledLink = styled.a`
@@ -29,13 +30,16 @@ const StyledLink = styled.a`
   padding: 10px 15px;
   border-radius: 5px;
   transition: transform 0.5s, background-color 0.2s;
-  color: #f5f5f4; // Bright cyan color for text
+  color: #22d3ee; // Bright cyan color for text
   display: block;
   text-decoration: none;
+  text-shadow: 0 0 8px rgba(34, 211, 238, 0.75); // Glowing effect using the same color
+
   &:hover {
     background-color: #4b5563; // Tailwind gray-700
   }
 `;
+
 
 const Sidebar = () => {
   const location = useLocation();
@@ -48,10 +52,10 @@ const Sidebar = () => {
   return (
     <StyledSidebar>
       <nav>
-        <div className="text-2xl ml-4 pl-4 mb-8  text-white  font-bold font-serif">Shadow</div>
+        <div className="text-2xl ml-4 pl-4 mb-8 text-white  font-bold font-serif">Shadow</div>
         <div className="text-white ml-4 mt-4 pt-4 font-semibold flex flex-col justify-center space-y-4">
           <div>
-            <StyledButton
+            <StyledButton 
               onClick={() => setDropdownOpen(dropdownOpen)}
               open={dropdownOpen}
             >
