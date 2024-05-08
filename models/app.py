@@ -81,7 +81,8 @@ def beatwise_analysis():
 
         analysis_text = data.get('analysis_text', '')
         district = data.get('district', '')
-        police_station = data.get('police_station', '')
+        unitname = data.get('unitname', '')
+        beat_name = data.get('beat_name', '')
 
         if not analysis_text:
             return jsonify({'error': 'Analysis text is required'}), 400
@@ -89,7 +90,7 @@ def beatwise_analysis():
         print("Received analysis text:", analysis_text)
         # Generate crime analysis using LLM function
 
-        beatwise_analysis = generate_beatwise_analysis(analysis_text, district, police_station, data)
+        beatwise_analysis = generate_beatwise_analysis(analysis_text, district, unitname, beat_name, data)
         print("Returning analysis result:", beatwise_analysis)
 
 

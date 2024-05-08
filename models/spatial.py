@@ -4,10 +4,10 @@ import re
 from dotenv import load_dotenv # type: ignore
 
 load_dotenv()
-print("Environment Keys Loaded:", os.getenv('HUGGINGFACE_API_KEY'))  # This should print your API key if loaded correctly
+print("Environment Keys Loaded:", os.getenv('HUGGINGFACE_API_SPATIAL'))  # This should print your API key if loaded correctly
 
 # Load the text generation model from Hugging Face Hub
-hf_api_key = os.getenv('HUGGINGFACE_API_KEY')
+hf_api_key = os.getenv('HUGGINGFACE_API_SPATIAL')
 if not hf_api_key:
     raise ValueError("Hugging Face API Key not set in environment variable")
 text_generation_client = InferenceClient(token=hf_api_key, model= "mistralai/Mixtral-8x7B-Instruct-v0.1")
