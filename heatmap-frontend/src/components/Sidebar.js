@@ -22,7 +22,6 @@ const StyledButton = styled.button`
   justify-content: space-between;
   align-items: center;
   cursor: pointer;
-  text-shadow: 0 0 8px rgba(34, 211, 238, 0.75);
 `;
 
 const StyledLink = styled.a`
@@ -33,7 +32,6 @@ const StyledLink = styled.a`
   color: #f5f5f4; // Bright cyan color for text
   display: block;
   text-decoration: none;
-  text-shadow: 0 0 8px rgba(34, 211, 238, 0.75); // Glowing effect using the same color
 
   &:hover {
     background-color: #4b5563; // Tailwind gray-700
@@ -51,7 +49,7 @@ const Sidebar = () => {
   return (
     <StyledSidebar>
       <nav>
-        <div className="text-2xl ml-4 pl-4 mb-8  text-white  font-bold font-serif">
+        <div className="text-3xl pt-1 ml-4 pl-4 mb-8  text-white  font-bold font-serif">
           Shadow
         </div>
         <div className="text-white ml-4 mt-4 pt-4 font-semibold flex flex-col justify-center space-y-4">
