@@ -37,7 +37,6 @@ const StyledLink = styled.a`
 
   &:hover {
     background-color: #4b5563; // Tailwind gray-700
-    
   }
 `;
 

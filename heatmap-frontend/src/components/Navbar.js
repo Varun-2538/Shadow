@@ -12,8 +12,9 @@ const Navbar = () => {
     return null;
   }
 
+  // Changed the background to a gradient similar to Landing.js
   return (
-    <nav className="flex items-center justify-between px-4 py-2 w-full mt-0  bg-stone-950 text-white pt-4 pr-16 pl-16">
+    <nav className="flex items-center justify-between px-4 py-2 w-full mt-0 bg-gradient-to-r from-slate-900 to-stone-950 text-white pt-4 pr-16 pl-16">
       <div className="text-2xl font-bold">
         <a href="/" className="hover:text-red-500">
           Shadow
@@ -38,19 +39,14 @@ const Navbar = () => {
             FAQs
           </a>
         </li>
-        
+
         <li>
           <a href="#" className="hover:text-gray-400">
             About Us
           </a>
         </li>
       </ul>
-      <button
-        onClick={handleOnClick}
-        className="px-4 py-2 bg-white text-gray-900 rounded-md hover:bg-gray-200"
-      >
-        Login
-      </button>
+      
     </nav>
   );
 };
