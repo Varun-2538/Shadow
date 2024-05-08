@@ -232,7 +232,7 @@ const Spatial = () => {
 
   const fetchAndDisplayAnalysis = () => {
     axios
-      .post("http://localhost:8000/crime_analysis", {
+      .post("http://localhost:8000/spatial_analysis", {
         analysis_text: formattedAnalysisText,
         district: selectedDistrict,
         police_station: selectedUnit,
