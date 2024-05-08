@@ -3,11 +3,13 @@ import axios from "axios";
 import { Bar, Pie } from "react-chartjs-2";
 import "chart.js/auto";
 import { MapContainer, TileLayer } from "react-leaflet";
+import { ProgressBar } from "react-loader-spinner";
 import "leaflet/dist/leaflet.css";
 import HeatmapLayer from "./HeatmapLayer";
 
 const Spatial = () => {
   const [districts, setDistricts] = useState([]);
+  const [showProgressBar, setShowProgressBar] = useState(false);
   const [units, setUnits] = useState([]);
   const [selectedDistrict, setSelectedDistrict] = useState("");
   const [selectedUnit, setSelectedUnit] = useState("");
@@ -241,6 +243,7 @@ const Spatial = () => {
   };
 
   const fetchAndDisplayAnalysis = () => {
+    setShowProgressBar(true);
     axios
       .post("http://localhost:8000/spatial_analysis", {
         analysis_text: formattedAnalysisText,
@@ -248,12 +251,23 @@ const Spatial = () => {
         police_station: selectedUnit,
       })
       .then((response) => {
-        setAnalysisResult(response.data.analysis);
+        // Hide progress bar
+        setShowProgressBar(false);
+        const analysis = response.data.analysis;
+        // Split the analysis text into bullet points
+        const bulletPoints = analysis
+          .split("\n")
+          .map((point, index) => <li key={index}>{point}</li>);
+        // Set the analysis result with bullet points
+        setAnalysisResult(<ul>{bulletPoints}</ul>);
       })
       .catch((error) => {
+        // Hide progress bar on error too
+        setShowProgressBar(false);
         console.error("Error fetching analysis:", error);
       });
   };
+
 
   return (
     <div className="container bg-gradient-to-b from-indigo-950 via-gray-800 to-stone-950 text-white mx-auto px-4 pt-4">
@@ -342,6 +356,17 @@ const Spatial = () => {
       >
         Get Analysis
       </button>
+      {showProgressBar && (
+        <ProgressBar
+          visible={true}
+          height="80"
+          width="80"
+          color="#4fa94d"
+          ariaLabel="progress-bar-loading"
+          wrapperStyle={{}}
+          wrapperClass=""
+        />
+      )}
 
       <div className="mt-4">
         <h3 className="text-lg font-bold">Analysis Result:</h3>
