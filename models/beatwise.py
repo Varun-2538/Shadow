@@ -46,7 +46,7 @@ def format_prompt_for_model(user_prompt, district, police_station, data):
     combined_prompt = f"<s>[SYS] {system_context_prompt} [/SYS]\n[INST] {user_context_prompt} [/INST]"
     return combined_prompt
 
-def generate_crime_analysis(analysis_text, district, police_station, data):
+def generate_beatwise_analysis(analysis_text, district, police_station, data):
     """
     Generates text using the loaded model, with options for controlling the output.
 
@@ -60,7 +60,7 @@ def generate_crime_analysis(analysis_text, district, police_station, data):
     # Set model parameters for text generation
     generation_parameters = dict(
         temperature=0.3,  # Controls randomness of generated text
-        max_new_tokens=1024,  # Maximum number of tokens to generate
+        max_new_tokens=512,  # Maximum number of tokens to generate
         top_p=0.96,  # Likelihood of selecting common words
         repetition_penalty=1.0,  # Discourages repetition
         do_sample=True,
