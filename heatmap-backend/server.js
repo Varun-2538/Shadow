@@ -30,6 +30,14 @@ const readCSV = (filterColumn = null, filterValue = null) => {
   });
 };
 
+// app.post('/data', (req, res) => {
+//   const data = req.body;
+//   console.log(data);
+//   res.send('Data received');
+// });
+
+// app.listen(3000, () => console.log('Server running on port 3000'));
+
 // Endpoint to get unique district names
 app.get('/api/districts', async (req, res) => {
   try {

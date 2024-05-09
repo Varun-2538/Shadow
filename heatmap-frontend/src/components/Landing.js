@@ -11,18 +11,16 @@ export default function Landing() {
   return (
     <>
       <div className="bg-stone-950 min-h-screen w-full">
-        <div className=" bg-gradient-radial top-0 left-0 from-slate-900 to-stone-950">
-          <div className="flex-grow min-h-screen flex items-center justify-center flex-col text-white">
-            <h1 className="text-7xl font-bold mb-4 ">
+        <div className="bg-gradient-radial top-0 left-0 from-slate-900 to-stone-950">
+          <div className="flex-grow min-h-screen flex items-center justify-center flex-col text-white px-4 sm:px-6 lg:px-8">
+            <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold mb-4 text-center">
               Predict. <span className="text-sky-600">Prevent.</span> Preserve.
             </h1>
-            <h2 className="text-3xl font-semibold mb-8">
+            <h2 className="text-xl sm:text-2xl md:text-3xl font-semibold mb-8 text-center">
               Community Sentinel Suite.
             </h2>
-            <p className="text-center max-w-3xl mb-8">
-              Navigate public safety with precision using the Community Sentinel
-              Suite. Deploy law enforcement where it matters most. Insightful,
-              responsive, and diligent.
+            <p className="text-center text-sm sm:text-base md:text-lg max-w-3xl mb-8">
+              Navigate public safety with precision using the Community Sentinel Suite. Deploy law enforcement where it matters most. Insightful, responsive, and diligent.
             </p>
             <div className="flex space-x-4">
               <button className="bg-transparent no-underline group cursor-pointer relative shadow-2xl shadow-sky-600 rounded-full p-px text-xs font-semibold leading-6 text-white inline-block">
@@ -36,9 +34,9 @@ export default function Landing() {
                   <span>Get Started </span>
                   <svg
                     fill="none"
-                    height="38"
+                    height="24"
                     viewBox="0 0 22 22"
-                    width="32"
+                    width="24"
                     xmlns="http://www.w3.org/2000/svg"
                   >
                     <path
