@@ -15,7 +15,7 @@ const projectDir = path.dirname(path.dirname(path.dirname(__filename)));
 const readCSV = (filterColumn = null, filterValue = null) => {
   return new Promise((resolve, reject) => {
     const results = [];
-    const csvFilePath = path.join(projectDir, 'Shadow', 'heatmap-backend', 'dataset', 'combined_data.csv');
+    const csvFilePath = path.join(projectDir, 'Gallants-ksp', 'heatmap-backend', 'dataset', 'combined_data.csv');
     fs.createReadStream(csvFilePath)
       .pipe(csv())
       .on('data', (row) => {

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import { Bar, Pie } from "react-chartjs-2"; // Import Pie from react-chartjs-2
+import { Bar, Pie } from "react-chartjs-2";
 import "chart.js/auto";
 
 const BeatWiseAnalysis = () => {
@@ -12,6 +12,8 @@ const BeatWiseAnalysis = () => {
   const [selectedBeat, setSelectedBeat] = useState("");
   const [chartData, setChartData] = useState([]);
   const [collapsibleState, setCollapsibleState] = useState({});
+  const [analysisText, setAnalysisText] = useState("");
+  const [analysisResult, setAnalysisResult] = useState(""); // State to hold analysis result from server
 
   useEffect(() => {
     axios
@@ -47,50 +49,26 @@ const BeatWiseAnalysis = () => {
     }
   }, [selectedUnit]);
 
-  useEffect(() => {
-    // Initialize collapsible state for each field when chartData is set
-    setCollapsibleState(
-      chartData.reduce((acc, chart) => {
-        acc[chart.field] = true; // start all as closed
-        return acc;
-      }, {})
-    );
-  }, [chartData]);
-
   const handleSubmit = () => {
     if (selectedBeat) {
       axios
-        .get(
-          `http://localhost:5000/api/data-by-beat/${encodeURIComponent(
-            selectedBeat
-          )}`
-        )
+        .get(`http://localhost:5000/api/data-by-beat/${encodeURIComponent(selectedBeat)}`)
         .then((response) => {
           prepareChartData(response.data);
         })
-        .catch((error) => {
-          console.error("Error fetching data:", error);
-        });
+        .catch((error) => console.error("Error fetching data:", error));
     }
   };
-
-  const colors = [
-    "rgba(255, 99, 132, 0.5)",
-    "rgba(54, 162, 235, 0.5)",
-    "rgba(255, 206, 86, 0.5)",
-    "rgba(75, 192, 192, 0.5)",
-    "rgba(153, 102, 255, 0.5)",
-    "rgba(255, 159, 64, 0.5)",
-    "rgba(199, 199, 199, 0.5)", // You can extend this list with more colors
-    "rgba(164, 255, 101, 0.5)",
-    "rgba(101, 140, 255, 0.5)",
-  ];
 
   const generateColor = () => {
     const r = Math.floor(Math.random() * 256);
     const g = Math.floor(Math.random() * 256);
     const b = Math.floor(Math.random() * 256);
     return `rgba(${r}, ${g}, ${b}, 0.5)`;
+  };
+
+  const formatFieldName = (field) => {
+    return field.replace(/_/g, ' ').toLowerCase();
   };
 
   const prepareChartData = (data) => {
@@ -108,37 +86,25 @@ const BeatWiseAnalysis = () => {
     ];
     let chartDataSets = fields.map((field) => {
       const countData = data.reduce((acc, curr) => {
-        // Check if the field is latitude or longitude and the value is 0, skip adding to countData
-        if (
-          (field === "latitude" ||
-            field === "longitude" ||
-            field === "place_of_offence" ||
-            field === "actsection" ||
-            field === "Crime_Type" ||
-            field === "victim_profession" ||
-            field === "victim_caste" ||
-            field === "accused_caste") &&
-          curr[field] === "null"
-        ) {
-          return acc;
+        if (curr[field] !== "null") {
+          acc[curr[field]] = (acc[curr[field]] || 0) + 1;
         }
-
-        acc[curr[field]] = (acc[curr[field]] || 0) + 1;
         return acc;
       }, {});
-
+  
       const labels = Object.keys(countData);
-      const colors = labels.map(() => generateColor()); // Generate a unique color for each label
-
+      const colors = labels.map(() => generateColor());
+  
       return {
         field: field,
         labels: labels,
+        countData: countData,
         datasets: [
           {
-            label: `${field.replace("_", " ")} Frequency`,
+            label: `${formatFieldName(field)} Frequency`,
             data: Object.values(countData),
-            backgroundColor: colors, // Apply the dynamically generated colors to each bar
-            borderColor: colors.map((color) => color.replace("0.5", "1")), // Darker borders for better visibility
+            backgroundColor: colors,
+            borderColor: colors.map(color => color.replace("0.5", "1")),
             borderWidth: 1,
             barThickness: 10,
             borderRadius: 5,
@@ -147,9 +113,60 @@ const BeatWiseAnalysis = () => {
         ],
       };
     });
-
+  
     setChartData(chartDataSets);
+    const newCollapsibleState = {};
+    chartDataSets.forEach(({ field }) => {
+      newCollapsibleState[field] = true;
+    });
+    setCollapsibleState(newCollapsibleState);
   };
+  
+  useEffect(() => {
+    if (chartData.length > 0) {
+      generateAnalysisText(chartData);
+    }
+  }, [chartData]); // Dependency on chartData to ensure it runs after update
+  
+
+  const generateAnalysisText = (chartDataSets) => {
+    let text = "";
+  
+    chartDataSets.forEach((chart, index) => {
+      const { field, countData } = chart;
+      const formattedField = formatFieldName(field);
+      const sortedValues = Object.entries(countData).sort((a, b) => b[1] - a[1]);
+      const total = sortedValues.reduce((acc, [_, freq]) => acc + freq, 0);
+      const topThreeValues = sortedValues.slice(0, 3);
+  
+      const topThreeText = topThreeValues.map(([value, freq], idx) => {
+        const percentage = Math.floor((freq / total) * 100);
+        return `${idx + 1}. ${value}: ${freq} (${percentage}% of total)`;
+      }).join("; ");
+  
+      text += `${index + 1}) In the beat of ${selectedUnit} unit of ${selectedDistrict} district, the top 3 frequencies in ${formattedField} are: ${topThreeText}.\n`;
+    });
+  
+    setAnalysisText(text); // Ensure this line is working as expected
+  };
+
+  const fetchAndDisplayAnalysis = () => {
+    axios
+      .post("http://localhost:8000/beatwise_analysis", {
+        analysis_text: analysisText, // Correct variable name for the analysis text
+        district: selectedDistrict,
+        unit: selectedUnit,
+        beat: selectedBeat
+      })
+      .then((response) => {
+        setAnalysisResult(response.data.analysis); // Assuming 'analysis' is the field in response
+      })
+      .catch((error) => {
+        console.error("Error posting analysis:", error);
+      });
+  };
+  
+  
 
   const chartConfig = (data, chartType = "bar") => {
     const commonOptions = {
@@ -207,6 +224,8 @@ const BeatWiseAnalysis = () => {
     }));
   };
 
+
+
   const renderCharts = () => {
     const pairedCharts = [];
     for (let i = 0; i < chartData.length; i += 2) {
@@ -222,14 +241,11 @@ const BeatWiseAnalysis = () => {
                 onClick={() => toggleCollapse(data.field)}
                 className="w-full text-left text-lg font-semibold py-2 px-4 bg-white rounded"
               >
-                {collapsibleState[data.field] ? "►" : "▼"}{" "}
-                {data.field.replace("_", " ")}
+                {collapsibleState[data.field] ? "►" : "▼"} {data.field.replace("_", " ")}
               </button>
-              <div
-                className={`${
-                  collapsibleState[data.field] ? "hidden" : ""
-                } p-4 bg-white rounded`}
-              >
+              <div className={`${
+                collapsibleState[data.field] ? "hidden" : ""
+              } p-4 bg-white rounded`}>
                 {renderChart(data, data.field)}
               </div>
             </div>
@@ -317,8 +333,23 @@ const BeatWiseAnalysis = () => {
         </div>
       </div>
       {renderCharts()}
+      <div className="mt-4 p-4 bg-white shadow rounded">
+        <h3 className="text-lg font-semibold mb-2">Analysis Summary:</h3>
+        <pre className="whitespace-pre-wrap break-words overflow-hidden max-w-full">{analysisText}</pre>
+        <button
+          onClick={fetchAndDisplayAnalysis}
+          className="mt-4 bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded"
+        >
+          Get Detailed Analysis
+        </button>
+        <div className="mt-4">
+          <h4 className="text-lg font-bold">Detailed Analysis Result:</h4>
+          <p>{analysisResult || "Click 'Get Detailed Analysis' to view the result."}</p>
+        </div>
+      </div>
     </div>
   );
+  
 };
 
 export default BeatWiseAnalysis;
