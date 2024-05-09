@@ -16,6 +16,8 @@
     "react-chartjs-2": "^5.2.0",
     "react-dom": "^18.2.0",
     "react-leaflet": "^4.2.1",
+    "react-loader-spinner": "^6.1.6",
+    "react-progressbar": "^15.4.1",
     "react-router-dom": "^6.22.3",
     "react-scripts": "5.0.1",
     "styled-component": "^2.8.0",

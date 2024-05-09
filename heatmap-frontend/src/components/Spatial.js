@@ -3,11 +3,13 @@ import axios from "axios";
 import { Bar, Pie } from "react-chartjs-2";
 import "chart.js/auto";
 import { MapContainer, TileLayer } from "react-leaflet";
+import { ProgressBar } from "react-loader-spinner";
 import "leaflet/dist/leaflet.css";
 import HeatmapLayer from "./HeatmapLayer";
 
 const Spatial = () => {
   const [districts, setDistricts] = useState([]);
+  const [showProgressBar, setShowProgressBar] = useState(false);
   const [units, setUnits] = useState([]);
   const [selectedDistrict, setSelectedDistrict] = useState("");
   const [selectedUnit, setSelectedUnit] = useState("");
@@ -28,9 +30,9 @@ const Spatial = () => {
   }, [frequencyData]);
 
   const toggleCollapse = (field) => {
-    setCollapsibleState(prevState => ({
+    setCollapsibleState((prevState) => ({
       ...prevState,
-      [field]: !prevState[field]
+      [field]: !prevState[field],
     }));
   };
 
@@ -97,14 +99,27 @@ const Spatial = () => {
   const renderCharts = () => {
     const excludeFields = [
       "district_name",
+      "place_of_offence",
+      "beat_name",
+      "ioname",
+      "distance_from_ps",
+      "fir_stage",
+      "actsection",
+      "victim_profession",
+
+      "victim_sex",
+      "accused_presentaddress",
+      "fir_type",
+      "victim_age",
+      "accused_sex",
       "unitname",
       "crime_no",
       "latitude",
       "longitude",
-      "Accused Age"
+      "Accused Age",
     ];
     const pieChartFields = ["accused_presentaddress", "victim_presentaddress"];
-  
+
     // Create pairs of fields to be displayed in the same row
     const fieldPairs = Object.entries(frequencyData)
       .filter(([field]) => !excludeFields.includes(field))
@@ -115,67 +130,64 @@ const Spatial = () => {
         }
         return result;
       }, []);
-  
+
     return fieldPairs.map((pair, rowIndex) => (
       <div key={rowIndex} className="flex flex-wrap -mx-2">
         {pair.map(([field, values], index) => {
-        // Data for the chart
-        const chartData = {
-          labels: Object.keys(values),
-          datasets: [
-            {
-              label: `${field} Values`,
-              data: Object.values(values),
-              backgroundColor: [
-                "rgba(255, 99, 132, 0.5)",
-                "rgba(54, 162, 235, 0.5)",
-                "rgba(255, 206, 86, 0.5)",
-                "rgba(75, 192, 192, 0.5)",
-                "rgba(153, 102, 255, 0.5)",
-                "rgba(255, 159, 64, 0.5)",
-              ],
-              borderColor: [
-                "rgba(255, 99, 132, 1)",
-                "rgba(54, 162, 235, 1)",
-                "rgba(255, 206, 86, 1)",
-                "rgba(75, 192, 192, 1)",
-                "rgba(153, 102, 255, 1)",
-                "rgba(255, 159, 64, 1)",
-              ],
-              borderWidth: 1,
-            },
-          ],
-        };
+          // Data for the chart
+          const chartData = {
+            labels: Object.keys(values),
+            datasets: [
+              {
+                label: `${field} Values`,
+                data: Object.values(values),
+                backgroundColor: [
+                  "rgba(255, 99, 132, 0.5)",
+                  "rgba(54, 162, 235, 0.5)",
+                  "rgba(255, 206, 86, 0.5)",
+                  "rgba(75, 192, 192, 0.5)",
+                  "rgba(153, 102, 255, 0.5)",
+                  "rgba(255, 159, 64, 0.5)",
+                ],
+                borderColor: [
+                  "rgba(255, 99, 132, 1)",
+                  "rgba(54, 162, 235, 1)",
+                  "rgba(255, 206, 86, 1)",
+                  "rgba(75, 192, 192, 1)",
+                  "rgba(153, 102, 255, 1)",
+                  "rgba(255, 159, 64, 1)",
+                ],
+                borderWidth: 1,
+              },
+            ],
+          };
 
-        return (
-          <div
-            key={index}
-            className="w-full  md:w-1/2 p-2"
-          >
-            <div className="p-5 border border-gray-200 shadow rounded">
-              <button
-                onClick={() => toggleCollapse(field)}
-                className="flex items-center font-bold text-lg mb-2"
-              >
-                {collapsibleState[field] ? "▼" : "►"}
-                <span className="ml-2">{formatFieldName(field)}</span>
-              </button>
-              {collapsibleState[field] && (
-                <div>
-                  {pieChartFields.includes(field) ? (
-                    <Pie data={chartData} />
-                  ) : (
-                    <Bar data={chartData} />
-                  )}
-                </div>
-              )}
+          return (
+            <div key={index} className="w-full  md:w-1/2 p-2">
+              <div className="p-5 backdrop-blur-sm bg-slate-900 shadow-lg shadow-indigo-900 rounded">
+                <button
+                  onClick={() => toggleCollapse(field)}
+                  className="flex items-center font-bold text-lg mb-2"
+                >
+                  {collapsibleState[field] ? "▼" : "►"}
+                  <span className="ml-2">{formatFieldName(field)}</span>
+                </button>
+                {collapsibleState[field] && (
+                  <div>
+                    {pieChartFields.includes(field) ? (
+                      <Pie data={chartData} />
+                    ) : (
+                      <Bar data={chartData} />
+                    )}
+                  </div>
+                )}
+              </div>
             </div>
-          </div>
-        );
-      })}
-    </div>
-  ));
-};
+          );
+        })}
+      </div>
+    ));
+  };
 
   const renderUnitOptions = () => {
     let options = units.map((unit) => (
@@ -231,22 +243,34 @@ const Spatial = () => {
   };
 
   const fetchAndDisplayAnalysis = () => {
+    setShowProgressBar(true);
     axios
-      .post("http://localhost:8000/crime_analysis", {
+      .post("http://localhost:8000/spatial_analysis", {
         analysis_text: formattedAnalysisText,
         district: selectedDistrict,
         police_station: selectedUnit,
       })
       .then((response) => {
-        setAnalysisResult(response.data.analysis);
+        // Hide progress bar
+        setShowProgressBar(false);
+        const analysis = response.data.analysis;
+        // Split the analysis text into bullet points
+        const bulletPoints = analysis
+          .split("\n")
+          .map((point, index) => <li key={index}>{point}</li>);
+        // Set the analysis result with bullet points
+        setAnalysisResult(<ul>{bulletPoints}</ul>);
       })
       .catch((error) => {
+        // Hide progress bar on error too
+        setShowProgressBar(false);
         console.error("Error fetching analysis:", error);
       });
   };
 
+
   return (
-    <div className="container text-white mx-auto px-4 pt-4 bg-gray-900">
+    <div className="container bg-gradient-to-b from-indigo-950 via-gray-800 to-stone-950 text-white mx-auto px-4 pt-4">
       <h2 className="text-3xl font-bold mb-2">Spatial Analysis</h2>
       <p className="mb-4 pb-4">Lorem Ipsum hey this is spatial</p>
 
@@ -326,14 +350,26 @@ const Spatial = () => {
         )}
       </div>
 
-      <button
-        onClick={fetchAndDisplayAnalysis}
-        className="mt-4 text-white bg-green-500 hover:bg-green-700 focus:ring-4 focus:outline-none focus:ring-green-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center"
-      >
-        Get Analysis
+      <button onClick={fetchAndDisplayAnalysis} className=" mt-4 p-[3px] relative">
+        <div className="absolute inset-0 bg-gradient-to-r from-indigo-800 to-green-700 rounded-lg" />
+        <div className="px-8 py-2  bg-black rounded-[6px]  relative group transition duration-200 text-white hover:bg-transparent">
+          Get Analysis
+        </div>
       </button>
 
-      <div className="mt-4">
+      {showProgressBar && (
+        <ProgressBar
+          visible={true}
+          height="80"
+          width="80"
+          color="#4fa94d"
+          ariaLabel="progress-bar-loading"
+          wrapperStyle={{}}
+          wrapperClass=""
+        />
+      )}
+
+      <div className="mt-4 pb-16">
         <h3 className="text-lg font-bold">Analysis Result:</h3>
         <p>{analysisResult || "Click 'Get Analysis' to view the result."}</p>
       </div>
