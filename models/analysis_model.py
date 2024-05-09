@@ -83,5 +83,8 @@ def generate_crime_analysis(analysis_text, district, police_station, data):
     final_output_text = ""
     for text_segment in generated_text_stream:
         final_output_text += text_segment.token.text
+    
+    final_output_text = final_output_text.replace('**', '')
+    final_output_text = final_output_text.replace('</s>', '')
 
     return final_output_text
