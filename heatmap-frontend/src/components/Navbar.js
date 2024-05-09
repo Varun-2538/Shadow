@@ -28,9 +28,10 @@ const Navbar = () => {
     return null;
   }
 
+  // Changed the background to a gradient similar to Landing.js
   return (
-    <nav className="flex items-center justify-between px-4 sm:px-6 lg:px-8 py-2 w-full bg-stone-950 text-white relative">
-      <div className="text-xl sm:text-2xl font-bold">
+    <nav className="flex items-center justify-between px-4 py-2 w-full mt-0 bg-gradient-to-r from-slate-900 to-stone-950 text-white pt-4 pr-16 pl-16">
+      <div className="text-2xl font-bold">
         <a href="/" className="hover:text-red-500">
           Shadow
         </a>
@@ -63,25 +64,14 @@ const Navbar = () => {
             FAQs
           </a>
         </li>
+
         <li>
           <a href="#" className="hover:text-gray-400" onClick={() => setIsOpen(false)}>
             About Us
           </a>
         </li>
       </ul>
-      {/* Normal navigation and login button for medium and larger screens */}
-      <div className="hidden sm:flex space-x-4 sm:space-x-6 md:space-x-8 lg:space-x-12 items-center">
-        <a href="/" className="text-white hover:text-gray-400">Home</a>
-        <a href="https://github.com/Varun-2538/Shadow" className="text-white hover:text-gray-400">Github</a>
-        <a href="#" className="text-white hover:text-gray-400">FAQs</a>
-        <a href="#" className="text-white hover:text-gray-400">About Us</a>
-        <button
-          onClick={handleOnClick}
-          className="px-4 py-2 bg-white text-gray-900 rounded-md hover:bg-gray-200"
-        >
-          Login
-        </button>
-      </div>
+      
     </nav>
   );
 };
