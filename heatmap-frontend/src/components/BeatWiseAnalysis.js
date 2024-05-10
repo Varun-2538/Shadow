@@ -1,7 +1,18 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react"; // Import useRef
 import axios from "axios";
+import { MapContainer, TileLayer, Marker, Tooltip } from 'react-leaflet';
+import L from 'leaflet';
+import 'leaflet/dist/leaflet.css';
 import { Bar, Pie } from "react-chartjs-2";
 import "chart.js/auto";
+import pinIconUrl from './marker.png'; // Make sure to provide the correct path
+
+const pinIcon = new L.Icon({
+  iconUrl: pinIconUrl,
+  iconSize: [35, 35], // Adjust size as needed
+  iconAnchor: [17, 35], // Ensures the pin points exactly to the location
+  popupAnchor: [0, -35] // Adjust based on your tooltip needs
+});
 
 const BeatWiseAnalysis = () => {
   const [districts, setDistricts] = useState([]);
@@ -13,53 +24,84 @@ const BeatWiseAnalysis = () => {
   const [chartData, setChartData] = useState([]);
   const [collapsibleState, setCollapsibleState] = useState({});
   const [analysisText, setAnalysisText] = useState("");
-  const [analysisResult, setAnalysisResult] = useState(""); // State to hold analysis result from server
+  const [analysisResult, setAnalysisResult] = useState("");
+  const [mapMarkers, setMapMarkers] = useState([]);
 
   useEffect(() => {
-    axios
-      .get("http://localhost:5000/api/districts")
-      .then((response) => {
+    axios.get("http://localhost:5000/api/districts")
+      .then(response => {
         setDistricts(response.data);
         setSelectedDistrict(response.data[0] || "");
       })
-      .catch((error) => console.error("Error fetching districts:", error));
+      .catch(error => console.error("Error fetching districts:", error));
   }, []);
 
   useEffect(() => {
     if (selectedDistrict) {
-      axios
-        .get(`http://localhost:5000/api/units/${selectedDistrict}`)
-        .then((response) => {
+      axios.get(`http://localhost:5000/api/units/${selectedDistrict}`)
+        .then(response => {
           setUnits(response.data);
           setSelectedUnit(response.data[0] || "");
         })
-        .catch((error) => console.error("Error fetching units:", error));
+        .catch(error => console.error("Error fetching units:", error));
     }
   }, [selectedDistrict]);
 
   useEffect(() => {
     if (selectedUnit) {
-      axios
-        .get(`http://localhost:5000/api/beats/${selectedUnit}`)
-        .then((response) => {
+      axios.get(`http://localhost:5000/api/beats/${selectedUnit}`)
+        .then(response => {
           setBeats(response.data);
           setSelectedBeat(response.data[0] || "");
         })
-        .catch((error) => console.error("Error fetching beats:", error));
+        .catch(error => console.error("Error fetching beats:", error));
     }
   }, [selectedUnit]);
 
   const handleSubmit = () => {
     if (selectedBeat) {
-      axios
-        .get(`http://localhost:5000/api/data-by-beat/${encodeURIComponent(selectedBeat)}`)
-        .then((response) => {
+      axios.get(`http://localhost:5000/api/data-by-beat/${encodeURIComponent(selectedBeat)}`)
+        .then(response => {
           prepareChartData(response.data);
+          prepareMapMarkers(response.data);
         })
-        .catch((error) => console.error("Error fetching data:", error));
+        .catch(error => console.error("Error fetching data:", error));
     }
   };
 
+  useEffect(() => {
+    if (mapMarkers.length > 0 && mapRef.current) {
+      const bounds = L.latLngBounds(mapMarkers.map(loc => L.latLng(loc.lat, loc.long)));
+      mapRef.current.fitBounds(bounds, { padding: [50, 50] });
+    }
+  }, [mapMarkers]);  // Depend on mapMarkers to ensure it runs after updates
+
+  const prepareMapMarkers = (data) => {
+    let latLongCount = {};
+    data.forEach(crime => {
+      const key = `${crime.latitude}-${crime.longitude}`;
+      if (crime.latitude !== "null" && crime.longitude !== "null") {
+        if (!latLongCount[key]) {
+          latLongCount[key] = { count: 0, details: crime.Crime_Type };
+        }
+        latLongCount[key].count++;
+      }
+    });
+  
+    const sortedLocations = Object.entries(latLongCount)
+      .sort((a, b) => b[1].count - a[1].count)
+      .slice(0, 3)
+      .map(item => ({
+        lat: parseFloat(item[0].split('-')[0]),
+        long: parseFloat(item[0].split('-')[1]),
+        detail: item[1].details,
+        count: item[1].count // Store the frequency count
+      }));
+  
+    setMapMarkers(sortedLocations);
+  };
+  
+  
   const generateColor = () => {
     const r = Math.floor(Math.random() * 256);
     const g = Math.floor(Math.random() * 256);
@@ -127,6 +169,37 @@ const BeatWiseAnalysis = () => {
       generateAnalysisText(chartData);
     }
   }, [chartData]); // Dependency on chartData to ensure it runs after update
+
+  const mapRef = useRef(null);
+
+  const renderMap = () => {
+    return (
+      <MapContainer
+        whenCreated={mapInstance => { mapRef.current = mapInstance; }}
+        center={[14.5204, 75.7224]}  // Center on Karnataka
+        zoom={8}
+        style={{ height: '400px', width: '100%' }}
+      >
+        <TileLayer
+          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        />
+        {mapMarkers.map((marker, idx) => (
+          <Marker 
+            key={idx} 
+            position={[marker.lat, marker.long]}
+            icon={pinIcon}
+          >
+            <Tooltip>
+              {`${marker.detail}: ${marker.count}`} {/* Display crime type and frequency */}
+            </Tooltip>
+          </Marker>
+        ))}
+      </MapContainer>
+    );
+  };
+  
+  
   
 
   const generateAnalysisText = (chartDataSets) => {
@@ -334,6 +407,7 @@ const BeatWiseAnalysis = () => {
           </button>
         </div>
       </div>
+      {renderMap()}
       {renderCharts()}
       <div className="mt-2  border-rounded">
         <div className="relative z-10 w-full cursor-pointer overflow-hidden rounded-xl border border-slate-800 p-[1.75px]">
