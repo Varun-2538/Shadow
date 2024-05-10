@@ -18,6 +18,7 @@ const Spatial = () => {
   const [formattedAnalysisText, setFormattedAnalysisText] = useState("");
   const defaultPosition = [16.1882, 75.6958]; // Adjust as needed
   const [collapsibleState, setCollapsibleState] = useState({});
+  const [isSidebarOpen, setSidebarOpen] = useState(false);    
 
   useEffect(() => {
     // Initialize collapsible state for each field when frequencyData is set
@@ -270,27 +271,20 @@ const Spatial = () => {
 
 
   return (
-    <div className="container bg-gradient-to-b from-indigo-950 via-gray-800 to-stone-950 text-white mx-auto px-4 pt-4">
-      <h2 className="text-3xl font-bold mb-2">Spatial Analysis</h2>
-      <p className="mb-4 pb-4">Lorem Ipsum hey this is spatial</p>
+    <div className="container bg-gradient-to-b from-indigo-950 via-gray-800 to-stone-950 text-white mx-auto px-4 pt-4 sm:px-2">
+      <h2 className="text-2xl sm:text-xl font-bold mb-2">Spatial Analysis</h2>
+      <p className="mb-4 pb-4 text-sm sm:text-xs">Lorem Ipsum hey this is spatial</p>
 
       <div className="flex flex-wrap -mx-2 mb-4">
-        {" "}
-        {/* Added this wrapper with flex */}
-        <div className="w-1/2 px-2">
-          {" "}
-          {/* Adjusted width to half of the container */}
-          <label
-            htmlFor="district-select"
-            className="block mb-2 text-sm text-white font-medium"
-          >
+        <div className="w-full sm:w-1/2 px-2">
+          <label htmlFor="district-select" className="block mb-2 text-sm sm:text-xs text-white font-medium">
             District:
           </label>
           <select
             id="district-select"
             value={selectedDistrict}
             onChange={handleDistrictChange}
-            className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
+            className="bg-gray-50 border border-gray-300 text-gray-900 text-sm sm:text-xs rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
           >
             {districts.map((district) => (
               <option key={district} value={district}>
@@ -299,13 +293,8 @@ const Spatial = () => {
             ))}
           </select>
         </div>
-        <div className="w-1/2 px-2">
-          {" "}
-          {/* Adjusted width to half of the container */}
-          <label
-            htmlFor="unit-select"
-            className="block mb-2 text-sm font-medium text-white"
-          >
+        <div className="w-full sm:w-1/2 px-2">
+          <label htmlFor="unit-select" className="block mb-2 text-sm sm:text-xs font-medium text-white">
             Unit:
           </label>
           <select
@@ -313,7 +302,7 @@ const Spatial = () => {
             value={selectedUnit}
             onChange={handleUnitChange}
             disabled={!selectedDistrict}
-            className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
+            className="bg-gray-50 border border-gray-300 text-gray-900 text-sm sm:text-xs rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
           >
             {renderUnitOptions()}
           </select>
@@ -322,7 +311,7 @@ const Spatial = () => {
 
       <button
         onClick={handleSubmit}
-        className="text-white bg-blue-500 hover:bg-blue-700 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center"
+        className="text-white bg-blue-500 hover:bg-blue-700 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm sm:text-xs px-5 py-2.5 text-center"
       >
         Submit
       </button>
@@ -337,7 +326,6 @@ const Spatial = () => {
             url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
             attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
           />
-          {/* You can add Markers here if you have specific locations to mark within Karnataka */}
           <HeatmapLayer />
         </MapContainer>
       </div>
@@ -346,13 +334,13 @@ const Spatial = () => {
         {Object.keys(frequencyData).length > 0 ? (
           renderCharts()
         ) : (
-          <p className="text-gray-500">No data to display</p>
+          <p className="text-gray-500 text-sm sm:text-xs">No data to display</p>
         )}
       </div>
 
-      <button onClick={fetchAndDisplayAnalysis} className=" mt-4 p-[3px] relative">
+      <button onClick={fetchAndDisplayAnalysis} className="mt-4 p-[3px] relative">
         <div className="absolute inset-0 bg-gradient-to-r from-indigo-800 to-green-700 rounded-lg" />
-        <div className="px-8 py-2  bg-black rounded-[6px]  relative group transition duration-200 text-white hover:bg-transparent">
+        <div className="px-8 py-2 bg-black rounded-[6px] relative group transition duration-200 text-white hover:bg-transparent text-sm sm:text-xs">
           Get Analysis
         </div>
       </button>
@@ -370,11 +358,11 @@ const Spatial = () => {
       )}
 
       <div className="mt-4 pb-16">
-        <h3 className="text-lg font-bold">Analysis Result:</h3>
-        <p>{analysisResult || "Click 'Get Analysis' to view the result."}</p>
+        <h3 className="text-lg sm:text-md font-bold">Analysis Result:</h3>
+        <p className="text-sm sm:text-xs">{analysisResult || "Click 'Get Analysis' to view the result."}</p>
       </div>
     </div>
-  );
+);
 };
 
 export default Spatial;

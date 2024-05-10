@@ -245,7 +245,7 @@ const BeatWiseAnalysis = () => {
         Select District, Unit, and Beat for Analysis
       </h2>
       <div className="flex flex-wrap -mx-2 mb-4">
-        <div className="w-1/3 px-2">
+        <div className="w-full sm:w-1/2 md:w-1/3 px-2">
           <label
             htmlFor="district-select"
             className="block mb-2 text-sm font-medium text-gray-900"
@@ -265,7 +265,7 @@ const BeatWiseAnalysis = () => {
             ))}
           </select>
         </div>
-        <div className="w-1/3 px-2">
+        <div className="w-full sm:w-1/2 md:w-1/3 px-2">
           <label
             htmlFor="unit-select"
             className="block mb-2 text-sm font-medium text-gray-900"
@@ -286,7 +286,7 @@ const BeatWiseAnalysis = () => {
             ))}
           </select>
         </div>
-        <div className="w-1/3 px-2">
+        <div className="w-full sm:w-1/2 md:w-1/3 px-2">
           <label
             htmlFor="beat-select"
             className="block mb-2 text-sm font-medium text-gray-900"
@@ -319,6 +319,7 @@ const BeatWiseAnalysis = () => {
       {renderCharts()}
     </div>
   );
+  
 };
 
 export default BeatWiseAnalysis;
