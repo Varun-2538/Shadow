@@ -236,16 +236,19 @@ const BeatWiseAnalysis = () => {
       <div key={index} className="flex flex-wrap -mx-2">
         {pair.map((data) => (
           <div key={data.field} className="w-full md:w-1/2 px-2">
-            <div className="p-5 border border-gray-200 shadow rounded">
+            <div className="p-5 m-2 backdrop-blur-sm bg-slate-900 shadow-lg shadow-indigo-900 rounded">
               <button
                 onClick={() => toggleCollapse(data.field)}
-                className="w-full text-left text-lg font-semibold py-2 px-4 bg-white rounded"
+                className="flex items-center font-bold text-lg pb-2 mb-2"
               >
-                {collapsibleState[data.field] ? "►" : "▼"} {data.field.replace("_", " ")}
+                {collapsibleState[data.field] ? "►" : "▼"}{" "}
+                {data.field.replace("_", " ")}
               </button>
-              <div className={`${
-                collapsibleState[data.field] ? "hidden" : ""
-              } p-4 bg-white rounded`}>
+              <div
+                className={`${
+                  collapsibleState[data.field] ? "hidden" : ""
+                } p-4  rounded`}
+              >
                 {renderChart(data, data.field)}
               </div>
             </div>
@@ -256,15 +259,15 @@ const BeatWiseAnalysis = () => {
   };
 
   return (
-    <div className="container mx-auto px-4">
-      <h2 className="text-2xl font-bold mb-4">
+    <div className="container bg-gradient-to-b min-h-screen from-indigo-950 via-gray-800 to-stone-950 text-white mx-auto px-4 pt-4">
+      <h2 className="text-3xl pt-1 font-bold mb-4 font-serif pb-2">
         Select District, Unit, and Beat for Analysis
       </h2>
       <div className="flex flex-wrap -mx-2 mb-4">
         <div className="w-1/3 px-2">
           <label
             htmlFor="district-select"
-            className="block mb-2 text-sm font-medium text-gray-900"
+            className="block mb-2 text-sm font-medium text-white"
           >
             District:
           </label>
@@ -284,7 +287,7 @@ const BeatWiseAnalysis = () => {
         <div className="w-1/3 px-2">
           <label
             htmlFor="unit-select"
-            className="block mb-2 text-sm font-medium text-gray-900"
+            className="block mb-2 text-sm font-medium text-white"
           >
             Unit:
           </label>
@@ -305,7 +308,7 @@ const BeatWiseAnalysis = () => {
         <div className="w-1/3 px-2">
           <label
             htmlFor="beat-select"
-            className="block mb-2 text-sm font-medium text-gray-900"
+            className="block mb-2 text-sm font-medium text-white"
           >
             Beat:
           </label>
@@ -333,9 +336,11 @@ const BeatWiseAnalysis = () => {
         </div>
       </div>
       {renderCharts()}
-      <div className="mt-4 p-4 bg-white shadow rounded">
+      <div className="mt-4 p-4  shadow rounded">
         <h3 className="text-lg font-semibold mb-2">Analysis Summary:</h3>
-        <pre className="whitespace-pre-wrap break-words overflow-hidden max-w-full">{analysisText}</pre>
+        <pre className="whitespace-pre-wrap break-words overflow-hidden max-w-full">
+          {analysisText}
+        </pre>
         <button
           onClick={fetchAndDisplayAnalysis}
           className="mt-4 bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded"
@@ -344,7 +349,10 @@ const BeatWiseAnalysis = () => {
         </button>
         <div className="mt-4">
           <h4 className="text-lg font-bold">Detailed Analysis Result:</h4>
-          <p>{analysisResult || "Click 'Get Detailed Analysis' to view the result."}</p>
+          <p>
+            {analysisResult ||
+              "Click 'Get Detailed Analysis' to view the result."}
+          </p>
         </div>
       </div>
     </div>
