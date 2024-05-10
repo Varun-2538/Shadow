@@ -224,8 +224,7 @@ const BeatWiseAnalysis = () => {
     }));
   };
 
-
-
+  
   const renderCharts = () => {
     const pairedCharts = [];
     for (let i = 0; i < chartData.length; i += 2) {
@@ -336,18 +335,27 @@ const BeatWiseAnalysis = () => {
         </div>
       </div>
       {renderCharts()}
-      <div className="mt-4 p-4  shadow rounded">
-        <h3 className="text-lg font-semibold mb-2">Analysis Summary:</h3>
-        <pre className="whitespace-pre-wrap break-words overflow-hidden max-w-full">
-          {analysisText}
-        </pre>
-        <button
-          onClick={fetchAndDisplayAnalysis}
-          className="mt-4 bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded"
-        >
-          Get Detailed Analysis
+      <div className="mt-2  border-rounded">
+        <div className="relative z-10 w-full cursor-pointer overflow-hidden rounded-xl border border-slate-800 p-[1.75px]">
+          <div className="animate-rotate absolute inset-0 h-full w-full rounded-full bg-[conic-gradient(#0ea5e9_20deg,transparent_120deg)]"></div>
+          <div className="relative z-20 flex flex-col rounded bg-slate-900 p-2 shadow-2xl backdrop-blur-2xl">
+            <h3 className="text-lg font-semibold m-2 text-white">
+              Analysis Summary:
+            </h3>
+            <div className="p-1 whitespace-pre-wrap break-words overflow-hidden max-w-full text-gray-300">
+              {analysisText}
+            </div>
+          </div>
+        </div>
+
+        
+        <button onClick={fetchAndDisplayAnalysis} className="mt-4 inline-flex h-12 animate-shimmer items-center justify-center rounded-md border border-slate-700 bg-[linear-gradient(110deg,#000103,45%,#1e2631,55%,#000103)] bg-[length:200%_100%] px-6 font-medium text-slate-400 transition-colors focus:outline-none focus:ring-2 focus:ring-slate-400 focus:ring-offset-2 focus:ring-offset-slate-50">
+          Get Analysis
         </button>
-        <div className="mt-4">
+  
+        
+      
+        <div className="mt-4 pb-4">
           <h4 className="text-lg font-bold">Detailed Analysis Result:</h4>
           <p>
             {analysisResult ||
