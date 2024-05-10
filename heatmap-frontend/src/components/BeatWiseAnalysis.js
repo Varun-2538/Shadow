@@ -1,7 +1,18 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react"; // Import useRef
 import axios from "axios";
-import { Bar, Pie } from "react-chartjs-2"; // Import Pie from react-chartjs-2
+import { MapContainer, TileLayer, Marker, Tooltip } from 'react-leaflet';
+import L from 'leaflet';
+import 'leaflet/dist/leaflet.css';
+import { Bar, Pie } from "react-chartjs-2";
 import "chart.js/auto";
+import pinIconUrl from './marker.png'; // Make sure to provide the correct path
+
+const pinIcon = new L.Icon({
+  iconUrl: pinIconUrl,
+  iconSize: [35, 35], // Adjust size as needed
+  iconAnchor: [17, 35], // Ensures the pin points exactly to the location
+  popupAnchor: [0, -35] // Adjust based on your tooltip needs
+});
 
 const BeatWiseAnalysis = () => {
   const [districts, setDistricts] = useState([]);
@@ -12,85 +23,94 @@ const BeatWiseAnalysis = () => {
   const [selectedBeat, setSelectedBeat] = useState("");
   const [chartData, setChartData] = useState([]);
   const [collapsibleState, setCollapsibleState] = useState({});
+  const [analysisText, setAnalysisText] = useState("");
+  const [analysisResult, setAnalysisResult] = useState("");
+  const [mapMarkers, setMapMarkers] = useState([]);
 
   useEffect(() => {
-    axios
-      .get("http://localhost:5000/api/districts")
-      .then((response) => {
+    axios.get("http://localhost:5000/api/districts")
+      .then(response => {
         setDistricts(response.data);
         setSelectedDistrict(response.data[0] || "");
       })
-      .catch((error) => console.error("Error fetching districts:", error));
+      .catch(error => console.error("Error fetching districts:", error));
   }, []);
 
   useEffect(() => {
     if (selectedDistrict) {
-      axios
-        .get(`http://localhost:5000/api/units/${selectedDistrict}`)
-        .then((response) => {
+      axios.get(`http://localhost:5000/api/units/${selectedDistrict}`)
+        .then(response => {
           setUnits(response.data);
           setSelectedUnit(response.data[0] || "");
         })
-        .catch((error) => console.error("Error fetching units:", error));
+        .catch(error => console.error("Error fetching units:", error));
     }
   }, [selectedDistrict]);
 
   useEffect(() => {
     if (selectedUnit) {
-      axios
-        .get(`http://localhost:5000/api/beats/${selectedUnit}`)
-        .then((response) => {
+      axios.get(`http://localhost:5000/api/beats/${selectedUnit}`)
+        .then(response => {
           setBeats(response.data);
           setSelectedBeat(response.data[0] || "");
         })
-        .catch((error) => console.error("Error fetching beats:", error));
+        .catch(error => console.error("Error fetching beats:", error));
     }
   }, [selectedUnit]);
 
-  useEffect(() => {
-    // Initialize collapsible state for each field when chartData is set
-    setCollapsibleState(
-      chartData.reduce((acc, chart) => {
-        acc[chart.field] = true; // start all as closed
-        return acc;
-      }, {})
-    );
-  }, [chartData]);
-
   const handleSubmit = () => {
     if (selectedBeat) {
-      axios
-        .get(
-          `http://localhost:5000/api/data-by-beat/${encodeURIComponent(
-            selectedBeat
-          )}`
-        )
-        .then((response) => {
+      axios.get(`http://localhost:5000/api/data-by-beat/${encodeURIComponent(selectedBeat)}`)
+        .then(response => {
           prepareChartData(response.data);
+          prepareMapMarkers(response.data);
         })
-        .catch((error) => {
-          console.error("Error fetching data:", error);
-        });
+        .catch(error => console.error("Error fetching data:", error));
     }
   };
 
-  const colors = [
-    "rgba(255, 99, 132, 0.5)",
-    "rgba(54, 162, 235, 0.5)",
-    "rgba(255, 206, 86, 0.5)",
-    "rgba(75, 192, 192, 0.5)",
-    "rgba(153, 102, 255, 0.5)",
-    "rgba(255, 159, 64, 0.5)",
-    "rgba(199, 199, 199, 0.5)", // You can extend this list with more colors
-    "rgba(164, 255, 101, 0.5)",
-    "rgba(101, 140, 255, 0.5)",
-  ];
+  useEffect(() => {
+    if (mapMarkers.length > 0 && mapRef.current) {
+      const bounds = L.latLngBounds(mapMarkers.map(loc => L.latLng(loc.lat, loc.long)));
+      mapRef.current.fitBounds(bounds, { padding: [50, 50] });
+    }
+  }, [mapMarkers]);  // Depend on mapMarkers to ensure it runs after updates
 
+  const prepareMapMarkers = (data) => {
+    let latLongCount = {};
+    data.forEach(crime => {
+      const key = `${crime.latitude}-${crime.longitude}`;
+      if (crime.latitude !== "null" && crime.longitude !== "null") {
+        if (!latLongCount[key]) {
+          latLongCount[key] = { count: 0, details: crime.Crime_Type };
+        }
+        latLongCount[key].count++;
+      }
+    });
+  
+    const sortedLocations = Object.entries(latLongCount)
+      .sort((a, b) => b[1].count - a[1].count)
+      .slice(0, 3)
+      .map(item => ({
+        lat: parseFloat(item[0].split('-')[0]),
+        long: parseFloat(item[0].split('-')[1]),
+        detail: item[1].details,
+        count: item[1].count // Store the frequency count
+      }));
+  
+    setMapMarkers(sortedLocations);
+  };
+  
+  
   const generateColor = () => {
     const r = Math.floor(Math.random() * 256);
     const g = Math.floor(Math.random() * 256);
     const b = Math.floor(Math.random() * 256);
     return `rgba(${r}, ${g}, ${b}, 0.5)`;
+  };
+
+  const formatFieldName = (field) => {
+    return field.replace(/_/g, ' ').toLowerCase();
   };
 
   const prepareChartData = (data) => {
@@ -108,37 +128,25 @@ const BeatWiseAnalysis = () => {
     ];
     let chartDataSets = fields.map((field) => {
       const countData = data.reduce((acc, curr) => {
-        // Check if the field is latitude or longitude and the value is 0, skip adding to countData
-        if (
-          (field === "latitude" ||
-            field === "longitude" ||
-            field === "place_of_offence" ||
-            field === "actsection" ||
-            field === "Crime_Type" ||
-            field === "victim_profession" ||
-            field === "victim_caste" ||
-            field === "accused_caste") &&
-          curr[field] === "null"
-        ) {
-          return acc;
+        if (curr[field] !== "null") {
+          acc[curr[field]] = (acc[curr[field]] || 0) + 1;
         }
-
-        acc[curr[field]] = (acc[curr[field]] || 0) + 1;
         return acc;
       }, {});
-
+  
       const labels = Object.keys(countData);
-      const colors = labels.map(() => generateColor()); // Generate a unique color for each label
-
+      const colors = labels.map(() => generateColor());
+  
       return {
         field: field,
         labels: labels,
+        countData: countData,
         datasets: [
           {
-            label: `${field.replace("_", " ")} Frequency`,
+            label: `${formatFieldName(field)} Frequency`,
             data: Object.values(countData),
-            backgroundColor: colors, // Apply the dynamically generated colors to each bar
-            borderColor: colors.map((color) => color.replace("0.5", "1")), // Darker borders for better visibility
+            backgroundColor: colors,
+            borderColor: colors.map(color => color.replace("0.5", "1")),
             borderWidth: 1,
             barThickness: 10,
             borderRadius: 5,
@@ -147,9 +155,91 @@ const BeatWiseAnalysis = () => {
         ],
       };
     });
-
+  
     setChartData(chartDataSets);
+    const newCollapsibleState = {};
+    chartDataSets.forEach(({ field }) => {
+      newCollapsibleState[field] = true;
+    });
+    setCollapsibleState(newCollapsibleState);
   };
+  
+  useEffect(() => {
+    if (chartData.length > 0) {
+      generateAnalysisText(chartData);
+    }
+  }, [chartData]); // Dependency on chartData to ensure it runs after update
+
+  const mapRef = useRef(null);
+
+  const renderMap = () => {
+    return (
+      <MapContainer
+        whenCreated={mapInstance => { mapRef.current = mapInstance; }}
+        center={[14.5204, 75.7224]}  // Center on Karnataka
+        zoom={8}
+        style={{ height: '400px', width: '100%' }}
+      >
+        <TileLayer
+          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        />
+        {mapMarkers.map((marker, idx) => (
+          <Marker 
+            key={idx} 
+            position={[marker.lat, marker.long]}
+            icon={pinIcon}
+          >
+            <Tooltip>
+              {`${marker.detail}: ${marker.count}`} {/* Display crime type and frequency */}
+            </Tooltip>
+          </Marker>
+        ))}
+      </MapContainer>
+    );
+  };
+  
+  
+  
+
+  const generateAnalysisText = (chartDataSets) => {
+    let text = "";
+  
+    chartDataSets.forEach((chart, index) => {
+      const { field, countData } = chart;
+      const formattedField = formatFieldName(field);
+      const sortedValues = Object.entries(countData).sort((a, b) => b[1] - a[1]);
+      const total = sortedValues.reduce((acc, [_, freq]) => acc + freq, 0);
+      const topThreeValues = sortedValues.slice(0, 3);
+  
+      const topThreeText = topThreeValues.map(([value, freq], idx) => {
+        const percentage = Math.floor((freq / total) * 100);
+        return `${idx + 1}. ${value}: ${freq} (${percentage}% of total)`;
+      }).join("; ");
+  
+      text += `${index + 1}) In the beat of ${selectedUnit} unit of ${selectedDistrict} district, the top 3 frequencies in ${formattedField} are: ${topThreeText}.\n`;
+    });
+  
+    setAnalysisText(text); // Ensure this line is working as expected
+  };
+
+  const fetchAndDisplayAnalysis = () => {
+    axios
+      .post("http://localhost:8000/beatwise_analysis", {
+        analysis_text: analysisText, // Correct variable name for the analysis text
+        district: selectedDistrict,
+        unit: selectedUnit,
+        beat: selectedBeat
+      })
+      .then((response) => {
+        setAnalysisResult(response.data.analysis); // Assuming 'analysis' is the field in response
+      })
+      .catch((error) => {
+        console.error("Error posting analysis:", error);
+      });
+  };
+  
+  
 
   const chartConfig = (data, chartType = "bar") => {
     const commonOptions = {
@@ -207,6 +297,7 @@ const BeatWiseAnalysis = () => {
     }));
   };
 
+  
   const renderCharts = () => {
     const pairedCharts = [];
     for (let i = 0; i < chartData.length; i += 2) {
@@ -217,10 +308,10 @@ const BeatWiseAnalysis = () => {
       <div key={index} className="flex flex-wrap -mx-2">
         {pair.map((data) => (
           <div key={data.field} className="w-full md:w-1/2 px-2">
-            <div className="p-5 border border-gray-200 shadow rounded">
+            <div className="p-5 m-2 backdrop-blur-sm bg-slate-900 shadow-lg shadow-indigo-900 rounded">
               <button
                 onClick={() => toggleCollapse(data.field)}
-                className="w-full text-left text-lg font-semibold py-2 px-4 bg-white rounded"
+                className="flex items-center font-bold text-lg pb-2 mb-2"
               >
                 {collapsibleState[data.field] ? "►" : "▼"}{" "}
                 {data.field.replace("_", " ")}
@@ -228,7 +319,7 @@ const BeatWiseAnalysis = () => {
               <div
                 className={`${
                   collapsibleState[data.field] ? "hidden" : ""
-                } p-4 bg-white rounded`}
+                } p-4  rounded`}
               >
                 {renderChart(data, data.field)}
               </div>
@@ -240,15 +331,15 @@ const BeatWiseAnalysis = () => {
   };
 
   return (
-    <div className="container mx-auto px-4">
-      <h2 className="text-2xl font-bold mb-4">
+    <div className="container bg-gradient-to-b min-h-screen from-indigo-950 via-gray-800 to-stone-950 text-white mx-auto px-4 pt-4">
+      <h2 className="text-3xl pt-1 font-bold mb-4 font-serif pb-2">
         Select District, Unit, and Beat for Analysis
       </h2>
       <div className="flex flex-wrap -mx-2 mb-4">
         <div className="w-full sm:w-1/2 md:w-1/3 px-2">
           <label
             htmlFor="district-select"
-            className="block mb-2 text-sm font-medium text-gray-900"
+            className="block mb-2 text-sm font-medium text-white"
           >
             District:
           </label>
@@ -268,7 +359,7 @@ const BeatWiseAnalysis = () => {
         <div className="w-full sm:w-1/2 md:w-1/3 px-2">
           <label
             htmlFor="unit-select"
-            className="block mb-2 text-sm font-medium text-gray-900"
+            className="block mb-2 text-sm font-medium text-white"
           >
             Unit:
           </label>
@@ -289,7 +380,7 @@ const BeatWiseAnalysis = () => {
         <div className="w-full sm:w-1/2 md:w-1/3 px-2">
           <label
             htmlFor="beat-select"
-            className="block mb-2 text-sm font-medium text-gray-900"
+            className="block mb-2 text-sm font-medium text-white"
           >
             Beat:
           </label>
@@ -316,7 +407,36 @@ const BeatWiseAnalysis = () => {
           </button>
         </div>
       </div>
+      {renderMap()}
       {renderCharts()}
+      <div className="mt-2  border-rounded">
+        <div className="relative z-10 w-full cursor-pointer overflow-hidden rounded-xl border border-slate-800 p-[1.75px]">
+          <div className="animate-rotate absolute inset-0 h-full w-full rounded-full bg-[conic-gradient(#0ea5e9_20deg,transparent_120deg)]"></div>
+          <div className="relative z-20 flex flex-col rounded bg-slate-900 p-2 shadow-2xl backdrop-blur-2xl">
+            <h3 className="text-lg font-semibold m-2 text-white">
+              Analysis Summary:
+            </h3>
+            <div className="p-1 whitespace-pre-wrap break-words overflow-hidden max-w-full text-gray-300">
+              {analysisText}
+            </div>
+          </div>
+        </div>
+
+        
+        <button onClick={fetchAndDisplayAnalysis} className="mt-4 inline-flex h-12 animate-shimmer items-center justify-center rounded-md border border-slate-700 bg-[linear-gradient(110deg,#000103,45%,#1e2631,55%,#000103)] bg-[length:200%_100%] px-6 font-medium text-slate-400 transition-colors focus:outline-none focus:ring-2 focus:ring-slate-400 focus:ring-offset-2 focus:ring-offset-slate-50">
+          Get Analysis
+        </button>
+  
+        
+      
+        <div className="mt-4 pb-4">
+          <h4 className="text-lg font-bold">Detailed Analysis Result:</h4>
+          <p>
+            {analysisResult ||
+              "Click 'Get Detailed Analysis' to view the result."}
+          </p>
+        </div>
+      </div>
     </div>
   );
   

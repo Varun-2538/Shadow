@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
+import {useLocation } from "react-router-dom";
 
 const Navbar = () => {
-  const navigate = useNavigate();
   const location = useLocation();
   const [isOpen, setIsOpen] = useState(false); // State to manage dropdown toggle
 
@@ -20,9 +19,7 @@ const Navbar = () => {
     };
   }, []);
 
-  const handleOnClick = () => {
-    navigate("/Spatial");
-  };
+  
 
   if (location.pathname !== "/") {
     return null;

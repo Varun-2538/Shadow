@@ -274,7 +274,6 @@ const Spatial = () => {
     <div className="container bg-gradient-to-b from-indigo-950 via-gray-800 to-stone-950 text-white mx-auto px-4 pt-4 sm:px-2">
       <h2 className="text-2xl sm:text-xl font-bold mb-2">Spatial Analysis</h2>
       <p className="mb-4 pb-4 text-sm sm:text-xs">Lorem Ipsum hey this is spatial</p>
-
       <div className="flex flex-wrap -mx-2 mb-4">
         <div className="w-full sm:w-1/2 px-2">
           <label htmlFor="district-select" className="block mb-2 text-sm sm:text-xs text-white font-medium">
