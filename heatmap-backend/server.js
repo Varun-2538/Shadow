@@ -11,23 +11,37 @@ app.use(express.json());
 // Get the project directory
 const projectDir = path.dirname(path.dirname(path.dirname(__filename)));
 
+// // Utility function to read CSV and filter based on selection
+// const readCSV = (filterColumn = null, filterValue = null) => {
+//   return new Promise((resolve, reject) => {
+//     const results = [];
+//     const csvFilePath = path.join(projectDir, 'Shadow', 'heatmap-backend', 'dataset', 'updated_ml_model_ready_dataset.csv');
+//     fs.createReadStream(csvFilePath)
+//       .pipe(csv())
+//       .on('data', (row) => {
+//         if (!filterColumn || row[filterColumn] === filterValue) {
+//           results.push(row);
+//         }
+//       })
+//       .on('end', () => {
+//         resolve(results);
+//       })
+//       .on('error', reject);
+//   });
+// };
+
 // Utility function to read CSV and filter based on selection
+const axios = require('axios');
+
 const readCSV = (filterColumn = null, filterValue = null) => {
-  return new Promise((resolve, reject) => {
-    const results = [];
-    const csvFilePath = path.join(projectDir, 'Shadow', 'heatmap-backend', 'dataset', 'updated_ml_model_ready_dataset.csv');
-    fs.createReadStream(csvFilePath)
-      .pipe(csv())
-      .on('data', (row) => {
-        if (!filterColumn || row[filterColumn] === filterValue) {
-          results.push(row);
-        }
-      })
-      .on('end', () => {
-        resolve(results);
-      })
-      .on('error', reject);
-  });
+  return axios.get('http://localhost:8000/read_csv')
+    .then(response => {
+      const results = response.data.filter(row => !filterColumn || row[filterColumn] === filterValue);
+      return results;
+    })
+    .catch(error => {
+      console.error(`Error: ${error}`);
+    });
 };
 
 const readTimeData = (filterColumn = null, filterValue = null) => {
