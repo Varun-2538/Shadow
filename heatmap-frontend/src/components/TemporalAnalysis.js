@@ -160,97 +160,80 @@ const TemporalAnalysis = () => {
   };
 
   return (
-  <div className="container text-white mx-auto px-4 pt-4 bg-gray-900">
-    <h2 className="text-3xl font-bold mb-2">Temporal Analysis</h2>
-    <p className="mb-4 pb-4">Lorem Ipsum hey this is temporal</p>
-    <div className="flex flex-wrap -mx-2 mb-4">
-      <div className="w-1/2 px-2">
-        <label htmlFor="year-select" className="block mb-2 text-sm text-white font-medium">
-          Year:
-        </label>
-        <input
-          type="number"
-          id="year-select"
-          value={year}
-          onChange={handleYearChange}
-          className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
-        />
-      </div>
-      <div className="w-1/2 px-2">
-        <label htmlFor="season-select" className="block mb-2 text-sm font-medium text-white">
-          Season:
-        </label>
-        <select
-          id="season-select"
-          value={selectedSeason}
-          onChange={handleSeasonChange}
-          className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
-        >
-          <option value="Winter">Winter</option>
-          <option value="Spring">Spring</option>
-          <option value="Summer">Summer</option>
-          <option value="Fall">Fall</option>
-        </select>
-      </div>
-    </div>
-    <div className="flex flex-wrap -mx-2">
-      <div className="w-full px-2 mt-4 justify-end">
-        <div className="flex justify-between">
-          <div className="flex justify-end">
-            <button
-              onClick={toggleMonthlyChart}
-              className="text-white bg-blue-500 hover:bg-blue-700 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center mr-4"
-            >
-              {isMonthlyChartVisible ? 'Hide' : 'Show'} Monthly Chart
-            </button>
-            <button
-              onClick={toggleYearlyChart}
-              className="text-white bg-blue-500 hover:bg-blue-700 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center"
-            >
-              {isYearlyChartVisible ? 'Hide' : 'Show'} Yearly Chart
-            </button>
-          </div>
+    <div className="container text-white mx-auto px-4 pt-4 bg-gray-900">
+      <h2 className="text-3xl font-bold mb-2">Temporal Analysis</h2>
+      <p className="mb-4 pb-4">Lorem Ipsum hey this is temporal</p>
+      <div className="flex flex-wrap -mx-2 mb-4">
+        <div className="w-1/2 px-2">
+          <label htmlFor="year-select" className="block mb-2 text-sm text-white font-medium">
+            Year:
+          </label>
+          <input
+            type="number"
+            id="year-select"
+            value={year}
+            onChange={handleYearChange}
+            className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
+          />
         </div>
-        <div className="flex flex-wrap -mx-2">
-          <div className="w-1/2 px-2 mt-4">
-            {isMonthlyChartVisible && <Bar data={monthlyChartData} />}
-          </div>
-          <div className="w-1/2 px-2 mt-4">
-            {isYearlyChartVisible && <Bar data={yearlyChartData} />}
-          </div>
+        <div className="w-1/2 px-2">
+          <label htmlFor="season-select" className="block mb-2 text-sm font-medium text-white">
+            Season:
+          </label>
+          <select
+            id="season-select"
+            value={selectedSeason}
+            onChange={handleSeasonChange}
+            className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
+          >
+            <option value="Winter">Winter</option>
+            <option value="Spring">Spring</option>
+            <option value="Summer">Summer</option>
+            <option value="Fall">Fall</option>
+          </select>
         </div>
       </div>
-    </div>
-    <div className="flex flex-wrap -mx-2">
-      <div className="w-full px-2 mt-4">
-        <div className="flex justify-between">
-          <div className="flex">
-            <button
-              onClick={toggleSeasonalChart}
-              className="text-white bg-blue-500 hover:bg-blue-700 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center mr-4"
-            >
-              {isSeasonalChartVisible ? 'Hide' : 'Show'} Seasonal Chart
-            </button>
-            <button
-              onClick={toggleSelectiveSeasonalChart}
-              className="text-white bg-blue-500 hover:bg-blue-700 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center"
-            >
-              {isSelectiveSeasonalChartVisible ? 'Hide' : 'Show'} Selective Seasonal Chart
-            </button>
-          </div>
+  
+      <div className="flex flex-wrap justify-between -mx-2">
+        <div className="w-1/2 px-2">
+          <details open>
+            <summary className="text-lg font-bold cursor-pointer">Monthly Chart</summary>
+            <div className="px-2 mt-4">
+              <Bar data={monthlyChartData} />
+            </div>
+          </details>
         </div>
-        <div className="flex flex-wrap -mx-2">
-          <div className="w-1/2 px-2 mt-4">
-            {isSeasonalChartVisible && <Bar data={seasonalChartData} />}
-          </div>
-          <div className="w-1/2 px-2 mt-4">
-            {isSelectiveSeasonalChartVisible && <Bar data={selectiveSeasonalChartData} />}
-          </div>
+        <div className="w-1/2 px-2">
+          <details open>
+            <summary className="text-lg font-bold cursor-pointer">Yearly Chart</summary>
+            <div className="px-2 mt-4">
+              <Bar data={yearlyChartData} />
+            </div>
+          </details>
+        </div>
+      </div>
+  
+      <div className="flex flex-wrap justify-between -mx-2 mt-4">
+        <div className="w-1/2 px-2">
+          <details open>
+            <summary className="text-lg font-bold cursor-pointer">Seasonal Chart</summary>
+            <div className="px-2 mt-4">
+              <Bar data={seasonalChartData} />
+            </div>
+          </details>
+        </div>
+        <div className="w-1/2 px-2">
+          <details open>
+            <summary className="text-lg font-bold cursor-pointer">Selective Seasonal Chart</summary>
+            <div className="px-2 mt-4">
+              <Bar data={selectiveSeasonalChartData} />
+            </div>
+          </details>
         </div>
       </div>
     </div>
-  </div>
-);
+  ); 
+  
 };
 
 export default TemporalAnalysis;
