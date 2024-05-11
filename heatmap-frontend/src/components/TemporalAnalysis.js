@@ -216,7 +216,7 @@ const TemporalAnalysis = () => {
       <div className="flex flex-wrap justify-between -mx-2 mt-4">
         <div className="w-1/2 px-2">
           <details open>
-            <summary className="text-lg font-bold cursor-pointer">Seasonal Chart</summary>
+            <summary className="text-lg font-bold cursor-pointer"> Yearly Seasonal Chart</summary>
             <div className="px-2 mt-4">
               <Bar data={seasonalChartData} />
             </div>
@@ -224,7 +224,7 @@ const TemporalAnalysis = () => {
         </div>
         <div className="w-1/2 px-2">
           <details open>
-            <summary className="text-lg font-bold cursor-pointer">Selective Seasonal Chart</summary>
+            <summary className="text-lg font-bold cursor-pointer">Seasonal Chart</summary>
             <div className="px-2 mt-4">
               <Bar data={selectiveSeasonalChartData} />
             </div>
