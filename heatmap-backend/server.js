@@ -90,6 +90,80 @@ app.get("/api/data-by-beat/:beat", async (req, res) => {
   }
 });
 
+app.post("/api/details", async (req, res) => {
+  try {
+    const { district, unit } = req.body; // Extract district and unit from request body
+    const data = await readCSV(); // Read data from CSV
+    // Filter data based on provided district and unit
+    const filteredData = data.filter(
+      (row) =>
+        (row.district_name === district || !row.district_name) &&
+        (row.unitname === unit || !row.unitname)
+    );
+
+    // Helper function to calculate top occurrences
+    const getTopOccurrences = (data, key, count = 3) => {
+      const frequency = {};
+      data.forEach((item) => {
+        const value = item[key];
+        if (value && value.trim() !== "") {
+          // Check for non-empty and non-null values
+          if (!frequency[value]) {
+            frequency[value] = 0;
+          }
+          frequency[value] += 1;
+        }
+      });
+      // Return sorted array based on frequency, sliced to the top 'count' items
+      return Object.entries(frequency)
+        .sort((a, b) => b[1] - a[1])
+        .slice(0, count)
+        .map(([value, freq]) => ({ value, freq }));
+    };
+
+    // Get top 3 latitude-longitude pairs
+    const topLatLong = getTopOccurrences(filteredData, "latitude").map(
+      (lat) => ({
+        latitude: lat.value,
+        longitude: getTopOccurrences(
+          filteredData.filter(
+            (item) => item.latitude === lat.value && item.longitude
+          ),
+          "longitude"
+        )[0]?.value,
+      })
+    );
+
+    // Get top 3 highest occurring crime group names
+    const topCrimeGroups = getTopOccurrences(filteredData, "crime_group_name");
+
+    // Get other top 3 major crimes occurring in the region
+    const topCrimes = getTopOccurrences(filteredData, "crime_type");
+
+    // Get top 3 places of occurrence
+    const topPlaces = getTopOccurrences(filteredData, "place_of_offence");
+
+    // Get top 3 highest occurring crime months
+    const topMonths = getTopOccurrences(filteredData, "month");
+
+    // Combine all data into a single object
+    const details = {
+      topLatLong,
+      topCrimeGroups,
+      topCrimes,
+      topPlaces,
+      topMonths,
+    };
+
+    // Send the compiled details back as a JSON response
+    res.json(details);
+  } catch (error) {
+    console.error("Error fetching details:", error);
+    res.status(500).send("Error fetching details from CSV");
+  }
+});
+
+
 // Endpoint to process data and return frequency of each value for every field
 app.post("/api/data-frequency", async (req, res) => {
   try {
