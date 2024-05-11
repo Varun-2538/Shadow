@@ -10,27 +10,6 @@ const TemporalAnalysis = () => {
   const [year, setYear] = useState(2020);
   const [selectedSeason, setSelectedSeason] = useState('Summer');
 
-  const [isMonthlyChartVisible, setMonthlyChartVisible] = useState(true);
-  const [isYearlyChartVisible, setYearlyChartVisible] = useState(true);
-  const [isSeasonalChartVisible, setSeasonalChartVisible] = useState(true);
-  const [isSelectiveSeasonalChartVisible, setSelectiveSeasonalChartVisible] = useState(true);
-
-  const toggleMonthlyChart = () => {
-    setMonthlyChartVisible(!isMonthlyChartVisible);
-  };
-
-  const toggleYearlyChart = () => {
-    setYearlyChartVisible(!isYearlyChartVisible);
-  };
-
-  const toggleSeasonalChart = () => {
-    setSeasonalChartVisible(!isSeasonalChartVisible);
-  };
-
-  const toggleSelectiveSeasonalChart = () => {
-    setSelectiveSeasonalChartVisible(!isSelectiveSeasonalChartVisible);
-  };
-
   const handleSeasonChange = (event) => {
     setSelectedSeason(event.target.value);
   };
