@@ -1,5 +1,6 @@
 import os
 import pandas as pd
+import csv
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 from spatial import generate_spatial_analysis
@@ -97,6 +98,24 @@ def beatwise_analysis():
         return jsonify({'analysis': beatwise_analysis}), 200
     except Exception as e:
         app.logger.error('Failed to generate analysis: %s\n%s', str(e), traceback.format_exc())
+        return jsonify({'error': str(e)}), 500
+    
+@app.route('/read_csv', methods=['GET'])
+def read_csv():
+    try:
+        # Specify the CSV file path
+        csv_file_path = r'dataset\updated_ml_model_ready_dataset.csv'
+
+        # Read the CSV data
+        with open(csv_file_path, 'r') as csv_file:
+            reader = csv.DictReader(csv_file)
+            data = list(reader)
+        data = [row for row in data if not '0' in row.values()]
+
+        # Return the data as JSON
+        return jsonify(data), 200
+    except Exception as e:
+        app.logger.error('Failed to read CSV file: %s\n%s', str(e), traceback.format_exc())
         return jsonify({'error': str(e)}), 500
 
 # Run the Flask app in debug mode on port 8000

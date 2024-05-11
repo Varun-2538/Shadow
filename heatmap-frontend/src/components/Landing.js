@@ -1,4 +1,5 @@
 import React from "react";
+import axios from "axios";
 import { useNavigate } from "react-router-dom";
 
 export default function Landing() {
@@ -7,6 +8,14 @@ export default function Landing() {
   const handleClick = () => {
     navigate("/Spatial");
   };
+
+  axios.get('http://localhost:8000/read_csv')
+  .then(response => {
+    console.log(response.data);
+  })
+  .catch(error => {
+    console.error(`Error: ${error}`);
+  });
 
   return (
     <>
