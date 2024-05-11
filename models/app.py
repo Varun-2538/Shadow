@@ -3,7 +3,8 @@ import pandas as pd
 import csv
 from flask import Flask, request, jsonify
 from flask_cors import CORS
-from analysis_model import generate_crime_analysis
+from spatial import generate_spatial_analysis
+from beatwise import generate_beatwise_analysis
 import traceback
 
 # Create Flask app instance
@@ -47,8 +48,8 @@ def get_data():
     return jsonify(data)
 
 # API endpoint for generating crime analysis (POST request)
-@app.route('/crime_analysis', methods=['POST'])
-def crime_analysis():
+@app.route('/spatial_analysis', methods=['POST'])
+def spatial_analysis():
     try:
         data = request.json
         app.logger.debug('Received data: %s', data)  # or use print(f"Received data: {data}")
@@ -63,11 +64,38 @@ def crime_analysis():
         print("Received analysis text:", analysis_text)
         # Generate crime analysis using LLM function
 
-        crime_analysis = generate_crime_analysis(analysis_text, district, police_station, data)
-        print("Returning analysis result:", crime_analysis)
+        spatial_analysis = generate_spatial_analysis(analysis_text, district, police_station, data)
+        print("Returning analysis result:", spatial_analysis)
 
 
-        return jsonify({'analysis': crime_analysis}), 200
+        return jsonify({'analysis': spatial_analysis}), 200
+    except Exception as e:
+        app.logger.error('Failed to generate analysis: %s\n%s', str(e), traceback.format_exc())
+        return jsonify({'error': str(e)}), 500
+    
+    
+@app.route('/beatwise_analysis', methods=['POST'])
+def beatwise_analysis():
+    try:
+        data = request.json
+        app.logger.debug('Received data: %s', data)  # or use print(f"Received data: {data}")
+
+        analysis_text = data.get('analysis_text', '')
+        district = data.get('district', '')
+        unitname = data.get('unitname', '')
+        beat_name = data.get('beat_name', '')
+
+        if not analysis_text:
+            return jsonify({'error': 'Analysis text is required'}), 400
+        
+        print("Received analysis text:", analysis_text)
+        # Generate crime analysis using LLM function
+
+        beatwise_analysis = generate_beatwise_analysis(analysis_text, district, unitname, beat_name, data)
+        print("Returning analysis result:", beatwise_analysis)
+
+
+        return jsonify({'analysis': beatwise_analysis}), 200
     except Exception as e:
         app.logger.error('Failed to generate analysis: %s\n%s', str(e), traceback.format_exc())
         return jsonify({'error': str(e)}), 500

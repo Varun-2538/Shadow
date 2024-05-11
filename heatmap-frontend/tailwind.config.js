@@ -3,6 +3,10 @@ module.exports = {
   content: ["./src/components/**/*.{js,ts,jsx,tsx}"],
   theme: {
     extend: {
+      animation: {
+        rotate: "rotate 13s linear infinite",
+        shimmer: "shimmer 2s linear infinite",
+      },
       backdropFilter: {
         none: "none",
         blur: "blur(20px)",
@@ -34,8 +38,21 @@ module.exports = {
       gradientBorderColors: {
         "gradient-red": ["#ff0000", "#ff7f7f"],
       },
+      keyframes: {
+        shimmer: {
+          from: {
+            backgroundPosition: "0 0",
+          },
+          to: {
+            backgroundPosition: "-200% 0",
+          },
+        },
+        rotate: {
+          "0%": { transform: "rotate(0deg) scale(10)" },
+          "100%": { transform: "rotate(-360deg) scale(10)" },
+        },
+      },
     },
   },
   plugins: [],
 };
-

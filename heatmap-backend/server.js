@@ -47,6 +47,7 @@ const readCSV = (filterColumn = null, filterValue = null) => {
 const readTimeData = (filterColumn = null, filterValue = null) => {
   return new Promise((resolve, reject) => {
     const results = [];
+
     const csvFilePath = path.join(projectDir, 'Shadow', 'heatmap-backend', 'dataset', 'combined_details3.csv');
     fs.createReadStream(csvFilePath)
       .pipe(csv())
@@ -61,6 +62,7 @@ const readTimeData = (filterColumn = null, filterValue = null) => {
       .on('error', reject);
   });
 };
+
 
 app.get('/api/timeData', async (req, res) => {
   try {
@@ -97,6 +99,30 @@ app.get('/api/units/:district', async (req, res) => {
     res.status(500).send('Error reading CSV file');
   }
 });
+
+// New endpoint to get beat names based on the selected unit
+app.get('/api/beats/:unit', async (req, res) => {
+  try {
+    const { unit } = req.params;
+    const data = await readCSV('unitname', unit);
+    const beats = [...new Set(data.map(item => item.beat_name))];
+    res.json(beats);
+  } catch (error) {
+    res.status(500).send('Error reading CSV file');
+  }
+});
+
+// Endpoint to get data based on the selected beat
+app.get('/api/data-by-beat/:beat', async (req, res) => {
+  try {
+    const { beat } = req.params;
+    const data = await readCSV('beat_name', beat);
+    res.json(data);
+  } catch (error) {
+    res.status(500).send('Error reading CSV file: ' + error.message);
+  }
+});
+
 
 // Endpoint to process data and return frequency of each value for every field
 app.post('/api/data-frequency', async (req, res) => {
