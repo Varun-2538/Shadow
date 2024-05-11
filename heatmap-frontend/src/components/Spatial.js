@@ -18,7 +18,7 @@ const Spatial = () => {
   const [formattedAnalysisText, setFormattedAnalysisText] = useState("");
   const defaultPosition = [16.1882, 75.6958]; // Adjust as needed
   const [collapsibleState, setCollapsibleState] = useState({});
-  const [isSidebarOpen, setSidebarOpen] = useState(false);    
+  const [isSidebarOpen, setSidebarOpen] = useState(false);
 
   useEffect(() => {
     // Initialize collapsible state for each field when frequencyData is set
@@ -269,14 +269,18 @@ const Spatial = () => {
       });
   };
 
-
   return (
     <div className="container bg-gradient-to-b from-indigo-950 via-gray-800 to-stone-950 text-white mx-auto px-4 pt-4 sm:px-2">
       <h2 className="text-2xl sm:text-xl font-bold mb-2">Spatial Analysis</h2>
-      <p className="mb-4 pb-4 text-sm sm:text-xs">Lorem Ipsum hey this is spatial</p>
+      <p className="mb-4 pb-4 text-sm sm:text-xs">
+        Lorem Ipsum hey this is spatial
+      </p>
       <div className="flex flex-wrap -mx-2 mb-4">
         <div className="w-full sm:w-1/2 px-2">
-          <label htmlFor="district-select" className="block mb-2 text-sm sm:text-xs text-white font-medium">
+          <label
+            htmlFor="district-select"
+            className="block mb-2 text-sm sm:text-xs text-white font-medium"
+          >
             District:
           </label>
           <select
@@ -293,7 +297,10 @@ const Spatial = () => {
           </select>
         </div>
         <div className="w-full sm:w-1/2 px-2">
-          <label htmlFor="unit-select" className="block mb-2 text-sm sm:text-xs font-medium text-white">
+          <label
+            htmlFor="unit-select"
+            className="block mb-2 text-sm sm:text-xs font-medium text-white"
+          >
             Unit:
           </label>
           <select
@@ -337,7 +344,10 @@ const Spatial = () => {
         )}
       </div>
 
-      <button onClick={fetchAndDisplayAnalysis} className="mt-4 p-[3px] relative">
+      <button
+        onClick={fetchAndDisplayAnalysis}
+        className="mt-4 p-[3px] relative"
+      >
         <div className="absolute inset-0 bg-gradient-to-r from-indigo-800 to-green-700 rounded-lg" />
         <div className="px-8 py-2 bg-black rounded-[6px] relative group transition duration-200 text-white hover:bg-transparent text-sm sm:text-xs">
           Get Analysis
@@ -358,10 +368,12 @@ const Spatial = () => {
 
       <div className="mt-4 pb-16">
         <h3 className="text-lg sm:text-md font-bold">Analysis Result:</h3>
-        <p className="text-sm sm:text-xs">{analysisResult || "Click 'Get Analysis' to view the result."}</p>
+        <p className="text-sm sm:text-xs">
+          {analysisResult || "Click 'Get Analysis' to view the result."}
+        </p>
       </div>
     </div>
-);
+  );
 };
 
 export default Spatial;
