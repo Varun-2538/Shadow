@@ -15,7 +15,7 @@ const projectDir = path.dirname(path.dirname(path.dirname(__filename)));
 const readCSV = (filterColumn = null, filterValue = null) => {
   return new Promise((resolve, reject) => {
     const results = [];
-    const csvFilePath = path.join(projectDir, 'Gallants-ksp', 'heatmap-backend', 'dataset', 'updated_ml_model_ready_dataset.csv');
+    const csvFilePath = path.join(projectDir, 'Shadow', 'heatmap-backend', 'dataset', 'updated_ml_model_ready_dataset.csv');
     fs.createReadStream(csvFilePath)
       .pipe(csv())
       .on('data', (row) => {
@@ -29,6 +29,37 @@ const readCSV = (filterColumn = null, filterValue = null) => {
       .on('error', reject);
   });
 };
+
+const readTimeData = (filterColumn = null, filterValue = null) => {
+  return new Promise((resolve, reject) => {
+    const results = [];
+    const csvFilePath = path.join(projectDir, 'Shadow', 'heatmap-backend', 'dataset', 'combined_details3.csv');
+    fs.createReadStream(csvFilePath)
+      .pipe(csv())
+      .on('data', (row) => {
+        if (!filterColumn || row[filterColumn] === filterValue) {
+          results.push(row);
+        }
+      })
+      .on('end', () => {
+        resolve(results);
+      })
+      .on('error', reject);
+  });
+};
+
+app.get('/api/timeData', async (req, res) => {
+  try {
+    const data = await readTimeData();
+    const yearMonth = data.map(item => ({
+      year: Number(item.Year),
+      month: Number(item.Month)
+    }));
+    res.json(yearMonth);
+  } catch (error) {
+    res.status(500).send('Error reading CSV file');
+  }
+});
 
 // Endpoint to get unique district names
 app.get('/api/districts', async (req, res) => {
