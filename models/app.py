@@ -1,19 +1,26 @@
 import os
 import pandas as pd
-from flask import Flask, request, jsonify
-from flask_cors import CORS
+from fastapi import FastAPI, Request, HTTPException
+from fastapi.responses import JSONResponse
+from fastapi.middleware.cors import CORSMiddleware
 from spatial import generate_spatial_analysis
 from beatwise import generate_beatwise_analysis
 import traceback
 
-# Create Flask app instance
-app = Flask(__name__)
+# Create FastAPI app instance
+app = FastAPI()
 
 # Enable CORS for all routes and domains
-CORS(app)
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 # Get the project directory
-project_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))  # Get the parent directory
+project_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 # Construct the file path for the CSV file
 csv_file_path = os.path.join(project_dir, 'models', 'dataset', 'updated_ml_model_ready_dataset.csv')
@@ -24,12 +31,8 @@ df = pd.read_csv(csv_file_path)
 df = df[(df['latitude'] != 0) & (df['longitude'] != 0)]
 
 # API endpoint for retrieving crime data (GET request)
-@app.route('/data', methods=['GET'])
-def get_data():
-    # Extract pagination parameters from the query string
-    page = request.args.get('page', default=1, type=int)
-    per_page = request.args.get('per_page', default=100, type=int)
-
+@app.get("/data")
+async def get_data(page: int = 1, per_page: int = 100):
     # Calculate start and end index for data slice based on pagination
     start = (page - 1) * per_page
     end = start + per_page
@@ -44,61 +47,45 @@ def get_data():
                 record[key] = None
 
     # Return JSON response containing the data
-    return jsonify(data)
+    return JSONResponse(content=data)
 
 # API endpoint for generating crime analysis (POST request)
-@app.route('/spatial_analysis', methods=['POST'])
-def spatial_analysis():
+@app.post("/spatial_analysis")
+async def spatial_analysis(request: Request):
     try:
-        data = request.json
-        app.logger.debug('Received data: %s', data)  # or use print(f"Received data: {data}")
-
+        data = await request.json()
         analysis_text = data.get('analysis_text', '')
         district = data.get('district', '')
         police_station = data.get('police_station', '')
 
         if not analysis_text:
-            return jsonify({'error': 'Analysis text is required'}), 400
-        
-        print("Received analysis text:", analysis_text)
-        # Generate crime analysis using LLM function
+            raise HTTPException(status_code=400, detail="Analysis text is required")
 
-        spatial_analysis = generate_spatial_analysis(analysis_text, district, police_station, data)
-        print("Returning analysis result:", spatial_analysis)
-
-
-        return jsonify({'analysis': spatial_analysis}), 200
+        spatial_analysis_result = generate_spatial_analysis(analysis_text, district, police_station, data)
+        return JSONResponse(content={'analysis': spatial_analysis_result})
     except Exception as e:
-        app.logger.error('Failed to generate analysis: %s\n%s', str(e), traceback.format_exc())
-        return jsonify({'error': str(e)}), 500
-    
-    
-@app.route('/beatwise_analysis', methods=['POST'])
-def beatwise_analysis():
-    try:
-        data = request.json
-        app.logger.debug('Received data: %s', data)  # or use print(f"Received data: {data}")
+        traceback_str = ''.join(traceback.format_exception(None, e, e.__traceback__))
+        return JSONResponse(content={'error': str(e), 'traceback': traceback_str}, status_code=500)
 
+@app.post("/beatwise_analysis")
+async def beatwise_analysis(request: Request):
+    try:
+        data = await request.json()
         analysis_text = data.get('analysis_text', '')
         district = data.get('district', '')
         unitname = data.get('unitname', '')
         beat_name = data.get('beat_name', '')
 
         if not analysis_text:
-            return jsonify({'error': 'Analysis text is required'}), 400
-        
-        print("Received analysis text:", analysis_text)
-        # Generate crime analysis using LLM function
+            raise HTTPException(status_code=400, detail="Analysis text is required")
 
-        beatwise_analysis = generate_beatwise_analysis(analysis_text, district, unitname, beat_name, data)
-        print("Returning analysis result:", beatwise_analysis)
-
-
-        return jsonify({'analysis': beatwise_analysis}), 200
+        beatwise_analysis_result = generate_beatwise_analysis(analysis_text, district, unitname, beat_name, data)
+        return JSONResponse(content={'analysis': beatwise_analysis_result})
     except Exception as e:
-        app.logger.error('Failed to generate analysis: %s\n%s', str(e), traceback.format_exc())
-        return jsonify({'error': str(e)}), 500
+        traceback_str = ''.join(traceback.format_exception(None, e, e.__traceback__))
+        return JSONResponse(content={'error': str(e), 'traceback': traceback_str}, status_code=500)
 
-# Run the Flask app in debug mode on port 8000
-if __name__ == '__main__':
-    app.run(debug=True, port=8000)
+# Run the FastAPI app (use uvicorn to run this script)
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run(app, host="0.0.0.0", port=8000, log_level="debug")
