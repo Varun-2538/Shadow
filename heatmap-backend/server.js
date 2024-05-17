@@ -20,7 +20,7 @@ const readCSV = (filterColumn = null, filterValue = null) => {
       "Shadow",
       "heatmap-backend",
       "dataset",
-      "combined_data.csv"
+      "merged_data.csv"
     );
     fs.createReadStream(csvFilePath)
       .pipe(csv())
@@ -89,6 +89,51 @@ app.get("/api/data-by-beat/:beat", async (req, res) => {
     res.status(500).send("Error reading CSV file: " + error.message);
   }
 });
+
+app.get("/api/crime-by-time/:district/:unit", async (req, res) => {
+  try {
+    const { district, unit } = req.params;
+    const data = await readCSV("district_name", district);
+    const filteredData = data.filter(d => d.unitname === unit);
+
+    const timeCounts = filteredData.reduce((acc, row) => {
+      const time = row.Offence_From_Time_only;
+      if (time) {
+        const hour = time.split(':')[0];  // Get the hour from time
+        if (!acc[hour]) {
+          acc[hour] = { count: 0, crimes: {} };
+        }
+        acc[hour].count++;
+        const crimeType = row.Crime_Type || "Unknown";  // Assuming 'Crime_Type' is the column
+        if (!acc[hour].crimes[crimeType]) {
+          acc[hour].crimes[crimeType] = 0;
+        }
+        acc[hour].crimes[crimeType]++;
+      }
+      return acc;
+    }, {});
+
+    const sortedTimes = [];
+    for (let i = 0; i < 24; i++) {  // Ensure all hours are included
+      const hourData = timeCounts[i] || { count: 0, crimes: {} };
+      const topCrimes = Object.entries(hourData.crimes)
+        .sort((a, b) => b[1] - a[1])
+        .slice(0, 3)
+        .map(item => `${item[0]} (${item[1]})`);
+      sortedTimes.push({
+        hour: `${i}:00`,
+        count: hourData.count,
+        topCrimes: topCrimes.length ? topCrimes.join(", ") : "No data"
+      });
+    }
+
+    res.json(sortedTimes);
+  } catch (error) {
+    res.status(500).send("Error processing data by time: " + error.message);
+  }
+});
+
+
 
 app.post("/api/details", async (req, res) => {
   try {
