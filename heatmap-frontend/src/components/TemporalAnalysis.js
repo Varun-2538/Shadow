@@ -122,8 +122,8 @@ Top 3 Crimes: ${crimeInfo.topCrimes}`;
           disabled={!selectedDistrict}
         >
           {units.map(unit => (
-            <option key={unit} value={unit}>{unit}</option
-
+            <option key={unit} value={unit}>{unit}</option>
+          ))}
         </select>
       </div>
       <button onClick={handleFetchData} className="mt-4 px-4 py-2 bg-blue-500 text-white rounded">
@@ -131,7 +131,7 @@ Top 3 Crimes: ${crimeInfo.topCrimes}`;
       </button>
       {chartData.labels.length > 0 && (
         <>
-          <Bar data={chartData} options={options} />
+          {/* <Bar data={chartData} options={options} /> */}
           <Line data={chartData} options={options} />
         </>
       )}
