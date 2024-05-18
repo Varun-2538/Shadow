@@ -20,7 +20,7 @@ const readCSV = (filterColumn = null, filterValue = null) => {
       "Shadow",
       "heatmap-backend",
       "dataset",
-      "merged_data.csv"
+      "merged_data_cleaned.csv"
     );
     fs.createReadStream(csvFilePath)
       .pipe(csv())
@@ -151,24 +151,51 @@ app.get("/api/crime-by-month/:district/:unit", async (req, res) => {
   res.json(sortedMonths);
 });
 
-app.get("/api/crime-by-year/:district/:unit", async (req, res) => {
+// app.get("/api/crime-by-year/:district/:unit", async (req, res) => {
+//   const { district, unit } = req.params;
+//   const data = await readCSV("district_name", district);
+//   const filteredData = data.filter(d => d.unitname === unit);
+
+//   const yearCounts = filteredData.reduce((acc, row) => {
+//     const year = row.Offence_From_Date_only.split('-')[0]; // Assumes YYYY-MM-DD format
+//     acc[year] = (acc[year] || 0) + 1;
+//     return acc;
+//   }, {});
+
+//   const sortedYears = Object.keys(yearCounts).map(year => ({
+//     year,
+//     count: yearCounts[year]
+//   })).sort((a, b) => a.year - b.year); // Ensure the years are ordered
+
+//   res.json(sortedYears);
+// });
+
+app.get("/api/crime-by-week/:district/:unit", async (req, res) => {
   const { district, unit } = req.params;
   const data = await readCSV("district_name", district);
   const filteredData = data.filter(d => d.unitname === unit);
 
-  const yearCounts = filteredData.reduce((acc, row) => {
-    const year = row.Offence_From_Date_only.split('-')[0]; // Assumes YYYY-MM-DD format
-    acc[year] = (acc[year] || 0) + 1;
+  const weekCounts = filteredData.reduce((acc, row) => {
+    const date = new Date(row.Offence_From_Date_only);
+    const week = getWeekNumber(date); // Function to calculate week number
+    acc[week] = (acc[week] || 0) + 1;
     return acc;
   }, {});
 
-  const sortedYears = Object.keys(yearCounts).map(year => ({
-    year,
-    count: yearCounts[year]
-  })).sort((a, b) => a.year - b.year); // Ensure the years are ordered
+  const sortedWeeks = Object.keys(weekCounts).map(week => ({
+    week,
+    count: weekCounts[week]
+  })).sort((a, b) => a.week - b.week); // Ensure the weeks are ordered
 
-  res.json(sortedYears);
+  res.json(sortedWeeks);
 });
+
+function getWeekNumber(d) {
+  d = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
+  const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
+  const weekNo = Math.ceil((((d - yearStart) / 86400000) + 1) / 7);
+  return weekNo;
+}
 
 
 
@@ -184,24 +211,25 @@ app.post("/api/details", async (req, res) => {
     );
 
     // Helper function to calculate top occurrences
-    const getTopOccurrences = (data, key, count = 3) => {
+    const getTopOccurrences = (data, key, count = 10) => {
       const frequency = {};
       data.forEach((item) => {
         const value = item[key];
-        if (value && value.trim() !== "") {
-          // Check for non-empty and non-null values
+        // Check if the value is not just hyphens, commas, spaces, or empty
+        if (value && value.trim() !== "" && !/^[-,\s]*$/.test(value)) {
           if (!frequency[value]) {
             frequency[value] = 0;
           }
           frequency[value] += 1;
         }
       });
-      // Return sorted array based on frequency, sliced to the top 'count' items
       return Object.entries(frequency)
         .sort((a, b) => b[1] - a[1])
         .slice(0, count)
         .map(([value, freq]) => ({ value, freq }));
     };
+    
+    
 
     // Get top 3 latitude-longitude pairs
     const topLatLong = getTopOccurrences(filteredData, "latitude").map(

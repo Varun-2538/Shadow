@@ -10,10 +10,10 @@ const TemporalAnalysis = () => {
   const [selectedUnit, setSelectedUnit] = useState("");
   const [timeData, setTimeData] = useState([]);
   const [monthData, setMonthData] = useState([]);
-  const [yearData, setYearData] = useState([]);
+  const [weekData, setWeekData] = useState([]);
   const [chartData, setChartData] = useState({ labels: [], datasets: [] });
   const [monthChartData, setMonthChartData] = useState({ labels: [], datasets: [] });
-  const [yearChartData, setYearChartData] = useState({ labels: [], datasets: [] });
+  const [weekChartData, setWeekChartData] = useState({ labels: [], datasets: [] });
 
   useEffect(() => {
     axios.get('http://localhost:5000/api/districts')
@@ -91,28 +91,28 @@ const TemporalAnalysis = () => {
     }
   };
 
-  const handleFetchYearData = () => {
+  const handleFetchWeekData = () => {
     if (selectedDistrict && selectedUnit) {
-      axios.get(`http://localhost:5000/api/crime-by-year/${selectedDistrict}/${selectedUnit}`)
+      axios.get(`http://localhost:5000/api/crime-by-week/${selectedDistrict}/${selectedUnit}`)
         .then(response => {
-          setYearData(response.data);
+          setWeekData(response.data);
           const data = {
-            labels: response.data.map(d => d.year),
+            labels: response.data.map(d => `Week ${d.week}`),
             datasets: [
               {
-                label: 'Number of Crimes by Year',
+                label: 'Number of Crimes by Week',
                 data: response.data.map(d => d.count),
-                backgroundColor: 'rgba(75, 192, 192, 0.2)',
-                borderColor: 'rgba(75, 192, 192, 1)',
+                backgroundColor: 'rgba(153, 102, 255, 0.2)',
+                borderColor: 'rgba(153, 102, 255, 1)',
                 borderWidth: 2,
                 fill: false,
                 tension: 0.4
               }
             ]
           };
-          setYearChartData(data);
+          setWeekChartData(data);
         })
-        .catch(error => console.error('Error fetching year data:', error));
+        .catch(error => console.error('Error fetching week data:', error));
     }
   };
 
@@ -162,7 +162,7 @@ const TemporalAnalysis = () => {
       <div className="my-4">
         <button onClick={handleFetchData} className="mx-2 px-4 py-2 bg-blue-500 text-white rounded">Fetch Hourly Data</button>
         <button onClick={handleFetchMonthData} className="mx-2 px-4 py-2 bg-green-500 text-white rounded">Fetch Monthly Data</button>
-        <button onClick={handleFetchYearData} className="mx-2 px-4 py-2 bg-red-500 text-white rounded">Fetch Yearly Data</button>
+        <button onClick={handleFetchWeekData} className="mx-2 px-4 py-2 bg-purple-500 text-white rounded">Fetch Weekly Data</button>
       </div>
       {chartData.labels.length > 0 && (
         <>
@@ -176,10 +176,10 @@ const TemporalAnalysis = () => {
           <Line data={monthChartData} options={options} />
         </>
       )}
-      {yearChartData.labels.length > 0 && (
+      {weekChartData.labels.length > 0 && (
         <>
-          <h2 className="text-xl font-bold">Yearly Crime Data</h2>
-          <Line data={yearChartData} options={options} />
+          <h2 className="text-xl font-bold">Weekly Crime Data</h2>
+          <Line data={weekChartData} options={options} />
         </>
       )}
     </div>

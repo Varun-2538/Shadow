@@ -1,11 +1,16 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
+import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
+import "leaflet/dist/leaflet.css";
 
 const Prediction = () => {
   const [districts, setDistricts] = useState([]);
   const [units, setUnits] = useState([]);
+  const [months] = useState([...Array(12).keys()].map((i) => i + 1)); // Array of months 1-12
   const [selectedDistrict, setSelectedDistrict] = useState("");
   const [selectedUnit, setSelectedUnit] = useState("");
+  const [startMonth, setStartMonth] = useState(1); // Default to January
+  const [endMonth, setEndMonth] = useState(1); // Default to January
   const [details, setDetails] = useState({});
   const [analysisText, setAnalysisText] = useState("");
 
@@ -48,12 +53,22 @@ const Prediction = () => {
     setSelectedUnit(event.target.value);
   };
 
-  // Fetch details based on selected district and unit
+  const handleStartMonthChange = (event) => {
+    setStartMonth(Number(event.target.value));
+  };
+
+  const handleEndMonthChange = (event) => {
+    setEndMonth(Number(event.target.value));
+  };
+
+  // Fetch details based on selected district, unit, and month range
   const fetchDetails = () => {
     axios
       .post("http://localhost:5000/api/details", {
         district: selectedDistrict,
         unit: selectedUnit,
+        startMonth,
+        endMonth,
       })
       .then((response) => {
         console.log(response.data);
@@ -87,17 +102,15 @@ const Prediction = () => {
         : "No data";
 
     const analysisText = `
-    Top Latitude-Longitude pairs: ${formatTopItems(topLatLong)}
-    Top Crime Groups: ${formatTopItems(topCrimeGroups)}
-    Top Crimes: ${formatTopItems(topCrimes)}
-    Top Places of Occurrence: ${formatTopItems(topPlaces)}
-    Top Crime Months: ${formatTopItems(topMonths)}
-  `;
+      Top Latitude-Longitude pairs: ${formatTopItems(topLatLong)}
+      Top Crime Groups: ${formatTopItems(topCrimeGroups)}
+      Top Crimes: ${formatTopItems(topCrimes)}
+      Top Places of Occurrence: ${formatTopItems(topPlaces)}
+      Top Crime Months: ${formatTopItems(topMonths)}
+    `;
 
     setAnalysisText(analysisText.trim());
   };
-
-
 
   return (
     <div className="container mx-auto px-4 pt-4">
@@ -144,13 +157,82 @@ const Prediction = () => {
             ))}
           </select>
         </div>
+        <div className="mt-4">
+          <label
+            htmlFor="start-month-select"
+            className="block mb-2 text-sm font-medium"
+          >
+            Start Month:
+          </label>
+          <select
+            id="start-month-select"
+            value={startMonth}
+            onChange={handleStartMonthChange}
+            className="bg-gray-200 border border-gray-300 text-gray-900 rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
+          >
+            {months.map((month) => (
+              <option key={month} value={month}>
+                {month}
+              </option>
+            ))}
+          </select>
+        </div>
+        <div className="mt-4">
+          <label
+            htmlFor="end-month-select"
+            className="block mb-2 text-sm font-medium"
+          >
+            End Month:
+          </label>
+          <select
+            id="end-month-select"
+            value={endMonth}
+            onChange={handleEndMonthChange}
+            className="bg-gray-200 border border-gray-300 text-gray-900 rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
+          >
+            {months.map((month) => (
+              <option key={month} value={month}>
+                {month}
+              </option>
+            ))}
+          </select>
+        </div>
       </div>
+      
       <button
         onClick={fetchDetails}
         className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
       >
         Fetch Details
       </button>
+      <div className="mt-4">
+        <h3 className="text-lg font-bold mb-2">Map View:</h3>
+        <MapContainer
+  center={[12.9716, 77.5946]} // Default center (Bangalore coordinates)
+  zoom={10}
+  style={{ height: "400px", width: "100%" }}
+>
+  <TileLayer
+    url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+    attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+  />
+  {/* Ensure that details.topLatLong and details.topPlaces are checked for existence and length before mapping */}
+  {details.topLatLong && details.topPlaces && details.topLatLong.length === details.topPlaces.length && 
+    details.topLatLong.map((latLong, index) => {
+      // Retrieve corresponding place details safely within the map function
+      const placeDetails = details.topPlaces[index];
+      return (
+        <Marker key={index} position={[latLong.latitude, latLong.longitude]}>
+          <Popup>
+            {/* Use placeDetails safely within the Popup */}
+            {placeDetails ? `${placeDetails.value} - ${placeDetails.freq} occurrences` : "No data"}
+          </Popup>
+        </Marker>
+      );
+    })}
+</MapContainer>
+
+      </div>
       {buttonCondition && (
         <button
           onClick={generateAnalysisText}
@@ -162,9 +244,17 @@ const Prediction = () => {
       <div className="mt-4">
         <h3 className="text-lg font-bold">Analysis Result:</h3>
         <p>{analysisText || 'Click "Get Analysis Text" to view the result.'}</p>
+        <h3 className="text-lg font-bold">Top 10 Places of Offence:</h3>
+        <ul>
+          {details.topPlaces && details.topPlaces.map((place, index) => (
+            <li key={index}>{place.value} - {place.freq} occurrences</li>
+          ))}
+        </ul>
       </div>
+      
     </div>
   );
+  
 };
 
 export default Prediction;
