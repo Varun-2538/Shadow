@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { Bar, Line } from 'react-chartjs-2';
+import { Line } from 'react-chartjs-2';
 import 'chart.js/auto';
 
 const TemporalAnalysis = () => {
@@ -50,12 +50,11 @@ const TemporalAnalysis = () => {
             labels: response.data.map(d => d.hour),
             datasets: [
               {
-                type: 'line',
                 label: 'Number of Crimes by Hour',
                 data: response.data.map(d => d.count),
-                backgroundColor: 'rgba(255, 99, 132, 0.5)',
+                backgroundColor: 'rgba(255, 99, 132, 0.2)',
                 borderColor: 'rgba(255, 99, 132, 1)',
-                borderWidth: 3,
+                borderWidth: 2,
                 fill: false,
                 tension: 0.4
               }
@@ -78,8 +77,11 @@ const TemporalAnalysis = () => {
               {
                 label: 'Number of Crimes by Month',
                 data: response.data.map(d => d.count),
-                backgroundColor: 'rgba(54, 162, 235, 0.5)',
+                backgroundColor: 'rgba(54, 162, 235, 0.2)',
                 borderColor: 'rgba(54, 162, 235, 1)',
+                borderWidth: 2,
+                fill: false,
+                tension: 0.4
               }
             ]
           };
@@ -100,8 +102,11 @@ const TemporalAnalysis = () => {
               {
                 label: 'Number of Crimes by Year',
                 data: response.data.map(d => d.count),
-                backgroundColor: 'rgba(75, 192, 192, 0.5)',
+                backgroundColor: 'rgba(75, 192, 192, 0.2)',
                 borderColor: 'rgba(75, 192, 192, 1)',
+                borderWidth: 2,
+                fill: false,
+                tension: 0.4
               }
             ]
           };
@@ -168,13 +173,13 @@ const TemporalAnalysis = () => {
       {monthChartData.labels.length > 0 && (
         <>
           <h2 className="text-xl font-bold">Monthly Crime Data</h2>
-          <Bar data={monthChartData} options={options} />
+          <Line data={monthChartData} options={options} />
         </>
       )}
       {yearChartData.labels.length > 0 && (
         <>
           <h2 className="text-xl font-bold">Yearly Crime Data</h2>
-          <Bar data={yearChartData} options={options} />
+          <Line data={yearChartData} options={options} />
         </>
       )}
     </div>
