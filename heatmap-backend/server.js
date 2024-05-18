@@ -1,12 +1,14 @@
 const express = require("express");
 const cors = require("cors");
 const csv = require("csv-parser");
+const bodyParser = require('body-parser');
 const fs = require("fs");
 const path = require("path");
 const app = express();
 
 app.use(cors());
 app.use(express.json());
+app.use(bodyParser.json());
 
 // Get the project directory
 const projectDir = path.dirname(path.dirname(path.dirname(__filename)));
@@ -36,15 +38,6 @@ const readCSV = (filterColumn = null, filterValue = null) => {
   });
 };
 
-// app.post('/data', (req, res) => {
-//   const data = req.body;
-//   console.log(data);
-//   res.send('Data received');
-// });
-
-// app.listen(3000, () => console.log('Server running on port 3000'));
-
-// Endpoint to get unique district names
 app.get("/api/districts", async (req, res) => {
   try {
     const data = await readCSV();
@@ -53,6 +46,25 @@ app.get("/api/districts", async (req, res) => {
   } catch (error) {
     res.status(500).send("Error reading CSV file");
   }
+});
+
+const entriesFilePath = path.join(__dirname, "dataset", "entries.csv");
+
+// Function to write data to CSV file
+const writeDataToCSV = (data) => {
+  const headers = Object.keys(data).join(",") + "\n";
+  const values = Object.values(data).join(",") + "\n";
+
+  if (!fs.existsSync(entriesFilePath)) {
+    fs.writeFileSync(entriesFilePath, headers);
+  }
+  fs.appendFileSync(entriesFilePath, values);
+};
+
+app.post("/api/entries", (req, res) => {
+  const entry = req.body;
+  writeDataToCSV(entry);
+  res.status(201).send("Entry saved to CSV");
 });
 
 // Endpoint to get unit names based on the selected district
@@ -170,8 +182,6 @@ app.get("/api/crime-by-year/:district/:unit", async (req, res) => {
   res.json(sortedYears);
 });
 
-
-
 app.post("/api/details", async (req, res) => {
   try {
     const { district, unit } = req.body; // Extract district and unit from request body
@@ -245,7 +255,6 @@ app.post("/api/details", async (req, res) => {
   }
 });
 
-
 // Endpoint to process data and return frequency of each value for every field
 app.post("/api/data-frequency", async (req, res) => {
   try {
@@ -274,6 +283,46 @@ app.post("/api/data-frequency", async (req, res) => {
     res.json(frequency);
   } catch (error) {
     console.error(error);
+    res.status(500).send("Server Error");
+  }
+});
+
+// New endpoint to get details of a specific row based on index
+app.post("/api/entry-by-index", async (req, res) => {
+  try {
+    const { index } = req.body;
+    console.log("Received request for index:", index);
+    const results = [];
+    const csvFilePath = path.join(
+      projectDir,
+      "Shadow",
+      "heatmap-backend",
+      "dataset",
+      "entries.csv"
+    );
+    let currentIndex = 0;
+    fs.createReadStream(csvFilePath)
+      .pipe(csv())
+      .on("data", (row) => {
+        if (currentIndex === index) {
+          results.push(row);
+        }
+        currentIndex++;
+      })
+      .on("end", () => {
+        console.log("CSV file reading completed. Total rows read:", currentIndex);
+        if (results.length > 0) {
+          res.json(results[0]);
+        } else {
+          res.status(404).send("No entry found at the given index");
+        }
+      })
+      .on("error", (error) => {
+        console.error("Error reading CSV file:", error);
+        res.status(500).send("Error reading CSV file");
+      });
+  } catch (error) {
+    console.error("Error processing request:", error);
     res.status(500).send("Server Error");
   }
 });
