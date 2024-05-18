@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { Bar, Line } from 'react-chartjs-2';
 import 'chart.js/auto';
-import 'chartjs-plugin-crosshair'; // Import the plugin
 
 const TemporalAnalysis = () => {
   const [districts, setDistricts] = useState([]);
@@ -10,7 +9,11 @@ const TemporalAnalysis = () => {
   const [selectedDistrict, setSelectedDistrict] = useState("");
   const [selectedUnit, setSelectedUnit] = useState("");
   const [timeData, setTimeData] = useState([]);
+  const [monthData, setMonthData] = useState([]);
+  const [yearData, setYearData] = useState([]);
   const [chartData, setChartData] = useState({ labels: [], datasets: [] });
+  const [monthChartData, setMonthChartData] = useState({ labels: [], datasets: [] });
+  const [yearChartData, setYearChartData] = useState({ labels: [], datasets: [] });
 
   useEffect(() => {
     axios.get('http://localhost:5000/api/districts')
@@ -43,12 +46,12 @@ const TemporalAnalysis = () => {
       axios.get(`http://localhost:5000/api/crime-by-time/${selectedDistrict}/${selectedUnit}`)
         .then(response => {
           setTimeData(response.data);
-          const chartData = {
+          const data = {
             labels: response.data.map(d => d.hour),
             datasets: [
               {
                 type: 'line',
-                label: 'Number of Crimes (Line)',
+                label: 'Number of Crimes by Hour',
                 data: response.data.map(d => d.count),
                 backgroundColor: 'rgba(255, 99, 132, 0.5)',
                 borderColor: 'rgba(255, 99, 132, 1)',
@@ -58,37 +61,62 @@ const TemporalAnalysis = () => {
               }
             ]
           };
-          setChartData(chartData);
+          setChartData(data);
         })
         .catch(error => console.error('Error fetching time data:', error));
+    }
+  };
+
+  const handleFetchMonthData = () => {
+    if (selectedDistrict && selectedUnit) {
+      axios.get(`http://localhost:5000/api/crime-by-month/${selectedDistrict}/${selectedUnit}`)
+        .then(response => {
+          setMonthData(response.data);
+          const data = {
+            labels: response.data.map(d => `${d.month}`),
+            datasets: [
+              {
+                label: 'Number of Crimes by Month',
+                data: response.data.map(d => d.count),
+                backgroundColor: 'rgba(54, 162, 235, 0.5)',
+                borderColor: 'rgba(54, 162, 235, 1)',
+              }
+            ]
+          };
+          setMonthChartData(data);
+        })
+        .catch(error => console.error('Error fetching month data:', error));
+    }
+  };
+
+  const handleFetchYearData = () => {
+    if (selectedDistrict && selectedUnit) {
+      axios.get(`http://localhost:5000/api/crime-by-year/${selectedDistrict}/${selectedUnit}`)
+        .then(response => {
+          setYearData(response.data);
+          const data = {
+            labels: response.data.map(d => d.year),
+            datasets: [
+              {
+                label: 'Number of Crimes by Year',
+                data: response.data.map(d => d.count),
+                backgroundColor: 'rgba(75, 192, 192, 0.5)',
+                borderColor: 'rgba(75, 192, 192, 1)',
+              }
+            ]
+          };
+          setYearChartData(data);
+        })
+        .catch(error => console.error('Error fetching year data:', error));
     }
   };
 
   const options = {
     responsive: true,
     plugins: {
-      crosshair: {
-        line: {
-          color: '#F66',
-          width: 1
-        },
-        sync: {
-          enabled: false,
-        },
-        zoom: {
-          enabled: false,
-        }
-      },
       tooltip: {
         mode: 'index',
-        intersect: false,
-        callbacks: {
-          label: function(context) {
-            const crimeInfo = timeData[context.dataIndex];
-            return `${context.dataset.label}: ${context.parsed.y}
-Top 3 Crimes: ${crimeInfo.topCrimes}`;
-          }
-        }
+        intersect: false
       }
     },
     scales: {
@@ -126,13 +154,27 @@ Top 3 Crimes: ${crimeInfo.topCrimes}`;
           ))}
         </select>
       </div>
-      <button onClick={handleFetchData} className="mt-4 px-4 py-2 bg-blue-500 text-white rounded">
-        Submit
-      </button>
+      <div className="my-4">
+        <button onClick={handleFetchData} className="mx-2 px-4 py-2 bg-blue-500 text-white rounded">Fetch Hourly Data</button>
+        <button onClick={handleFetchMonthData} className="mx-2 px-4 py-2 bg-green-500 text-white rounded">Fetch Monthly Data</button>
+        <button onClick={handleFetchYearData} className="mx-2 px-4 py-2 bg-red-500 text-white rounded">Fetch Yearly Data</button>
+      </div>
       {chartData.labels.length > 0 && (
         <>
-          {/* <Bar data={chartData} options={options} /> */}
+          <h2 className="text-xl font-bold">Hourly Crime Data</h2>
           <Line data={chartData} options={options} />
+        </>
+      )}
+      {monthChartData.labels.length > 0 && (
+        <>
+          <h2 className="text-xl font-bold">Monthly Crime Data</h2>
+          <Bar data={monthChartData} options={options} />
+        </>
+      )}
+      {yearChartData.labels.length > 0 && (
+        <>
+          <h2 className="text-xl font-bold">Yearly Crime Data</h2>
+          <Bar data={yearChartData} options={options} />
         </>
       )}
     </div>

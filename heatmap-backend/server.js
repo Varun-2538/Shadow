@@ -95,16 +95,15 @@ app.get("/api/crime-by-time/:district/:unit", async (req, res) => {
     const { district, unit } = req.params;
     const data = await readCSV("district_name", district);
     const filteredData = data.filter(d => d.unitname === unit);
-
     const timeCounts = filteredData.reduce((acc, row) => {
       const time = row.Offence_From_Time_only;
       if (time) {
-        const hour = time.split(':')[0];  // Get the hour from time
+        const hour = time.split(':')[0];
         if (!acc[hour]) {
           acc[hour] = { count: 0, crimes: {} };
         }
         acc[hour].count++;
-        const crimeType = row.Crime_Type || "Unknown";  // Assuming 'Crime_Type' is the column
+        const crimeType = row.Crime_Type || "Unknown";
         if (!acc[hour].crimes[crimeType]) {
           acc[hour].crimes[crimeType] = 0;
         }
@@ -114,7 +113,7 @@ app.get("/api/crime-by-time/:district/:unit", async (req, res) => {
     }, {});
 
     const sortedTimes = [];
-    for (let i = 0; i < 24; i++) {  // Ensure all hours are included
+    for (let i = 0; i < 24; i++) {
       const hourData = timeCounts[i] || { count: 0, crimes: {} };
       const topCrimes = Object.entries(hourData.crimes)
         .sort((a, b) => b[1] - a[1])
@@ -131,6 +130,44 @@ app.get("/api/crime-by-time/:district/:unit", async (req, res) => {
   } catch (error) {
     res.status(500).send("Error processing data by time: " + error.message);
   }
+});
+
+app.get("/api/crime-by-month/:district/:unit", async (req, res) => {
+  const { district, unit } = req.params;
+  const data = await readCSV("district_name", district);
+  const filteredData = data.filter(d => d.unitname === unit);
+
+  const monthCounts = filteredData.reduce((acc, row) => {
+    const month = row.Offence_From_Date_only.split('-')[1]; // Assumes YYYY-MM-DD format
+    acc[month] = (acc[month] || 0) + 1;
+    return acc;
+  }, {});
+
+  const sortedMonths = Object.keys(monthCounts).map(month => ({
+    month,
+    count: monthCounts[month]
+  })).sort((a, b) => a.month - b.month); // Ensure the months are ordered
+
+  res.json(sortedMonths);
+});
+
+app.get("/api/crime-by-year/:district/:unit", async (req, res) => {
+  const { district, unit } = req.params;
+  const data = await readCSV("district_name", district);
+  const filteredData = data.filter(d => d.unitname === unit);
+
+  const yearCounts = filteredData.reduce((acc, row) => {
+    const year = row.Offence_From_Date_only.split('-')[0]; // Assumes YYYY-MM-DD format
+    acc[year] = (acc[year] || 0) + 1;
+    return acc;
+  }, {});
+
+  const sortedYears = Object.keys(yearCounts).map(year => ({
+    year,
+    count: yearCounts[year]
+  })).sort((a, b) => a.year - b.year); // Ensure the years are ordered
+
+  res.json(sortedYears);
 });
 
 
