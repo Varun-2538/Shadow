@@ -175,7 +175,6 @@ app.post("/api/details", async (req, res) => {
     const { district, unit, startMonth, endMonth } = req.body;
     const data = await readCSV();
 
-    // Filter data based on provided district, unit, and month range
     const filteredData = data.filter(
       (row) =>
         (row.district_name === district || !row.district_name) &&
@@ -183,7 +182,6 @@ app.post("/api/details", async (req, res) => {
         (parseInt(row.Offence_From_Date_only.split('-')[1]) >= startMonth && parseInt(row.Offence_From_Date_only.split('-')[1]) <= endMonth)
     );
 
-    // Helper function to calculate top occurrences
     const getTopOccurrences = (data, key, count = 10) => {
       const frequency = {};
       data.forEach((item) => {
@@ -201,33 +199,26 @@ app.post("/api/details", async (req, res) => {
         .map(([value, freq]) => ({ value, freq }));
     };
 
-    // Get top occurrences for summary
-    const topLatLong = getTopOccurrences(filteredData, "latitude").map(
-      (lat) => ({
-        latitude: lat.value,
-        longitude: getTopOccurrences(
-          filteredData.filter(
-            (item) => item.latitude === lat.value && item.longitude
-          ),
-          "longitude"
-        )[0]?.value,
-        crimeType: getTopOccurrences(
-          filteredData.filter(
-            (item) => item.latitude === lat.value && item.longitude
-          ),
-          "Crime_Type"
-        )[0]?.value,
-      })
-    );
+    const topCrimeTypes = getTopOccurrences(filteredData, "Crime_Type");
+
+    const topLatLong = topCrimeTypes.map(crimeType => ({
+      crimeType: crimeType.value,
+      locations: filteredData.filter(row => row.Crime_Type === crimeType.value)
+        .map(row => ({
+          latitude: row.latitude,
+          longitude: row.longitude,
+          crimeType: row.Crime_Type
+        }))
+        .filter(location => location.latitude && location.longitude)
+    }));
 
     const topCrimeGroups = getTopOccurrences(filteredData, "crime_group_name");
-    const topCrimes = getTopOccurrences(filteredData, "Crime_Type");
     const topMonths = getTopOccurrences(filteredData, "month");
 
     const details = {
       topLatLong,
       topCrimeGroups,
-      topCrimes,
+      topCrimeTypes,
       topMonths,
     };
 
@@ -237,6 +228,7 @@ app.post("/api/details", async (req, res) => {
     res.status(500).send("Error fetching details from CSV");
   }
 });
+
 
 
 // Endpoint to process data and return frequency of each value for every field
