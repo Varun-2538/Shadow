@@ -82,15 +82,19 @@ const BeatWiseAnalysis = () => {
       const bounds = L.latLngBounds(
         mapMarkers.map((loc) => L.latLng(loc.lat, loc.long))
       );
-      mapRef.current.fitBounds(bounds, { padding: [50, 50] });
+      if (bounds.isValid()) {
+        mapRef.current.fitBounds(bounds, { padding: [50, 50] });
+      }
     }
   }, [mapMarkers]); // Depend on mapMarkers to ensure it runs after updates
 
   const prepareMapMarkers = (data) => {
     let latLongCount = {};
     data.forEach((crime) => {
-      const key = `${crime.latitude}-${crime.longitude}`;
-      if (crime.latitude !== "null" && crime.longitude !== "null") {
+      const latitude = parseFloat(crime.latitude);
+      const longitude = parseFloat(crime.longitude);
+      if (!isNaN(latitude) && !isNaN(longitude)) {
+        const key = `${latitude}-${longitude}`;
         if (!latLongCount[key]) {
           latLongCount[key] = { count: 0, details: crime.Crime_Type };
         }
@@ -101,12 +105,15 @@ const BeatWiseAnalysis = () => {
     const sortedLocations = Object.entries(latLongCount)
       .sort((a, b) => b[1].count - a[1].count)
       .slice(0, 3)
-      .map((item) => ({
-        lat: parseFloat(item[0].split("-")[0]),
-        long: parseFloat(item[0].split("-")[1]),
-        detail: item[1].details,
-        count: item[1].count, // Store the frequency count
-      }));
+      .map((item) => {
+        const [lat, long] = item[0].split("-").map(Number);
+        return {
+          lat: lat,
+          long: long,
+          detail: item[1].details,
+          count: item[1].count, // Store the frequency count
+        };
+      });
 
     setMapMarkers(sortedLocations);
   };
