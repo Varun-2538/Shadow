@@ -82,15 +82,19 @@ const BeatWiseAnalysis = () => {
       const bounds = L.latLngBounds(
         mapMarkers.map((loc) => L.latLng(loc.lat, loc.long))
       );
-      mapRef.current.fitBounds(bounds, { padding: [50, 50] });
+      if (bounds.isValid()) {
+        mapRef.current.fitBounds(bounds, { padding: [50, 50] });
+      }
     }
   }, [mapMarkers]); // Depend on mapMarkers to ensure it runs after updates
 
   const prepareMapMarkers = (data) => {
     let latLongCount = {};
     data.forEach((crime) => {
-      const key = `${crime.latitude}-${crime.longitude}`;
-      if (crime.latitude !== "null" && crime.longitude !== "null") {
+      const latitude = parseFloat(crime.latitude);
+      const longitude = parseFloat(crime.longitude);
+      if (!isNaN(latitude) && !isNaN(longitude)) {
+        const key = `${latitude}-${longitude}`;
         if (!latLongCount[key]) {
           latLongCount[key] = { count: 0, details: crime.Crime_Type };
         }
@@ -101,12 +105,15 @@ const BeatWiseAnalysis = () => {
     const sortedLocations = Object.entries(latLongCount)
       .sort((a, b) => b[1].count - a[1].count)
       .slice(0, 3)
-      .map((item) => ({
-        lat: parseFloat(item[0].split("-")[0]),
-        long: parseFloat(item[0].split("-")[1]),
-        detail: item[1].details,
-        count: item[1].count, // Store the frequency count
-      }));
+      .map((item) => {
+        const [lat, long] = item[0].split("-").map(Number);
+        return {
+          lat: lat,
+          long: long,
+          detail: item[1].details,
+          count: item[1].count, // Store the frequency count
+        };
+      });
 
     setMapMarkers(sortedLocations);
   };
@@ -232,6 +239,7 @@ const BeatWiseAnalysis = () => {
     });
 
     setAnalysisText(text); // Ensure this line is working as expected
+    console.log({analysisText})
   };
 
   const fetchAndDisplayAnalysis = () => {
@@ -315,7 +323,7 @@ const BeatWiseAnalysis = () => {
     return pairedCharts.map((pair, index) => (
       <div key={index} className="flex flex-wrap -mx-2">
         {pair.map((data) => (
-          <div key={data.field} className="w-full md:w-1/2 px-2">
+          <div key={data.field} className="w-full sm:w-1/2 px-2 mb-4">
             <div className="p-5 m-2 backdrop-blur-sm bg-slate-900 shadow-lg shadow-indigo-900 rounded">
               <button
                 onClick={() => toggleCollapse(data.field)}
@@ -327,7 +335,7 @@ const BeatWiseAnalysis = () => {
               <div
                 className={`${
                   collapsibleState[data.field] ? "hidden" : ""
-                } p-4  rounded`}
+                } p-4 rounded`}
               >
                 {renderChart(data, data.field)}
               </div>
@@ -344,7 +352,7 @@ const BeatWiseAnalysis = () => {
         Select District, Unit, and Beat for Analysis
       </h2>
       <div className="flex flex-wrap -mx-2 mb-4">
-        <div className="w-full sm:w-1/2 md:w-1/3 px-2">
+        <div className="w-full sm:w-1/2 md:w-1/3 px-2 mb-4">
           <label
             htmlFor="district-select"
             className="block mb-2 text-sm font-medium text-white"
@@ -364,7 +372,7 @@ const BeatWiseAnalysis = () => {
             ))}
           </select>
         </div>
-        <div className="w-full sm:w-1/2 md:w-1/3 px-2">
+        <div className="w-full sm:w-1/2 md:w-1/3 px-2 mb-4">
           <label
             htmlFor="unit-select"
             className="block mb-2 text-sm font-medium text-white"
@@ -385,7 +393,7 @@ const BeatWiseAnalysis = () => {
             ))}
           </select>
         </div>
-        <div className="w-full sm:w-1/2 md:w-1/3 px-2">
+        <div className="w-full sm:w-1/2 md:w-1/3 px-2 mb-4">
           <label
             htmlFor="beat-select"
             className="block mb-2 text-sm font-medium text-white"
@@ -406,10 +414,10 @@ const BeatWiseAnalysis = () => {
             ))}
           </select>
         </div>
-        <div className="w-full px-2 mt-4">
+        <div className="w-full px-2 mt-4 mb-4">
           <button
             onClick={handleSubmit}
-            className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+            className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded w-full md:w-auto"
           >
             Submit
           </button>
@@ -417,22 +425,12 @@ const BeatWiseAnalysis = () => {
       </div>
       {renderMap()}
       {renderCharts()}
-      <div className="mt-2  border-rounded">
-        <div className="relative z-10 w-full cursor-pointer overflow-hidden rounded-xl border border-slate-800 p-[1.75px]">
-          <div className="animate-rotate absolute inset-0 h-full w-full rounded-full bg-[conic-gradient(#0ea5e9_20deg,transparent_120deg)]"></div>
-          <div className="relative z-20 flex flex-col rounded bg-slate-900 p-2 shadow-2xl backdrop-blur-2xl">
-            <h3 className="text-lg font-semibold m-2 text-white">
-              Analysis Summary:
-            </h3>
-            <div className="p-1 whitespace-pre-wrap break-words overflow-hidden max-w-full text-gray-300">
-              {analysisText}
-            </div>
-          </div>
-        </div>
+      <div className="mt-2 border-rounded">
+        
 
         <button
           onClick={fetchAndDisplayAnalysis}
-          className="mt-4 inline-flex h-12 animate-shimmer items-center justify-center rounded-md border border-slate-700 bg-[linear-gradient(110deg,#000103,45%,#1e2631,55%,#000103)] bg-[length:200%_100%] px-6 font-medium text-slate-400 transition-colors focus:outline-none focus:ring-2 focus:ring-slate-400 focus:ring-offset-2 focus:ring-offset-slate-50"
+          className="mt-4 inline-flex h-12 animate-shimmer items-center justify-center rounded-md border border-slate-700 bg-[linear-gradient(110deg,#000103,45%,#1e2631,55%,#000103)] bg-[length:200%_100%] px-6 font-medium text-slate-400 transition-colors focus:outline-none focus:ring-2 focus:ring-slate-400 focus:ring-offset-2 focus:ring-offset-slate-50 w-full md:w-auto"
         >
           Get Analysis
         </button>

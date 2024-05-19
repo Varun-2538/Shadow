@@ -123,13 +123,15 @@ const Prediction = () => {
   };
 
   return (
-    <div className="container mx-auto px-4 pt-4">
-      <h2 className="text-xl font-bold mb-2">Crime Prediction Analysis</h2>
-      <div className="mb-4">
-        <div>
+    <div className="min-h-screen container bg-gradient-to-b from-indigo-950 via-gray-800 to-stone-950 text-white mx-auto px-4 pt-4 sm:px-2">
+      <h2 className="text-3xl  pt-1 font-bold mb-4">Crime Prediction Analysis</h2>
+
+      <div className="flex flex-wrap -mx-2 mb-4">
+        <div className="w-full sm:w-1/2 px-2">
+
           <label
             htmlFor="district-select"
-            className="block mb-2 text-sm font-medium"
+            className="block mb-2 text-sm sm:text-xs text-white font-medium"
           >
             District:
           </label>
@@ -137,7 +139,7 @@ const Prediction = () => {
             id="district-select"
             value={selectedDistrict}
             onChange={handleDistrictChange}
-            className="bg-gray-200 border border-gray-300 text-gray-900 rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
+            className="bg-gray-50 border border-gray-300 text-gray-900 text-sm sm:text-xs rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
           >
             {districts.map((district) => (
               <option key={district} value={district}>
@@ -146,10 +148,11 @@ const Prediction = () => {
             ))}
           </select>
         </div>
-        <div className="mt-4">
+        <div className=" w-full sm:w-1/2 px-2">
+          
           <label
             htmlFor="unit-select"
-            className="block mb-2 text-sm font-medium"
+            className="block mb-2 text-sm sm:text-xs text-white font-medium"
           >
             Unit:
           </label>
@@ -158,7 +161,7 @@ const Prediction = () => {
             value={selectedUnit}
             onChange={handleUnitChange}
             disabled={!selectedDistrict}
-            className="bg-gray-200 border border-gray-300 text-gray-900 rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
+            className="bg-gray-50 border border-gray-300 text-gray-900 text-sm sm:text-xs rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
           >
             {units.map((unit) => (
               <option key={unit} value={unit}>
@@ -167,10 +170,13 @@ const Prediction = () => {
             ))}
           </select>
         </div>
-        <div className="mt-4">
+      </div>
+      <div className="flex flex-wrap -mx-2 mb-4">
+        <div className=" w-full sm:w-1/2 px-2">
+          
           <label
             htmlFor="start-month-select"
-            className="block mb-2 text-sm font-medium"
+            className="block mb-2 text-sm sm:text-xs text-white font-medium"
           >
             Start Month:
           </label>
@@ -178,7 +184,7 @@ const Prediction = () => {
             id="start-month-select"
             value={startMonth}
             onChange={handleStartMonthChange}
-            className="bg-gray-200 border border-gray-300 text-gray-900 rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
+            className="bg-gray-50 border border-gray-300 text-gray-900 text-sm sm:text-xs rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
           >
             {months.map((month) => (
               <option key={month} value={month}>
@@ -187,10 +193,10 @@ const Prediction = () => {
             ))}
           </select>
         </div>
-        <div className="mt-4">
+        <div className="w-full sm:w-1/2 px-2">
           <label
             htmlFor="end-month-select"
-            className="block mb-2 text-sm font-medium"
+            className="block mb-2 text-sm sm:text-xs text-white font-medium"
           >
             End Month:
           </label>
@@ -198,7 +204,7 @@ const Prediction = () => {
             id="end-month-select"
             value={endMonth}
             onChange={handleEndMonthChange}
-            className="bg-gray-200 border border-gray-300 text-gray-900 rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
+            className="bg-gray-50 border border-gray-300 text-gray-900 text-sm sm:text-xs rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
           >
             {months.map((month) => (
               <option key={month} value={month}>
@@ -208,7 +214,7 @@ const Prediction = () => {
           </select>
         </div>
       </div>
-      
+
       <button
         onClick={fetchDetails}
         className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
@@ -226,19 +232,17 @@ const Prediction = () => {
             url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
             attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
           />
-          {details.topLatLong && 
+          {details.topLatLong &&
             details.topLatLong.map((latLong, index) => (
               <React.Fragment key={index}>
-                <Marker 
-                  position={[latLong.latitude, latLong.longitude]} 
+                <Marker
+                  position={[latLong.latitude, latLong.longitude]}
                   icon={customIcon} // Use the custom icon
                 >
                   <Popup>
                     {`Crime Type: ${latLong.crimeType} (${latLong.latitude}, ${latLong.longitude})`}
                   </Popup>
-                  <Tooltip>
-                    {`Crime Type: ${latLong.crimeType}`}
-                  </Tooltip>
+                  <Tooltip>{`Crime Type: ${latLong.crimeType}`}</Tooltip>
                 </Marker>
                 <Circle
                   center={[latLong.latitude, latLong.longitude]}
@@ -247,9 +251,7 @@ const Prediction = () => {
                   fillColor="red"
                   fillOpacity={0.2}
                 >
-                  <Tooltip>
-                    {`Crime Type: ${latLong.crimeType}`}
-                  </Tooltip>
+                  <Tooltip>{`Crime Type: ${latLong.crimeType}`}</Tooltip>
                 </Circle>
               </React.Fragment>
             ))}
@@ -268,9 +270,12 @@ const Prediction = () => {
         <p>{analysisText || 'Click "Get Analysis Text" to view the result.'}</p>
         <h3 className="text-lg font-bold">Top 10 Crime Types:</h3>
         <ul>
-          {details.topCrimes && details.topCrimes.map((crime, index) => (
-            <li key={index}>{crime.value} - {crime.freq} occurrences</li>
-          ))}
+          {details.topCrimes &&
+            details.topCrimes.map((crime, index) => (
+              <li key={index}>
+                {crime.value} - {crime.freq} occurrences
+              </li>
+            ))}
         </ul>
       </div>
     </div>
