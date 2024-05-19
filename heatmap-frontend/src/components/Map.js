@@ -4,6 +4,7 @@ import "leaflet/dist/leaflet.css";
 import { Modal, Button, TextField, Select, MenuItem, Box, FormControl, InputLabel } from "@mui/material";
 import { makeStyles } from "@mui/styles";
 import axios from 'axios';
+import "tailwindcss/tailwind.css";
 
 function MapEvents({ onUpdate }) {
   useMapEvents({
@@ -94,7 +95,6 @@ function Map() {
   const [selectedEntry, setSelectedEntry] = useState(null);
 
   useEffect(() => {
-    // Fetch the initial data
     const fetchData = async () => {
       try {
         const allegedResponse = await axios.get('http://localhost:5000/api/allegedEntries');
@@ -114,7 +114,6 @@ function Map() {
 
     try {
       if (selectedEntry) {
-        // Update existing entry
         await axios.put(`http://localhost:5000/api/entries/${selectedEntry.id}`, newEntry);
         if (mapType === "alleged") {
           setAllegedEntries(allegedEntries.map(entry => entry.id === selectedEntry.id ? newEntry : entry));
@@ -123,7 +122,6 @@ function Map() {
         }
         setSelectedEntry(null);
       } else {
-        // Add new entry
         await axios.post('http://localhost:5000/api/entries', newEntry);
         if (mapType === "alleged") {
           setAllegedEntries([...allegedEntries, newEntry]);
@@ -157,9 +155,9 @@ function Map() {
         offence_from_time: "",
         offence_to_date: "",
         offence_to_time: "",
-      }); // Reset form
-      setShowModal(false); // Close modal
-      setEditModal(false); // Close edit modal
+      });
+      setShowModal(false);
+      setEditModal(false);
     } catch (error) {
       console.error('Error saving entry:', error);
     }
@@ -179,7 +177,7 @@ function Map() {
 
   const updateEntry = (lat, lng) => {
     setEntry({ ...entry, latitude: lat.toString(), longitude: lng.toString() });
-    setShowModal(true); // Open modal when the map is double-clicked
+    setShowModal(true);
   };
 
   const openModal = () => setShowModal(true);
@@ -226,21 +224,23 @@ function Map() {
   };
 
   return (
-    <div className="App">
+    <div className="container bg-gradient-to-b from-indigo-950 via-gray-800 to-stone-950 text-white mx-auto px-4 min-h-screen pt-4 sm:px-2">
       <h1 className="font-bold text-center text-3xl mb-4">Karnataka Heatmap Visualization</h1>
-      <Button variant="contained" color="primary" onClick={openModal} style={{ margin: "20px" }}>
-        Add Entry
-      </Button>
-      <Button variant="contained" color="secondary" onClick={openEditModal} style={{ margin: "20px" }}>
-        Edit Data
-      </Button>
+      <div className="flex space-x-4 mb-4">
+        <Button variant="contained" color="primary" onClick={openModal}>
+          Add Entry
+        </Button>
+        <Button variant="contained" color="secondary" onClick={openEditModal}>
+          Edit Data
+        </Button>
+      </div>
       <Modal
         open={showModal}
         onClose={closeModal}
         className={classes.modal}
       >
         <Box className={classes.paper}>
-          <h2>Add Entry</h2>
+          <h2 className="font-bold text-lg mb-4">Add Entry</h2>
           <form onSubmit={handleSubmit}>
             <TextField
               label="Crime No"
@@ -411,8 +411,9 @@ function Map() {
               value={entry.offence_to_time}
               onChange={(e) => setEntry({ ...entry, offence_to_time: e.target.value })}
               fullWidth
+              margin="normal"
             />
-            <Button variant="contained" color="primary" type="submit" style={{ marginTop: "20px" }}>
+            <Button variant="contained" color="primary" type="submit" className="mt-4">
               {selectedEntry ? "Update Entry" : "Add to Map"}
             </Button>
           </form>
@@ -424,7 +425,7 @@ function Map() {
         className={classes.modal}
       >
         <Box className={classes.paper}>
-          <h2>Edit Data</h2>
+          <h2 className="font-bold text-lg mb-4">Edit Data</h2>
           <FormControl fullWidth margin="normal">
             <InputLabel>Crime No</InputLabel>
             <Select
@@ -609,32 +610,34 @@ function Map() {
               value={entry.offence_to_time}
               onChange={(e) => setEntry({ ...entry, offence_to_time: e.target.value })}
               fullWidth
+              margin="normal"
             />
-            <Button variant="contained" color="primary" type="submit" style={{ marginTop: "20px" }}>
+            <Button variant="contained" color="primary" type="submit" className="mt-4">
               Update Entry
             </Button>
           </form>
         </Box>
       </Modal>
-      {mapType === "alleged" ? (
-        <>
-          <HeatMap
-            entries={allegedEntries}
-            color="red"
-            onUpdate={updateEntry}
+      <div className="mt-4" style={{ height: "400px" }}>
+        <MapContainer
+          center={[12.9716, 77.5946]}
+          zoom={12}
+          scrollWheelZoom={true}
+          style={{ height: "100%", width: "100%" }}
+        >
+          <TileLayer
+            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+            attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
           />
-        </>
-      ) : (
-        <>
-          <HeatMap
-            entries={provenEntries}
-            color="green"
-            onUpdate={updateEntry}
-          />
-        </>
-      )}
+          <MapEvents onUpdate={updateEntry} />
+          {mapType === "alleged" ? (
+            <HeatMap entries={allegedEntries} color="red" onUpdate={updateEntry} />
+          ) : (
+            <HeatMap entries={provenEntries} color="green" onUpdate={updateEntry} />
+          )}
+        </MapContainer>
+      </div>
     </div>
   );
 }
-
 export default Map;
