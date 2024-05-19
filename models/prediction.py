@@ -40,9 +40,9 @@ def format_prompt_for_model(user_prompt, district, unitname, data):
 )
 
     user_context_prompt = (
-        f"I am providing you with the top frequencies of certain crime-related fields in the {district} district and {unitname} unit name. Please provide an analysis on this data and identify any potential connections or correlations between these fields. Propose explanations or reasons for the identified links based on your knowledge and experience as a crime detective.\n\n"
+        f"I am providing you with data on various crime-related fields in the {district} district and {unitname} unit name. Please provide an analysis on this data and identify any potential connections or correlations between these fields, as per the guidelines provided in the system context prompt. Based on your analysis, make crime predictions for specific areas."
         f"The data is as follows:\n\n{data}"
-    )
+)
 
     # Combine all prompt sections into a single formatted prompt
     combined_prompt = f"<s>[SYS] {system_context_prompt} [/SYS]\n[INST] {user_context_prompt} [/INST]"
