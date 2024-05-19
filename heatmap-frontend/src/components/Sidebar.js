@@ -66,8 +66,8 @@ const Sidebar = () => {
               <StyledLink href="/temporal">&gt; Temporal</StyledLink>
             </div>
           </div>
-          <StyledLink href="/Deployment">Deployment</StyledLink>
-          <StyledLink href="/Prediction">Prediction Plan</StyledLink>
+          {/* <StyledLink href="/Deployment">Deployment</StyledLink> */}
+          <StyledLink href="/Prediction">Prediction & Deployment Plan</StyledLink>
           <StyledLink href="/map">Data Entry</StyledLink>
         </div>
       </nav>
