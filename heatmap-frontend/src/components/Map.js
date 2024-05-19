@@ -59,7 +59,8 @@ const useStyles = makeStyles({
 
 function Map() {
   const classes = useStyles();
-  const [dataEntries, setDataEntries] = useState([]);
+  const [allegedEntries, setAllegedEntries] = useState([]);
+  const [provenEntries, setProvenEntries] = useState([]);
   const [entry, setEntry] = useState({
     crime_no: "",
     district_name: "",
@@ -96,8 +97,10 @@ function Map() {
     // Fetch the initial data
     const fetchData = async () => {
       try {
-        const response = await axios.get('http://localhost:5000/api/entries');
-        setDataEntries(response.data);
+        const allegedResponse = await axios.get('http://localhost:5000/api/allegedEntries');
+        const provenResponse = await axios.get('http://localhost:5000/api/provenEntries');
+        setAllegedEntries(allegedResponse.data);
+        setProvenEntries(provenResponse.data);
       } catch (error) {
         console.error('Error fetching data:', error);
       }
@@ -113,12 +116,20 @@ function Map() {
       if (selectedEntry) {
         // Update existing entry
         await axios.put(`http://localhost:5000/api/entries/${selectedEntry.id}`, newEntry);
-        setDataEntries(dataEntries.map(entry => entry.id === selectedEntry.id ? newEntry : entry));
+        if (mapType === "alleged") {
+          setAllegedEntries(allegedEntries.map(entry => entry.id === selectedEntry.id ? newEntry : entry));
+        } else {
+          setProvenEntries(provenEntries.map(entry => entry.id === selectedEntry.id ? newEntry : entry));
+        }
         setSelectedEntry(null);
       } else {
         // Add new entry
         await axios.post('http://localhost:5000/api/entries', newEntry);
-        setDataEntries([...dataEntries, newEntry]);
+        if (mapType === "alleged") {
+          setAllegedEntries([...allegedEntries, newEntry]);
+        } else {
+          setProvenEntries([...provenEntries, newEntry]);
+        }
       }
 
       setEntry({
@@ -154,10 +165,16 @@ function Map() {
     }
   };
 
-  const handleDelete = (indexToDelete) => {
-    setDataEntries(
-      dataEntries.filter((_, index) => index !== indexToDelete)
-    );
+  const handleDelete = (indexToDelete, type) => {
+    if (type === "alleged") {
+      setAllegedEntries(
+        allegedEntries.filter((_, index) => index !== indexToDelete)
+      );
+    } else {
+      setProvenEntries(
+        provenEntries.filter((_, index) => index !== indexToDelete)
+      );
+    }
   };
 
   const updateEntry = (lat, lng) => {
@@ -173,7 +190,7 @@ function Map() {
   const handleCrimeNoChange = (e) => {
     const crimeNo = e.target.value;
     setSelectedCrimeNo(crimeNo);
-    const entry = dataEntries.find(entry => entry.crime_no === crimeNo);
+    const entry = allegedEntries.concat(provenEntries).find(entry => entry.crime_no === crimeNo);
     if (entry) {
       setSelectedEntry(entry);
       setEntry(entry);
@@ -414,7 +431,7 @@ function Map() {
               value={selectedCrimeNo}
               onChange={handleCrimeNoChange}
             >
-              {dataEntries.map(entry => (
+              {allegedEntries.concat(provenEntries).map(entry => (
                 <MenuItem key={entry.crime_no} value={entry.crime_no}>
                   {entry.crime_no}
                 </MenuItem>
@@ -600,17 +617,21 @@ function Map() {
         </Box>
       </Modal>
       {mapType === "alleged" ? (
-        <HeatMap
-          entries={dataEntries.filter(entry => entry.fir_stage === 'alleged')}
-          color="red"
-          onUpdate={updateEntry}
-        />
+        <>
+          <HeatMap
+            entries={allegedEntries}
+            color="red"
+            onUpdate={updateEntry}
+          />
+        </>
       ) : (
-        <HeatMap
-          entries={dataEntries.filter(entry => entry.fir_stage === 'proven')}
-          color="green"
-          onUpdate={updateEntry}
-        />
+        <>
+          <HeatMap
+            entries={provenEntries}
+            color="green"
+            onUpdate={updateEntry}
+          />
+        </>
       )}
     </div>
   );
