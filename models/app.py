@@ -96,6 +96,22 @@ async def beatwise_analysis(request: AnalysisRequest):
     except Exception as e:
         traceback_str = traceback.format_exc()
         return {"error": str(e), "traceback": traceback_str}
+    
+@app.post("/prediction_analysis")
+async def prediction_analysis(request: AnalysisRequest):
+    try:
+        analysis_text = request.analysis_text
+        district = request.district
+        unitname = request.unitname
+        
+        if not analysis_text:
+            raise HTTPException(status_code=400, detail="Analysis text is required")
+        
+        prediction_analysis_result = generate_prediction_analysis(analysis_text, district, unitname, request.dict())
+        return {"analysis": prediction_analysis_result}
+    except Exception as e:
+        traceback_str = traceback.format_exc()
+        return {"error": str(e), "traceback": traceback_str}
 
 # API endpoint for reading CSV (GET request)
 @app.get("/read_csv")
