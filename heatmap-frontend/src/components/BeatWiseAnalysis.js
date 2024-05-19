@@ -116,10 +116,6 @@ const BeatWiseAnalysis = () => {
   const prepareChartData = (data) => {
     const fields = [
       "place_of_offence",
-      "actsection",
-      "fir_type",
-      "latitude",
-      "longitude",
       "Crime_Type",
       "victim_profession",
       "victim_caste",
@@ -218,6 +214,7 @@ const BeatWiseAnalysis = () => {
     });
   
     setAnalysisText(text); // Ensure this line is working as expected
+    console.log({analysisText})
   };
 
   const fetchAndDisplayAnalysis = () => {
@@ -404,17 +401,7 @@ const BeatWiseAnalysis = () => {
       {renderMap()}
       {renderCharts()}
       <div className="mt-2  border-rounded">
-        <div className="relative z-10 w-full cursor-pointer overflow-hidden rounded-xl border border-slate-800 p-[1.75px]">
-          <div className="animate-rotate absolute inset-0 h-full w-full rounded-full bg-[conic-gradient(#0ea5e9_20deg,transparent_120deg)]"></div>
-          <div className="relative z-20 flex flex-col rounded bg-slate-900 p-2 shadow-2xl backdrop-blur-2xl">
-            <h3 className="text-lg font-semibold m-2 text-white">
-              Analysis Summary:
-            </h3>
-            <div className="p-1 whitespace-pre-wrap break-words overflow-hidden max-w-full text-gray-300">
-              {analysisText}
-            </div>
-          </div>
-        </div>
+        
 
         
         <button onClick={fetchAndDisplayAnalysis} className="mt-4 inline-flex h-12 animate-shimmer items-center justify-center rounded-md border border-slate-700 bg-[linear-gradient(110deg,#000103,45%,#1e2631,55%,#000103)] bg-[length:200%_100%] px-6 font-medium text-slate-400 transition-colors focus:outline-none focus:ring-2 focus:ring-slate-400 focus:ring-offset-2 focus:ring-offset-slate-50">
