@@ -24,7 +24,7 @@ app.add_middleware(
 project_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))  # Get the parent directory
 
 # Construct the file path for the CSV file
-csv_file_path = os.path.join(project_dir, 'heatmap-backend', 'dataset', 'combined_details3.csv')
+csv_file_path = os.path.join(project_dir, 'models', 'dataset', 'updated_ml_model_ready_dataset.csv')
 
 # Load crime data from CSV
 df = pd.read_csv(csv_file_path, low_memory=False)
@@ -33,8 +33,8 @@ df = pd.read_csv(csv_file_path, low_memory=False)
 # print("Column names:", df.columns)
 
 # Filter rows with zero latitude or longitude (optional, adjust for your data)
-if 'Latitude' in df.columns and 'Longitude' in df.columns:
-    df = df[(df['Latitude'] != 0) & (df['Longitude'] != 0)]
+if 'latitude' in df.columns and 'longitude' in df.columns:
+    df = df[(df['latitude'] != 0) & (df['longitude'] != 0)]
 else:
     raise KeyError("The required columns 'latitude' and 'longitude' are not present in the CSV file")
 
