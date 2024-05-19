@@ -11,8 +11,10 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "body-parser": "^1.20.2",
     "cors": "^2.8.5",
     "csv-parser": "^3.0.0",
+    "csv-writer": "^1.6.0",
     "express": "^4.18.3",
     "kdbush": "^4.0.2",
     "react-progressbar": "^15.4.1",

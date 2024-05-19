@@ -1,8 +1,11 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { MapContainer, TileLayer, Circle, useMapEvents } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
+import { Modal, Button, TextField, Select, MenuItem, Box, FormControl, InputLabel } from "@mui/material";
+import { makeStyles } from "@mui/styles";
+import axios from 'axios';
+import "tailwindcss/tailwind.css";
 
-// Define the MapEvents component for handling map events
 function MapEvents({ onUpdate }) {
   useMapEvents({
     dblclick(e) {
@@ -12,7 +15,6 @@ function MapEvents({ onUpdate }) {
   return null;
 }
 
-// Define the HeatMap component
 const HeatMap = ({ entries, color, onUpdate }) => {
   const center = [12.9716, 77.5946]; // Center on Bangalore
 
@@ -20,7 +22,7 @@ const HeatMap = ({ entries, color, onUpdate }) => {
     <MapContainer
       center={center}
       zoom={12}
-      style={{ height: "400px", width: "100%" ,  }}
+      style={{ height: "400px", width: "100%" }}
     >
       <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
       <MapEvents onUpdate={onUpdate} />
@@ -37,33 +39,128 @@ const HeatMap = ({ entries, color, onUpdate }) => {
   );
 };
 
+const useStyles = makeStyles({
+  modal: {
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  paper: {
+    backgroundColor: "white",
+    padding: "20px",
+    borderRadius: "10px",
+    outline: "none",
+    boxShadow: "0px 0px 10px rgba(0, 0, 0, 0.1)",
+    maxHeight: "90vh",
+    overflowY: "auto",
+    width: "80%",
+    maxWidth: "600px",
+  },
+});
+
 function Map() {
+  const classes = useStyles();
   const [allegedEntries, setAllegedEntries] = useState([]);
   const [provenEntries, setProvenEntries] = useState([]);
   const [entry, setEntry] = useState({
+    crime_no: "",
+    district_name: "",
+    unitname: "",
+    accused_presentaddress: "",
+    victim_presentaddress: "",
+    accused_age: "",
+    accused_caste: "",
+    accused_profession: "",
+    accused_sex: "",
+    victim_age: "",
+    victim_profession: "",
+    victim_sex: "",
+    crime: "",
     latitude: "",
     longitude: "",
-    crime: "",
-    severity: "1",
-    report: "",
+    fir_type: "",
+    fir_stage: "",
+    distance_from_ps: "",
+    beat_name: "",
+    place_of_offence: "",
+    offence_from_date: "",
+    offence_from_time: "",
+    offence_to_date: "",
+    offence_to_time: "",
   });
   const [mapType, setMapType] = useState("alleged");
+  const [showModal, setShowModal] = useState(false);
+  const [editModal, setEditModal] = useState(false);
+  const [selectedCrimeNo, setSelectedCrimeNo] = useState("");
+  const [selectedEntry, setSelectedEntry] = useState(null);
 
-  const handleSubmit = (e) => {
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const allegedResponse = await axios.get('http://localhost:5000/api/allegedEntries');
+        const provenResponse = await axios.get('http://localhost:5000/api/provenEntries');
+        setAllegedEntries(allegedResponse.data);
+        setProvenEntries(provenResponse.data);
+      } catch (error) {
+        console.error('Error fetching data:', error);
+      }
+    };
+    fetchData();
+  }, []);
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
     const newEntry = { ...entry };
-    if (mapType === "alleged") {
-      setAllegedEntries([...allegedEntries, newEntry]);
-    } else {
-      setProvenEntries([...provenEntries, newEntry]);
+
+    try {
+      if (selectedEntry) {
+        await axios.put(`http://localhost:5000/api/entries/${selectedEntry.id}`, newEntry);
+        if (mapType === "alleged") {
+          setAllegedEntries(allegedEntries.map(entry => entry.id === selectedEntry.id ? newEntry : entry));
+        } else {
+          setProvenEntries(provenEntries.map(entry => entry.id === selectedEntry.id ? newEntry : entry));
+        }
+        setSelectedEntry(null);
+      } else {
+        await axios.post('http://localhost:5000/api/entries', newEntry);
+        if (mapType === "alleged") {
+          setAllegedEntries([...allegedEntries, newEntry]);
+        } else {
+          setProvenEntries([...provenEntries, newEntry]);
+        }
+      }
+
+      setEntry({
+        crime_no: "",
+        district_name: "",
+        unitname: "",
+        accused_presentaddress: "",
+        victim_presentaddress: "",
+        accused_age: "",
+        accused_caste: "",
+        accused_profession: "",
+        accused_sex: "",
+        victim_age: "",
+        victim_profession: "",
+        victim_sex: "",
+        crime: "",
+        latitude: "",
+        longitude: "",
+        fir_type: "",
+        fir_stage: "",
+        distance_from_ps: "",
+        beat_name: "",
+        place_of_offence: "",
+        offence_from_date: "",
+        offence_from_time: "",
+        offence_to_date: "",
+        offence_to_time: "",
+      });
+      setShowModal(false);
+      setEditModal(false);
+    } catch (error) {
+      console.error('Error saving entry:', error);
     }
-    setEntry({
-      latitude: "",
-      longitude: "",
-      crime: "",
-      severity: "1",
-      report: "",
-    }); // Reset form
   };
 
   const handleDelete = (indexToDelete, type) => {
@@ -80,156 +177,467 @@ function Map() {
 
   const updateEntry = (lat, lng) => {
     setEntry({ ...entry, latitude: lat.toString(), longitude: lng.toString() });
+    setShowModal(true);
+  };
+
+  const openModal = () => setShowModal(true);
+  const closeModal = () => setShowModal(false);
+  const openEditModal = () => setEditModal(true);
+  const closeEditModal = () => setEditModal(false);
+
+  const handleCrimeNoChange = (e) => {
+    const crimeNo = e.target.value;
+    setSelectedCrimeNo(crimeNo);
+    const entry = allegedEntries.concat(provenEntries).find(entry => entry.crime_no === crimeNo);
+    if (entry) {
+      setSelectedEntry(entry);
+      setEntry(entry);
+    } else {
+      setSelectedEntry(null);
+      setEntry({
+        crime_no: crimeNo,
+        district_name: "",
+        unitname: "",
+        accused_presentaddress: "",
+        victim_presentaddress: "",
+        accused_age: "",
+        accused_caste: "",
+        accused_profession: "",
+        accused_sex: "",
+        victim_age: "",
+        victim_profession: "",
+        victim_sex: "",
+        crime: "",
+        latitude: "",
+        longitude: "",
+        fir_type: "",
+        fir_stage: "",
+        distance_from_ps: "",
+        beat_name: "",
+        place_of_offence: "",
+        offence_from_date: "",
+        offence_from_time: "",
+        offence_to_date: "",
+        offence_to_time: "",
+      });
+    }
   };
 
   return (
-    <div className="App ">
+    <div className="container bg-gradient-to-b from-indigo-950 via-gray-800 to-stone-950 text-white mx-auto px-4 min-h-screen pt-4 sm:px-2">
       <h1 className="font-bold text-center text-3xl mb-4">Karnataka Heatmap Visualization</h1>
-      <div>
-        <label>
-          <input
-            type="radio"
-            value="alleged"
-            name="mapType"
-            checked={mapType === "alleged"}
-            onChange={() => setMapType("alleged")}
-          />{" "}
-          Alleged
-        </label>
-        <label>
-          <input
-            type="radio"
-            value="proven"
-            name="mapType"
-            checked={mapType === "proven"}
-            onChange={() => setMapType("proven")}
-          />{" "}
-          Proven
-        </label>
+      <div className="flex space-x-4 mb-4">
+        <Button variant="contained" color="primary" onClick={openModal}>
+          Add Entry
+        </Button>
+        <Button variant="contained" color="secondary" onClick={openEditModal}>
+          Edit Data
+        </Button>
       </div>
-      <form onSubmit={handleSubmit} style={{ margin: "20px" }}>
-        <input
-          type="text"
-          value={entry.latitude}
-          onChange={(e) => setEntry({ ...entry, latitude: e.target.value })}
-          placeholder="Latitude"
-          required
-        />
-        <input
-          type="text"
-          value={entry.longitude}
-          onChange={(e) => setEntry({ ...entry, longitude: e.target.value })}
-          placeholder="Longitude"
-          required
-        />
-        <input
-          type="text"
-          value={entry.crime}
-          onChange={(e) => setEntry({ ...entry, crime: e.target.value })}
-          placeholder="Crime Type"
-          required
-        />
-
-        {mapType === "proven" && (
-          <>
-            
-            <select
-              value={entry.severity}
-              onChange={(e) => setEntry({ ...entry, severity: e.target.value })}
-              required
-            >
-              <option value="1">1</option>
-              <option value="2">2</option>
-              <option value="3">3</option>
-              <option value="4">4</option>
-              <option value="5">5</option>
-            </select>
-            <textarea
-              value={entry.report}
-              onChange={(e) => setEntry({ ...entry, report: e.target.value })}
-              placeholder="Incident Report"
+      <Modal
+        open={showModal}
+        onClose={closeModal}
+        className={classes.modal}
+      >
+        <Box className={classes.paper}>
+          <h2 className="font-bold text-lg mb-4">Add Entry</h2>
+          <form onSubmit={handleSubmit}>
+            <TextField
+              label="Crime No"
+              value={entry.crime_no}
+              onChange={(e) => setEntry({ ...entry, crime_no: e.target.value })}
+              fullWidth
+              margin="normal"
+            />
+            <TextField
+              label="District Name"
+              value={entry.district_name}
+              onChange={(e) => setEntry({ ...entry, district_name: e.target.value })}
+              fullWidth
+              margin="normal"
+            />
+            <TextField
+              label="Unit Name"
+              value={entry.unitname}
+              onChange={(e) => setEntry({ ...entry, unitname: e.target.value })}
+              fullWidth
+              margin="normal"
+            />
+            <TextField
+              label="Accused Present Address"
+              value={entry.accused_presentaddress}
+              onChange={(e) => setEntry({ ...entry, accused_presentaddress: e.target.value })}
+              fullWidth
+              margin="normal"
+            />
+            <TextField
+              label="Victim Present Address"
+              value={entry.victim_presentaddress}
+              onChange={(e) => setEntry({ ...entry, victim_presentaddress: e.target.value })}
+              fullWidth
+              margin="normal"
+            />
+            <TextField
+              label="Accused Age"
+              value={entry.accused_age}
+              onChange={(e) => setEntry({ ...entry, accused_age: e.target.value })}
+              fullWidth
+              margin="normal"
+            />
+            <TextField
+              label="Accused Caste"
+              value={entry.accused_caste}
+              onChange={(e) => setEntry({ ...entry, accused_caste: e.target.value })}
+              fullWidth
+              margin="normal"
+            />
+            <TextField
+              label="Accused Profession"
+              value={entry.accused_profession}
+              onChange={(e) => setEntry({ ...entry, accused_profession: e.target.value })}
+              fullWidth
+              margin="normal"
+            />
+            <TextField
+              label="Accused Sex"
+              value={entry.accused_sex}
+              onChange={(e) => setEntry({ ...entry, accused_sex: e.target.value })}
+              fullWidth
+              margin="normal"
+            />
+            <TextField
+              label="Victim Age"
+              value={entry.victim_age}
+              onChange={(e) => setEntry({ ...entry, victim_age: e.target.value })}
+              fullWidth
+              margin="normal"
+            />
+            <TextField
+              label="Victim Profession"
+              value={entry.victim_profession}
+              onChange={(e) => setEntry({ ...entry, victim_profession: e.target.value })}
+              fullWidth
+              margin="normal"
+            />
+            <TextField
+              label="Victim Sex"
+              value={entry.victim_sex}
+              onChange={(e) => setEntry({ ...entry, victim_sex: e.target.value })}
+              fullWidth
+              margin="normal"
+            />
+            <TextField
+              label="Crime Type"
+              value={entry.crime}
+              onChange={(e) => setEntry({ ...entry, crime: e.target.value })}
+              fullWidth
+              margin="normal"
               required
             />
-          </>
-        )}
-        <button type="submit">Add to Map</button>
-      </form>
-      {mapType === "alleged" ? (
-        <>
-          <HeatMap
-            entries={allegedEntries}
-            color="red"
-            onUpdate={updateEntry}
+            <TextField
+              label="Latitude"
+              value={entry.latitude}
+              onChange={(e) => setEntry({ ...entry, latitude: e.target.value })}
+              fullWidth
+              margin="normal"
+              required
+            />
+            <TextField
+              label="Longitude"
+              value={entry.longitude}
+              onChange={(e) => setEntry({ ...entry, longitude: e.target.value })}
+              fullWidth
+              margin="normal"
+              required
+            />
+            <TextField
+              label="FIR Type"
+              value={entry.fir_type}
+              onChange={(e) => setEntry({ ...entry, fir_type: e.target.value })}
+              fullWidth
+              margin="normal"
+            />
+            <TextField
+              label="FIR Stage"
+              value={entry.fir_stage}
+              onChange={(e) => setEntry({ ...entry, fir_stage: e.target.value })}
+              fullWidth
+              margin="normal"
+            />
+            <TextField
+              label="Distance from PS"
+              value={entry.distance_from_ps}
+              onChange={(e) => setEntry({ ...entry, distance_from_ps: e.target.value })}
+              fullWidth
+              margin="normal"
+            />
+            <TextField
+              label="Beat Name"
+              value={entry.beat_name}
+              onChange={(e) => setEntry({ ...entry, beat_name: e.target.value })}
+              fullWidth
+              margin="normal"
+            />
+            <TextField
+              label="Place of Offence"
+              value={entry.place_of_offence}
+              onChange={(e) => setEntry({ ...entry, place_of_offence: e.target.value })}
+              fullWidth
+              margin="normal"
+            />
+            <TextField
+              label="Offence From Date"
+              value={entry.offence_from_date}
+              onChange={(e) => setEntry({ ...entry, offence_from_date: e.target.value })}
+              fullWidth
+              margin="normal"
+            />
+            <TextField
+              label="Offence From Time"
+              value={entry.offence_from_time}
+              onChange={(e) => setEntry({ ...entry, offence_from_time: e.target.value })}
+              fullWidth
+              margin="normal"
+            />
+            <TextField
+              label="Offence To Date"
+              value={entry.offence_to_date}
+              onChange={(e) => setEntry({ ...entry, offence_to_date: e.target.value })}
+              fullWidth
+              margin="normal"
+            />
+            <TextField
+              label="Offence To Time"
+              value={entry.offence_to_time}
+              onChange={(e) => setEntry({ ...entry, offence_to_time: e.target.value })}
+              fullWidth
+              margin="normal"
+            />
+            <Button variant="contained" color="primary" type="submit" className="mt-4">
+              {selectedEntry ? "Update Entry" : "Add to Map"}
+            </Button>
+          </form>
+        </Box>
+      </Modal>
+      <Modal
+        open={editModal}
+        onClose={closeEditModal}
+        className={classes.modal}
+      >
+        <Box className={classes.paper}>
+          <h2 className="font-bold text-lg mb-4">Edit Data</h2>
+          <FormControl fullWidth margin="normal">
+            <InputLabel>Crime No</InputLabel>
+            <Select
+              value={selectedCrimeNo}
+              onChange={handleCrimeNoChange}
+            >
+              {allegedEntries.concat(provenEntries).map(entry => (
+                <MenuItem key={entry.crime_no} value={entry.crime_no}>
+                  {entry.crime_no}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+          <form onSubmit={handleSubmit}>
+            <TextField
+              label="Crime No"
+              value={entry.crime_no}
+              onChange={(e) => setEntry({ ...entry, crime_no: e.target.value })}
+              fullWidth
+              margin="normal"
+              disabled
+            />
+            <TextField
+              label="District Name"
+              value={entry.district_name}
+              onChange={(e) => setEntry({ ...entry, district_name: e.target.value })}
+              fullWidth
+              margin="normal"
+            />
+            <TextField
+              label="Unit Name"
+              value={entry.unitname}
+              onChange={(e) => setEntry({ ...entry, unitname: e.target.value })}
+              fullWidth
+              margin="normal"
+            />
+            <TextField
+              label="Accused Present Address"
+              value={entry.accused_presentaddress}
+              onChange={(e) => setEntry({ ...entry, accused_presentaddress: e.target.value })}
+              fullWidth
+              margin="normal"
+            />
+            <TextField
+              label="Victim Present Address"
+              value={entry.victim_presentaddress}
+              onChange={(e) => setEntry({ ...entry, victim_presentaddress: e.target.value })}
+              fullWidth
+              margin="normal"
+            />
+            <TextField
+              label="Accused Age"
+              value={entry.accused_age}
+              onChange={(e) => setEntry({ ...entry, accused_age: e.target.value })}
+              fullWidth
+              margin="normal"
+            />
+            <TextField
+              label="Accused Caste"
+              value={entry.accused_caste}
+              onChange={(e) => setEntry({ ...entry, accused_caste: e.target.value })}
+              fullWidth
+              margin="normal"
+            />
+            <TextField
+              label="Accused Profession"
+              value={entry.accused_profession}
+              onChange={(e) => setEntry({ ...entry, accused_profession: e.target.value })}
+              fullWidth
+              margin="normal"
+            />
+            <TextField
+              label="Accused Sex"
+              value={entry.accused_sex}
+              onChange={(e) => setEntry({ ...entry, accused_sex: e.target.value })}
+              fullWidth
+              margin="normal"
+            />
+            <TextField
+              label="Victim Age"
+              value={entry.victim_age}
+              onChange={(e) => setEntry({ ...entry, victim_age: e.target.value })}
+              fullWidth
+              margin="normal"
+            />
+            <TextField
+              label="Victim Profession"
+              value={entry.victim_profession}
+              onChange={(e) => setEntry({ ...entry, victim_profession: e.target.value })}
+              fullWidth
+              margin="normal"
+            />
+            <TextField
+              label="Victim Sex"
+              value={entry.victim_sex}
+              onChange={(e) => setEntry({ ...entry, victim_sex: e.target.value })}
+              fullWidth
+              margin="normal"
+            />
+            <TextField
+              label="Crime Type"
+              value={entry.crime}
+              onChange={(e) => setEntry({ ...entry, crime: e.target.value })}
+              fullWidth
+              margin="normal"
+              required
+            />
+            <TextField
+              label="Latitude"
+              value={entry.latitude}
+              onChange={(e) => setEntry({ ...entry, latitude: e.target.value })}
+              fullWidth
+              margin="normal"
+              required
+            />
+            <TextField
+              label="Longitude"
+              value={entry.longitude}
+              onChange={(e) => setEntry({ ...entry, longitude: e.target.value })}
+              fullWidth
+              margin="normal"
+              required
+            />
+            <TextField
+              label="FIR Type"
+              value={entry.fir_type}
+              onChange={(e) => setEntry({ ...entry, fir_type: e.target.value })}
+              fullWidth
+              margin="normal"
+            />
+            <TextField
+              label="FIR Stage"
+              value={entry.fir_stage}
+              onChange={(e) => setEntry({ ...entry, fir_stage: e.target.value })}
+              fullWidth
+              margin="normal"
+            />
+            <TextField
+              label="Distance from PS"
+              value={entry.distance_from_ps}
+              onChange={(e) => setEntry({ ...entry, distance_from_ps: e.target.value })}
+              fullWidth
+              margin="normal"
+            />
+            <TextField
+              label="Beat Name"
+              value={entry.beat_name}
+              onChange={(e) => setEntry({ ...entry, beat_name: e.target.value })}
+              fullWidth
+              margin="normal"
+            />
+            <TextField
+              label="Place of Offence"
+              value={entry.place_of_offence}
+              onChange={(e) => setEntry({ ...entry, place_of_offence: e.target.value })}
+              fullWidth
+              margin="normal"
+            />
+            <TextField
+              label="Offence From Date"
+              value={entry.offence_from_date}
+              onChange={(e) => setEntry({ ...entry, offence_from_date: e.target.value })}
+              fullWidth
+              margin="normal"
+            />
+            <TextField
+              label="Offence From Time"
+              value={entry.offence_from_time}
+              onChange={(e) => setEntry({ ...entry, offence_from_time: e.target.value })}
+              fullWidth
+              margin="normal"
+            />
+            <TextField
+              label="Offence To Date"
+              value={entry.offence_to_date}
+              onChange={(e) => setEntry({ ...entry, offence_to_date: e.target.value })}
+              fullWidth
+              margin="normal"
+            />
+            <TextField
+              label="Offence To Time"
+              value={entry.offence_to_time}
+              onChange={(e) => setEntry({ ...entry, offence_to_time: e.target.value })}
+              fullWidth
+              margin="normal"
+            />
+            <Button variant="contained" color="primary" type="submit" className="mt-4">
+              Update Entry
+            </Button>
+          </form>
+        </Box>
+      </Modal>
+      <div className="mt-4" style={{ height: "400px" }}>
+        <MapContainer
+          center={[12.9716, 77.5946]}
+          zoom={12}
+          scrollWheelZoom={true}
+          style={{ height: "100%", width: "100%" }}
+        >
+          <TileLayer
+            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+            attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
           />
-          {renderTable(allegedEntries, "alleged", handleDelete)}
-        </>
-      ) : (
-        <>
-          <HeatMap
-            entries={provenEntries}
-            color="green"
-            onUpdate={updateEntry}
-          />
-          {renderTable(provenEntries, "proven", handleDelete)}
-        </>
-      )}
+          <MapEvents onUpdate={updateEntry} />
+          {mapType === "alleged" ? (
+            <HeatMap entries={allegedEntries} color="red" onUpdate={updateEntry} />
+          ) : (
+            <HeatMap entries={provenEntries} color="green" onUpdate={updateEntry} />
+          )}
+        </MapContainer>
+      </div>
     </div>
   );
 }
-
-function renderTable(entries, type, handleDelete) {
-  return (
-    <table style={{ width: "100%", marginTop: "20px" }}>
-      <thead>
-        <tr>
-          <th>Serial Number</th>
-          <th>Latitude</th>
-          <th>Longitude</th>
-          {type === "proven" && (
-            <>
-              <th>Crime Type</th>
-              <th>Severity</th>
-              <th>Report</th>
-            </>
-          )}
-          {type === "alleged" && (
-            <>
-              <th>Crime Type</th>
-              
-              
-            </>
-          )}
-          <th>Action</th>
-        </tr>
-      </thead>
-      <tbody>
-        {entries.map((entry, index) => (
-          <tr key={index}>
-            <td>{index + 1}</td>
-            <td>{entry.latitude}</td>
-            <td>{entry.longitude}</td>
-            {type === "proven" && (
-              <>
-                <td>{entry.crime}</td>
-                <td>{entry.severity}</td>
-                <td>{entry.report}</td>
-              </>
-            )}
-            {type === "alleged" && (
-              <>
-                <td>{entry.crime}</td>
-                
-                
-              </>
-            )}
-            <td>
-              <button onClick={() => handleDelete(index, type)}>Delete</button>
-            </td>
-          </tr>
-        ))}
-      </tbody>
-    </table>
-  );
-}
-
 export default Map;

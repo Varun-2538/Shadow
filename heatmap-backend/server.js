@@ -1,12 +1,14 @@
 const express = require("express");
 const cors = require("cors");
 const csv = require("csv-parser");
+const bodyParser = require('body-parser');
 const fs = require("fs");
 const path = require("path");
 const app = express();
 
 app.use(cors());
 app.use(express.json());
+app.use(bodyParser.json());
 
 // Get the project directory
 const projectDir = path.dirname(path.dirname(path.dirname(__filename)));
@@ -36,7 +38,6 @@ const readCSV = (filterColumn = null, filterValue = null) => {
   });
 };
 
-// Endpoint to get unique district names
 app.get("/api/districts", async (req, res) => {
   try {
     const data = await readCSV();
@@ -45,6 +46,25 @@ app.get("/api/districts", async (req, res) => {
   } catch (error) {
     res.status(500).send("Error reading CSV file");
   }
+});
+
+const entriesFilePath = path.join(__dirname, "dataset","entries.csv");
+
+// Function to write data to CSV file
+const writeDataToCSV = (data) => {
+  const headers = Object.keys(data).join(",") + "\n";
+  const values = Object.values(data).join(",") + "\n";
+
+  if (!fs.existsSync(entriesFilePath)) {
+    fs.writeFileSync(entriesFilePath, headers);
+  }
+  fs.appendFileSync(entriesFilePath, values);
+};
+
+app.post("/api/entries", (req, res) => {
+  const entry = req.body;
+  writeDataToCSV(entry);
+  res.status(201).send("Entry saved to CSV");
 });
 
 // Endpoint to get unit names based on the selected district
