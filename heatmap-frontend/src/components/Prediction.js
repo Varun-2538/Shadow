@@ -131,6 +131,11 @@ const Prediction = () => {
     }));
   };
 
+  // Calculate the total number of cases for the top 10 crime types
+  const totalCases = details.topCrimes
+    ? details.topCrimes.reduce((total, crime) => total + crime.freq, 0)
+    : 0;
+
   return (
     <div className="min-h-screen container bg-gradient-to-b from-indigo-950 via-gray-800 to-stone-950 text-white mx-auto px-4 pt-4 sm:px-2">
       <h2 className="text-3xl pt-1 font-bold mb-4">Crime Prediction Analysis</h2>
@@ -277,7 +282,7 @@ const Prediction = () => {
       <div className="mt-4">
         <h3 className="text-lg font-bold">Analysis Result:</h3>
         <p>{analysisText || 'Click "Get Analysis Text" to view the result.'}</p>
-        <h3 className="text-lg font-bold">Prediction of Top 10 crime :</h3>
+        <h3 className="text-lg font-bold">Prediction and Deployment plan for Top 10 crime :</h3>
         <ul>
           {details.topCrimes &&
             details.topCrimes.map((crime, index) => (
@@ -288,7 +293,9 @@ const Prediction = () => {
                     checked={selectedCrimeTypes[crime.value] || false}
                     onChange={(e) => handleCrimeTypeChange(e, crime.value)}
                   />
-                  {` ${crime.value}`}
+                  {` ${crime.value} (${(
+                    (crime.freq / totalCases) * 100
+                  ).toFixed(2)}% of the police force should get deployed to corresponding latitude and longitude positions show in map to control ${crime.value})`}
                 </label>
               </li>
             ))}
