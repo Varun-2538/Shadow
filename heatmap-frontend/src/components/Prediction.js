@@ -25,6 +25,7 @@ const Prediction = () => {
   const [endMonth, setEndMonth] = useState(1); // Default to January
   const [details, setDetails] = useState({});
   const [analysisText, setAnalysisText] = useState("");
+  const [selectedCrimeTypes, setSelectedCrimeTypes] = useState({});
 
   const buttonCondition =
     details.length > 0 &&
@@ -122,13 +123,20 @@ const Prediction = () => {
     setAnalysisText(analysisText.trim());
   };
 
+  // Handle crime type checkbox change
+  const handleCrimeTypeChange = (event, crimeType) => {
+    setSelectedCrimeTypes((prevSelected) => ({
+      ...prevSelected,
+      [crimeType]: event.target.checked,
+    }));
+  };
+
   return (
     <div className="min-h-screen container bg-gradient-to-b from-indigo-950 via-gray-800 to-stone-950 text-white mx-auto px-4 pt-4 sm:px-2">
-      <h2 className="text-3xl  pt-1 font-bold mb-4">Crime Prediction Analysis</h2>
+      <h2 className="text-3xl pt-1 font-bold mb-4">Crime Prediction Analysis</h2>
 
       <div className="flex flex-wrap -mx-2 mb-4">
         <div className="w-full sm:w-1/2 px-2">
-
           <label
             htmlFor="district-select"
             className="block mb-2 text-sm sm:text-xs text-white font-medium"
@@ -148,8 +156,7 @@ const Prediction = () => {
             ))}
           </select>
         </div>
-        <div className=" w-full sm:w-1/2 px-2">
-          
+        <div className="w-full sm:w-1/2 px-2">
           <label
             htmlFor="unit-select"
             className="block mb-2 text-sm sm:text-xs text-white font-medium"
@@ -172,8 +179,7 @@ const Prediction = () => {
         </div>
       </div>
       <div className="flex flex-wrap -mx-2 mb-4">
-        <div className=" w-full sm:w-1/2 px-2">
-          
+        <div className="w-full sm:w-1/2 px-2">
           <label
             htmlFor="start-month-select"
             className="block mb-2 text-sm sm:text-xs text-white font-medium"
@@ -224,7 +230,7 @@ const Prediction = () => {
       <div className="mt-4">
         <h3 className="text-lg font-bold mb-2">Map View:</h3>
         <MapContainer
-          center={[12.9716, 77.5946]} // Default center (Bangalore coordinates)
+          center={[14.5204, 75.7224]}
           zoom={10}
           style={{ height: "400px", width: "100%" }}
         >
@@ -233,28 +239,31 @@ const Prediction = () => {
             attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
           />
           {details.topLatLong &&
-            details.topLatLong.map((latLong, index) => (
-              <React.Fragment key={index}>
-                <Marker
-                  position={[latLong.latitude, latLong.longitude]}
-                  icon={customIcon} // Use the custom icon
-                >
-                  <Popup>
-                    {`Crime Type: ${latLong.crimeType} (${latLong.latitude}, ${latLong.longitude})`}
-                  </Popup>
-                  <Tooltip>{`Crime Type: ${latLong.crimeType}`}</Tooltip>
-                </Marker>
-                <Circle
-                  center={[latLong.latitude, latLong.longitude]}
-                  radius={3000} // 5 km radius
-                  color="red"
-                  fillColor="red"
-                  fillOpacity={0.2}
-                >
-                  <Tooltip>{`Crime Type: ${latLong.crimeType}`}</Tooltip>
-                </Circle>
-              </React.Fragment>
-            ))}
+            details.topLatLong.map(
+              (latLong, index) =>
+                selectedCrimeTypes[latLong.crimeType] && (
+                  <React.Fragment key={index}>
+                    <Marker
+                      position={[latLong.latitude, latLong.longitude]}
+                      icon={customIcon} // Use the custom icon
+                    >
+                      <Popup>
+                        {`Crime Type: ${latLong.crimeType} (${latLong.latitude}, ${latLong.longitude})`}
+                      </Popup>
+                      <Tooltip>{`Crime Type: ${latLong.crimeType}`}</Tooltip>
+                    </Marker>
+                    <Circle
+                      center={[latLong.latitude, latLong.longitude]}
+                      radius={3000} // 3 km radius
+                      color="red"
+                      fillColor="red"
+                      fillOpacity={0.2}
+                    >
+                      <Tooltip>{`Crime Type: ${latLong.crimeType}`}</Tooltip>
+                    </Circle>
+                  </React.Fragment>
+                )
+            )}
         </MapContainer>
       </div>
       {buttonCondition && (
@@ -268,12 +277,19 @@ const Prediction = () => {
       <div className="mt-4">
         <h3 className="text-lg font-bold">Analysis Result:</h3>
         <p>{analysisText || 'Click "Get Analysis Text" to view the result.'}</p>
-        <h3 className="text-lg font-bold">Top 10 Crime Types:</h3>
+        <h3 className="text-lg font-bold">Prediction of Top 10 crime :</h3>
         <ul>
           {details.topCrimes &&
             details.topCrimes.map((crime, index) => (
               <li key={index}>
-                {crime.value} - {crime.freq} occurrences
+                <label>
+                  <input
+                    type="checkbox"
+                    checked={selectedCrimeTypes[crime.value] || false}
+                    onChange={(e) => handleCrimeTypeChange(e, crime.value)}
+                  />
+                  {` ${crime.value}`}
+                </label>
               </li>
             ))}
         </ul>
