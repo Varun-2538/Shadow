@@ -5,6 +5,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from spatial import generate_spatial_analysis
 from beatwise import generate_beatwise_analysis
+from prediction import generate_crime_prediction
 import traceback
 
 # Create FastAPI app instance
@@ -97,8 +98,9 @@ async def beatwise_analysis(request: AnalysisRequest):
         traceback_str = traceback.format_exc()
         return {"error": str(e), "traceback": traceback_str}
     
-@app.post("/prediction_analysis")
-async def prediction_analysis(request: AnalysisRequest):
+# API endpoint for generating crime prediction (POST request)
+@app.post("/crime_prediction")
+async def crime_prediction(request: AnalysisRequest):
     try:
         analysis_text = request.analysis_text
         district = request.district
@@ -107,8 +109,8 @@ async def prediction_analysis(request: AnalysisRequest):
         if not analysis_text:
             raise HTTPException(status_code=400, detail="Analysis text is required")
         
-        prediction_analysis_result = generate_prediction_analysis(analysis_text, district, unitname, request.dict())
-        return {"analysis": prediction_analysis_result}
+        crime_prediction_result = generate_crime_prediction(analysis_text, district, unitname, request.dict())
+        return {"analysis": crime_prediction_result}
     except Exception as e:
         traceback_str = traceback.format_exc()
         return {"error": str(e), "traceback": traceback_str}

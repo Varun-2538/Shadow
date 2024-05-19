@@ -49,7 +49,7 @@ def format_prompt_for_model(user_prompt, district, unitname, data):
     return combined_prompt
 
 
-def generate_beatwise_analysis(analysis_text, district, unitname, data):
+def generate_prediction_analysis(analysis_text, district, unitname, data):
     """
     Generates text using the loaded model, with options for controlling the output.
 
