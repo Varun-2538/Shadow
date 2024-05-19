@@ -1,7 +1,19 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
+import { MapContainer, TileLayer, Marker, Popup, Circle, Tooltip } from "react-leaflet";
+import L from "leaflet";
 import "leaflet/dist/leaflet.css";
+
+// Define the custom marker icon
+const customIcon = new L.Icon({
+  iconUrl: require("./marker.png"), // Replace with the path to your custom image
+  iconSize: [25, 41], // Size of the icon
+  iconAnchor: [12, 41], // Point of the icon which will correspond to marker's location
+  popupAnchor: [1, -34], // Point from which the popup should open relative to the iconAnchor
+  shadowUrl: require("leaflet/dist/images/marker-shadow.png"),
+  shadowSize: [41, 41],
+  shadowAnchor: [12, 41]
+});
 
 const Prediction = () => {
   const [districts, setDistricts] = useState([]);
@@ -90,7 +102,6 @@ const Prediction = () => {
       topLatLong = [],
       topCrimeGroups = [],
       topCrimes = [],
-      topPlaces = [],
       topMonths = [],
     } = details;
 
@@ -105,7 +116,6 @@ const Prediction = () => {
       Top Latitude-Longitude pairs: ${formatTopItems(topLatLong)}
       Top Crime Groups: ${formatTopItems(topCrimeGroups)}
       Top Crimes: ${formatTopItems(topCrimes)}
-      Top Places of Occurrence: ${formatTopItems(topPlaces)}
       Top Crime Months: ${formatTopItems(topMonths)}
     `;
 
@@ -208,30 +218,42 @@ const Prediction = () => {
       <div className="mt-4">
         <h3 className="text-lg font-bold mb-2">Map View:</h3>
         <MapContainer
-  center={[12.9716, 77.5946]} // Default center (Bangalore coordinates)
-  zoom={10}
-  style={{ height: "400px", width: "100%" }}
->
-  <TileLayer
-    url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-    attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-  />
-  {/* Ensure that details.topLatLong and details.topPlaces are checked for existence and length before mapping */}
-  {details.topLatLong && details.topPlaces && details.topLatLong.length === details.topPlaces.length && 
-    details.topLatLong.map((latLong, index) => {
-      // Retrieve corresponding place details safely within the map function
-      const placeDetails = details.topPlaces[index];
-      return (
-        <Marker key={index} position={[latLong.latitude, latLong.longitude]}>
-          <Popup>
-            {/* Use placeDetails safely within the Popup */}
-            {placeDetails ? `${placeDetails.value} - ${placeDetails.freq} occurrences` : "No data"}
-          </Popup>
-        </Marker>
-      );
-    })}
-</MapContainer>
-
+          center={[12.9716, 77.5946]} // Default center (Bangalore coordinates)
+          zoom={10}
+          style={{ height: "400px", width: "100%" }}
+        >
+          <TileLayer
+            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+            attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+          />
+          {details.topLatLong && 
+            details.topLatLong.map((latLong, index) => (
+              <React.Fragment key={index}>
+                <Marker 
+                  position={[latLong.latitude, latLong.longitude]} 
+                  icon={customIcon} // Use the custom icon
+                >
+                  <Popup>
+                    {`Crime Type: ${latLong.crimeType} (${latLong.latitude}, ${latLong.longitude})`}
+                  </Popup>
+                  <Tooltip>
+                    {`Crime Type: ${latLong.crimeType}`}
+                  </Tooltip>
+                </Marker>
+                <Circle
+                  center={[latLong.latitude, latLong.longitude]}
+                  radius={3000} // 5 km radius
+                  color="red"
+                  fillColor="red"
+                  fillOpacity={0.2}
+                >
+                  <Tooltip>
+                    {`Crime Type: ${latLong.crimeType}`}
+                  </Tooltip>
+                </Circle>
+              </React.Fragment>
+            ))}
+        </MapContainer>
       </div>
       {buttonCondition && (
         <button
@@ -244,17 +266,15 @@ const Prediction = () => {
       <div className="mt-4">
         <h3 className="text-lg font-bold">Analysis Result:</h3>
         <p>{analysisText || 'Click "Get Analysis Text" to view the result.'}</p>
-        <h3 className="text-lg font-bold">Top 10 Places of Offence:</h3>
+        <h3 className="text-lg font-bold">Top 10 Crime Types:</h3>
         <ul>
-          {details.topPlaces && details.topPlaces.map((place, index) => (
-            <li key={index}>{place.value} - {place.freq} occurrences</li>
+          {details.topCrimes && details.topCrimes.map((crime, index) => (
+            <li key={index}>{crime.value} - {crime.freq} occurrences</li>
           ))}
         </ul>
       </div>
-      
     </div>
   );
-  
 };
 
 export default Prediction;

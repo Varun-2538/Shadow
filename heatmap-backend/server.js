@@ -36,14 +36,6 @@ const readCSV = (filterColumn = null, filterValue = null) => {
   });
 };
 
-// app.post('/data', (req, res) => {
-//   const data = req.body;
-//   console.log(data);
-//   res.send('Data received');
-// });
-
-// app.listen(3000, () => console.log('Server running on port 3000'));
-
 // Endpoint to get unique district names
 app.get("/api/districts", async (req, res) => {
   try {
@@ -197,17 +189,17 @@ function getWeekNumber(d) {
   return weekNo;
 }
 
-
-
 app.post("/api/details", async (req, res) => {
   try {
-    const { district, unit } = req.body; // Extract district and unit from request body
-    const data = await readCSV(); // Read data from CSV
-    // Filter data based on provided district and unit
+    const { district, unit, startMonth, endMonth } = req.body;
+    const data = await readCSV();
+
+    // Filter data based on provided district, unit, and month range
     const filteredData = data.filter(
       (row) =>
         (row.district_name === district || !row.district_name) &&
-        (row.unitname === unit || !row.unitname)
+        (row.unitname === unit || !row.unitname) &&
+        (parseInt(row.Offence_From_Date_only.split('-')[1]) >= startMonth && parseInt(row.Offence_From_Date_only.split('-')[1]) <= endMonth)
     );
 
     // Helper function to calculate top occurrences
@@ -215,7 +207,6 @@ app.post("/api/details", async (req, res) => {
       const frequency = {};
       data.forEach((item) => {
         const value = item[key];
-        // Check if the value is not just hyphens, commas, spaces, or empty
         if (value && value.trim() !== "" && !/^[-,\s]*$/.test(value)) {
           if (!frequency[value]) {
             frequency[value] = 0;
@@ -228,10 +219,8 @@ app.post("/api/details", async (req, res) => {
         .slice(0, count)
         .map(([value, freq]) => ({ value, freq }));
     };
-    
-    
 
-    // Get top 3 latitude-longitude pairs
+    // Get top latitude-longitude pairs with corresponding Crime_Type
     const topLatLong = getTopOccurrences(filteredData, "latitude").map(
       (lat) => ({
         latitude: lat.value,
@@ -241,31 +230,26 @@ app.post("/api/details", async (req, res) => {
           ),
           "longitude"
         )[0]?.value,
+        crimeType: getTopOccurrences(
+          filteredData.filter(
+            (item) => item.latitude === lat.value && item.longitude
+          ),
+          "Crime_Type"
+        )[0]?.value,
       })
     );
 
-    // Get top 3 highest occurring crime group names
     const topCrimeGroups = getTopOccurrences(filteredData, "crime_group_name");
-
-    // Get other top 3 major crimes occurring in the region
-    const topCrimes = getTopOccurrences(filteredData, "crime_type");
-
-    // Get top 3 places of occurrence
-    const topPlaces = getTopOccurrences(filteredData, "place_of_offence");
-
-    // Get top 3 highest occurring crime months
+    const topCrimes = getTopOccurrences(filteredData, "Crime_Type");
     const topMonths = getTopOccurrences(filteredData, "month");
 
-    // Combine all data into a single object
     const details = {
       topLatLong,
       topCrimeGroups,
       topCrimes,
-      topPlaces,
       topMonths,
     };
 
-    // Send the compiled details back as a JSON response
     res.json(details);
   } catch (error) {
     console.error("Error fetching details:", error);
