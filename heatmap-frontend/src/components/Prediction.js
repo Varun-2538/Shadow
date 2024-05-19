@@ -25,6 +25,7 @@ const Prediction = () => {
   const [endMonth, setEndMonth] = useState(1); // Default to January
   const [details, setDetails] = useState({});
   const [analysisText, setAnalysisText] = useState("");
+  const [selectedCrimeTypes, setSelectedCrimeTypes] = useState(new Set());
 
   const buttonCondition =
     details.length > 0 &&
@@ -121,6 +122,26 @@ const Prediction = () => {
 
     setAnalysisText(analysisText.trim());
   };
+
+  // Handle crime type checkbox change
+  const handleCrimeTypeChange = (crimeType) => {
+    setSelectedCrimeTypes((prevSelectedCrimeTypes) => {
+      const newSelectedCrimeTypes = new Set(prevSelectedCrimeTypes);
+      if (newSelectedCrimeTypes.has(crimeType)) {
+        newSelectedCrimeTypes.delete(crimeType);
+      } else {
+        newSelectedCrimeTypes.add(crimeType);
+      }
+      return newSelectedCrimeTypes;
+    });
+  };
+
+  // Filtered markers based on selected crime types
+  const filteredMarkers = details.topLatLong
+    ? details.topLatLong.filter((latLong) =>
+        selectedCrimeTypes.has(latLong.crimeType)
+      )
+    : [];
 
   return (
     <div className="container mx-auto px-4 pt-4">
@@ -226,33 +247,32 @@ const Prediction = () => {
             url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
             attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
           />
-          {details.topLatLong && 
-            details.topLatLong.map((latLong, index) => (
-              <React.Fragment key={index}>
-                <Marker 
-                  position={[latLong.latitude, latLong.longitude]} 
-                  icon={customIcon} // Use the custom icon
-                >
-                  <Popup>
-                    {`Crime Type: ${latLong.crimeType} (${latLong.latitude}, ${latLong.longitude})`}
-                  </Popup>
-                  <Tooltip>
-                    {`Crime Type: ${latLong.crimeType}`}
-                  </Tooltip>
-                </Marker>
-                <Circle
-                  center={[latLong.latitude, latLong.longitude]}
-                  radius={3000} // 5 km radius
-                  color="red"
-                  fillColor="red"
-                  fillOpacity={0.2}
-                >
-                  <Tooltip>
-                    {`Crime Type: ${latLong.crimeType}`}
-                  </Tooltip>
-                </Circle>
-              </React.Fragment>
-            ))}
+          {filteredMarkers.map((latLong, index) => (
+            <React.Fragment key={index}>
+              <Marker 
+                position={[latLong.latitude, latLong.longitude]} 
+                icon={customIcon} // Use the custom icon
+              >
+                <Popup>
+                  {`Crime Type: ${latLong.crimeType} (${latLong.latitude}, ${latLong.longitude})`}
+                </Popup>
+                <Tooltip>
+                  {`Crime Type: ${latLong.crimeType}`}
+                </Tooltip>
+              </Marker>
+              <Circle
+                center={[latLong.latitude, latLong.longitude]}
+                radius={3000} // 5 km radius
+                color="red"
+                fillColor="red"
+                fillOpacity={0.2}
+              >
+                <Tooltip>
+                  {`Crime Type: ${latLong.crimeType}`}
+                </Tooltip>
+              </Circle>
+            </React.Fragment>
+          ))}
         </MapContainer>
       </div>
       {buttonCondition && (
@@ -269,7 +289,13 @@ const Prediction = () => {
         <h3 className="text-lg font-bold">Top 10 Crime Types:</h3>
         <ul>
           {details.topCrimes && details.topCrimes.map((crime, index) => (
-            <li key={index}>{crime.value} - {crime.freq} occurrences</li>
+            <li key={index}>
+              <input 
+                type="checkbox" 
+                onChange={() => handleCrimeTypeChange(crime.value)} 
+              /> 
+              {crime.value} - {crime.freq} occurrences
+            </li>
           ))}
         </ul>
       </div>

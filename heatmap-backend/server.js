@@ -143,25 +143,6 @@ app.get("/api/crime-by-month/:district/:unit", async (req, res) => {
   res.json(sortedMonths);
 });
 
-// app.get("/api/crime-by-year/:district/:unit", async (req, res) => {
-//   const { district, unit } = req.params;
-//   const data = await readCSV("district_name", district);
-//   const filteredData = data.filter(d => d.unitname === unit);
-
-//   const yearCounts = filteredData.reduce((acc, row) => {
-//     const year = row.Offence_From_Date_only.split('-')[0]; // Assumes YYYY-MM-DD format
-//     acc[year] = (acc[year] || 0) + 1;
-//     return acc;
-//   }, {});
-
-//   const sortedYears = Object.keys(yearCounts).map(year => ({
-//     year,
-//     count: yearCounts[year]
-//   })).sort((a, b) => a.year - b.year); // Ensure the years are ordered
-
-//   res.json(sortedYears);
-// });
-
 app.get("/api/crime-by-week/:district/:unit", async (req, res) => {
   const { district, unit } = req.params;
   const data = await readCSV("district_name", district);
@@ -220,7 +201,7 @@ app.post("/api/details", async (req, res) => {
         .map(([value, freq]) => ({ value, freq }));
     };
 
-    // Get top latitude-longitude pairs with corresponding Crime_Type
+    // Get top occurrences for summary
     const topLatLong = getTopOccurrences(filteredData, "latitude").map(
       (lat) => ({
         latitude: lat.value,
@@ -250,7 +231,7 @@ app.post("/api/details", async (req, res) => {
       topMonths,
     };
 
-    res.json(details);
+    res.json({ details, allData: filteredData });
   } catch (error) {
     console.error("Error fetching details:", error);
     res.status(500).send("Error fetching details from CSV");
