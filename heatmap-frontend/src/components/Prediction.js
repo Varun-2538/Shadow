@@ -230,7 +230,7 @@ const Prediction = () => {
       <div className="mt-4">
         <h3 className="text-lg font-bold mb-2">Map View:</h3>
         <MapContainer
-          center={[12.9716, 77.5946]} // Default center (Bangalore coordinates)
+          center={[14.5204, 75.7224]}
           zoom={10}
           style={{ height: "400px", width: "100%" }}
         >
@@ -277,7 +277,7 @@ const Prediction = () => {
       <div className="mt-4">
         <h3 className="text-lg font-bold">Analysis Result:</h3>
         <p>{analysisText || 'Click "Get Analysis Text" to view the result.'}</p>
-        <h3 className="text-lg font-bold">Top 10 Crime Types:</h3>
+        <h3 className="text-lg font-bold">Prediction of Top 10 crime :</h3>
         <ul>
           {details.topCrimes &&
             details.topCrimes.map((crime, index) => (
@@ -288,7 +288,7 @@ const Prediction = () => {
                     checked={selectedCrimeTypes[crime.value] || false}
                     onChange={(e) => handleCrimeTypeChange(e, crime.value)}
                   />
-                  {` ${crime.value} - ${crime.freq} occurrences`}
+                  {` ${crime.value}`}
                 </label>
               </li>
             ))}
