@@ -5,6 +5,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from spatial import generate_spatial_analysis
 from beatwise import generate_beatwise_analysis
+from prediction import generate_crime_prediction
 import traceback
 
 # Create FastAPI app instance
@@ -23,7 +24,7 @@ app.add_middleware(
 project_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))  # Get the parent directory
 
 # Construct the file path for the CSV file
-csv_file_path = os.path.join(project_dir, 'heatmap-backend', 'dataset', 'combined_details3.csv')
+csv_file_path = os.path.join(project_dir, 'models', 'dataset', 'updated_ml_model_ready_dataset.csv')
 
 # Load crime data from CSV
 df = pd.read_csv(csv_file_path, low_memory=False)
@@ -32,8 +33,8 @@ df = pd.read_csv(csv_file_path, low_memory=False)
 # print("Column names:", df.columns)
 
 # Filter rows with zero latitude or longitude (optional, adjust for your data)
-if 'Latitude' in df.columns and 'Longitude' in df.columns:
-    df = df[(df['Latitude'] != 0) & (df['Longitude'] != 0)]
+if 'latitude' in df.columns and 'longitude' in df.columns:
+    df = df[(df['latitude'] != 0) & (df['longitude'] != 0)]
 else:
     raise KeyError("The required columns 'latitude' and 'longitude' are not present in the CSV file")
 
@@ -93,6 +94,23 @@ async def beatwise_analysis(request: AnalysisRequest):
         
         beatwise_analysis_result = generate_beatwise_analysis(analysis_text, district, unitname, beat_name, request.dict())
         return {"analysis": beatwise_analysis_result}
+    except Exception as e:
+        traceback_str = traceback.format_exc()
+        return {"error": str(e), "traceback": traceback_str}
+    
+# API endpoint for generating crime prediction (POST request)
+@app.post("/crime_prediction")
+async def crime_prediction(request: AnalysisRequest):
+    try:
+        analysis_text = request.analysis_text
+        district = request.district
+        unitname = request.unitname
+        
+        if not analysis_text:
+            raise HTTPException(status_code=400, detail="Analysis text is required")
+        
+        crime_prediction_result = generate_crime_prediction(analysis_text, district, unitname, request.dict())
+        return {"analysis": crime_prediction_result}
     except Exception as e:
         traceback_str = traceback.format_exc()
         return {"error": str(e), "traceback": traceback_str}
