@@ -1,3 +1,5 @@
+
+
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { Bar, Pie } from "react-chartjs-2";
@@ -276,11 +278,9 @@ const Spatial = () => {
   };
 
   return (
-    <div className="container bg-gradient-to-b from-indigo-950 via-gray-800 to-stone-950 text-white mx-auto px-4 pt-4 sm:px-2">
+    <div className="min-h-screen container bg-gradient-to-b from-indigo-950 via-gray-800 to-stone-950 text-white mx-auto px-4 pt-4 sm:px-2">
       <h2 className="text-3xl pt-1 font-bold mb-2">Spatial Analysis</h2>
-      <p className="mb-4 pb-4 text-lg ">
-        Mapping Crime Hotspots for Strategic Policing
-      </p>
+      <p className="mb-4 pb-4 text-lg">Mapping Crime Hotspots for Strategic Policing</p>
       <div className="flex flex-wrap -mx-2 mb-4">
         <div className="w-full sm:w-1/2 px-2">
           <label
@@ -385,9 +385,7 @@ const Spatial = () => {
 
       <div className="mt-4 pb-16">
         <h3 className="text-lg sm:text-md font-bold pb-4">Analysis Result:</h3>
-        <p className="text-lg">
-          {analysisResult || "Click 'Get Analysis' to view the result."}
-        </p>
+        <div className="text-lg">{analysisResult || "Click 'Get Analysis' to view the result."}</div>
       </div>
     </div>
   );
