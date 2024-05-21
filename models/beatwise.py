@@ -36,6 +36,7 @@ def format_prompt_for_model(user_prompt, district, unitname, beat_name, data):
         "Consider how socio-economic conditions, cultural dynamics, law enforcement practices, or other contextual factors could be shaping these patterns. Weave together these different threads, offering insights that explain why these correlations exist and how they contribute to the overall crime landscape."
         "Pay particular attention to how different sections of the analysis are interconnected. For example, explore how the location and crime type relate to the victim and accused characteristics, and vice versa. Reveal the hidden patterns that emerge when these fields are considered in conjunction with one another."
         "Based on your comprehensive analysis, propose targeted improvement plans for the specific beat to reduce the crimes being committed. These improvement plans should address the interconnected factors contributing to the criminal activity in that area and provide specific, data-driven recommendations tailored to the unique characteristics and patterns identified in your analysis."
+        "The improvement plan should always start as 'based on these observations or based on this analysis'"
         "DO NOT EXCEED MORE THAN 500 WORDS"
     )
 
