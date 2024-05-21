@@ -209,62 +209,64 @@ function getWeekNumber(d) {
   return weekNo;
 }
 
+// Helper function to calculate top occurrences
+const getTopOccurrences = (data, key, count = 10) => {
+  const frequency = {};
+  data.forEach((item) => {
+    const value = item[key];
+    if (value && value.trim() !== "" && !/^[-,\s]*$/.test(value)) {
+      if (!frequency[value]) {
+        frequency[value] = 0;
+      }
+      frequency[value] += 1;
+    }
+  });
+  return Object.entries(frequency)
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, count)
+    .map(([value, freq]) => ({ value, freq }));
+};
+
 app.post("/api/details", async (req, res) => {
   try {
-    const { district, unit, startMonth, endMonth } = req.body;
+    const { district, unit, startMonth, endMonth, startTime, endTime } = req.body;
     const data = await readCSV();
 
-    // Filter data based on provided district, unit, and month range
-    const filteredData = data.filter(
+    // Filter data based on provided district, unit, and time/month range
+    let filteredData = data.filter(
       (row) =>
-        (row.district_name === district || !row.district_name) &&
-        (row.unitname === unit || !row.unitname) &&
-        (parseInt(row.Offence_From_Date_only.split('-')[1]) >= startMonth && parseInt(row.Offence_From_Date_only.split('-')[1]) <= endMonth)
+        (!district || row.district_name === district) &&
+        (!unit || row.unitname === unit)
     );
 
-    // Helper function to calculate top occurrences
-    const getTopOccurrences = (data, key, count = 10) => {
-      const frequency = {};
-      data.forEach((item) => {
-        const value = item[key];
-        if (value && value.trim() !== "" && !/^[-,\s]*$/.test(value)) {
-          if (!frequency[value]) {
-            frequency[value] = 0;
-          }
-          frequency[value] += 1;
-        }
-      });
-      return Object.entries(frequency)
-        .sort((a, b) => b[1] - a[1])
-        .slice(0, count)
-        .map(([value, freq]) => ({ value, freq }));
-    };
+    if (startMonth && endMonth) {
+      filteredData = filteredData.filter(
+        (row) =>
+          parseInt(row.Offence_From_Date_only.split('-')[1]) >= startMonth &&
+          parseInt(row.Offence_From_Date_only.split('-')[1]) <= endMonth
+      );
+    } else if (startTime && endTime) {
+      filteredData = filteredData.filter(
+        (row) =>
+          row.Offence_From_Time_only >= startTime && row.Offence_From_Time_only <= endTime
+      );
+    }
 
-    // Get top latitude-longitude pairs with corresponding Crime_Type
-    const topLatLong = getTopOccurrences(filteredData, "latitude").map(
-      (lat) => ({
-        latitude: lat.value,
-        longitude: getTopOccurrences(
-          filteredData.filter(
-            (item) => item.latitude === lat.value && item.longitude
-          ),
-          "longitude"
-        )[0]?.value,
-        crimeType: getTopOccurrences(
-          filteredData.filter(
-            (item) => item.latitude === lat.value && item.longitude
-          ),
-          "Crime_Type"
-        )[0]?.value,
-      })
-    );
+    // Collect all latitude-longitude pairs with corresponding Crime_Type
+    const allLatLong = filteredData
+      .filter(item => item.latitude && item.longitude)
+      .map(item => ({
+        latitude: item.latitude,
+        longitude: item.longitude,
+        crimeType: item.Crime_Type
+      }));
 
     const topCrimeGroups = getTopOccurrences(filteredData, "crime_group_name");
     const topCrimes = getTopOccurrences(filteredData, "Crime_Type");
     const topMonths = getTopOccurrences(filteredData, "month");
 
     const details = {
-      topLatLong,
+      allLatLong,
       topCrimeGroups,
       topCrimes,
       topMonths,
@@ -276,6 +278,8 @@ app.post("/api/details", async (req, res) => {
     res.status(500).send("Error fetching details from CSV");
   }
 });
+
+
 
 
 // Endpoint to process data and return frequency of each value for every field

@@ -21,15 +21,26 @@ const Prediction = () => {
   const [months] = useState([...Array(12).keys()].map((i) => i + 1)); // Array of months 1-12
   const [selectedDistrict, setSelectedDistrict] = useState("");
   const [selectedUnit, setSelectedUnit] = useState("");
-  const [startMonth, setStartMonth] = useState(1); // Default to January
-  const [endMonth, setEndMonth] = useState(1); // Default to January
+  const [startMonth, setStartMonth] = useState(null); // Default to January
+  const [endMonth, setEndMonth] = useState(null); // Default to January
+  const [selectedTimeRange, setSelectedTimeRange] = useState(null);
+  const [filterType, setFilterType] = useState("month"); // "month" or "time"
   const [details, setDetails] = useState({});
   const [analysisText, setAnalysisText] = useState("");
   const [selectedCrimeTypes, setSelectedCrimeTypes] = useState({});
 
+  const timeRanges = [
+    { label: "6-10am", start: "06:00:00", end: "10:00:00" },
+    { label: "10am-2pm", start: "10:00:00", end: "14:00:00" },
+    { label: "2-6pm", start: "14:00:00", end: "18:00:00" },
+    { label: "6-10pm", start: "18:00:00", end: "22:00:00" },
+    { label: "10pm-2am", start: "22:00:00", end: "02:00:00" },
+    { label: "2-6am", start: "02:00:00", end: "06:00:00" }
+  ];
+
   const buttonCondition =
-    details.length > 0 &&
-    details.some((detail) => detail.latitude !== undefined);
+    details.allLatLong &&
+    details.allLatLong.length > 0;
 
   // Fetch districts
   useEffect(() => {
@@ -66,23 +77,45 @@ const Prediction = () => {
     setSelectedUnit(event.target.value);
   };
 
-  const handleStartMonthChange = (event) => {
-    setStartMonth(Number(event.target.value));
+  const handleMonthChange = (type, value) => {
+    if (type === "start") setStartMonth(Number(value));
+    if (type === "end") setEndMonth(Number(value));
+    setSelectedTimeRange(null);
+    setFilterType("month");
   };
 
-  const handleEndMonthChange = (event) => {
-    setEndMonth(Number(event.target.value));
+  const handleTimeRangeChange = (event) => {
+    const selectedRange = timeRanges.find(range => range.label === event.target.value);
+    setSelectedTimeRange(selectedRange);
+    setFilterType("time");
+    setStartMonth(null);
+    setEndMonth(null);
   };
 
-  // Fetch details based on selected district, unit, and month range
+  const handleFilterTypeChange = (type) => {
+    setFilterType(type);
+    setStartMonth(null);
+    setEndMonth(null);
+    setSelectedTimeRange(null);
+  };
+
+  // Fetch details based on selected district, unit, and time/month range
   const fetchDetails = () => {
+    const params = {
+      district: selectedDistrict,
+      unit: selectedUnit
+    };
+
+    if (filterType === "time" && selectedTimeRange) {
+      params.startTime = selectedTimeRange.start;
+      params.endTime = selectedTimeRange.end;
+    } else if (filterType === "month") {
+      params.startMonth = startMonth;
+      params.endMonth = endMonth;
+    }
+
     axios
-      .post("http://localhost:5000/api/details", {
-        district: selectedDistrict,
-        unit: selectedUnit,
-        startMonth,
-        endMonth,
-      })
+      .post("http://localhost:5000/api/details", params)
       .then((response) => {
         console.log(response.data);
         setDetails(response.data);
@@ -100,7 +133,7 @@ const Prediction = () => {
     console.log("Details received:", details);
 
     const {
-      topLatLong = [],
+      allLatLong = [],
       topCrimeGroups = [],
       topCrimes = [],
       topMonths = [],
@@ -114,7 +147,7 @@ const Prediction = () => {
         : "No data";
 
     const analysisText = `
-      Top Latitude-Longitude pairs: ${formatTopItems(topLatLong)}
+      Top Latitude-Longitude pairs: ${formatTopItems(allLatLong)}
       Top Crime Groups: ${formatTopItems(topCrimeGroups)}
       Top Crimes: ${formatTopItems(topCrimes)}
       Top Crime Months: ${formatTopItems(topMonths)}
@@ -139,6 +172,21 @@ const Prediction = () => {
   return (
     <div className="min-h-screen container bg-gradient-to-b from-indigo-950 via-gray-800 to-stone-950 text-white mx-auto px-4 pt-4 sm:px-2">
       <h2 className="text-3xl pt-1 font-bold mb-4">Crime Prediction Analysis</h2>
+
+      <div className="flex justify-center mb-4">
+        <button
+          onClick={() => handleFilterTypeChange("month")}
+          className={`bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mr-2 ${filterType === "month" ? "opacity-50" : ""}`}
+        >
+          Month Filter
+        </button>
+        <button
+          onClick={() => handleFilterTypeChange("time")}
+          className={`bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded ${filterType === "time" ? "opacity-50" : ""}`}
+        >
+          Time Range Filter
+        </button>
+      </div>
 
       <div className="flex flex-wrap -mx-2 mb-4">
         <div className="w-full sm:w-1/2 px-2">
@@ -183,48 +231,75 @@ const Prediction = () => {
           </select>
         </div>
       </div>
-      <div className="flex flex-wrap -mx-2 mb-4">
-        <div className="w-full sm:w-1/2 px-2">
-          <label
-            htmlFor="start-month-select"
-            className="block mb-2 text-sm sm:text-xs text-white font-medium"
-          >
-            Start Month:
-          </label>
-          <select
-            id="start-month-select"
-            value={startMonth}
-            onChange={handleStartMonthChange}
-            className="bg-gray-50 border border-gray-300 text-gray-900 text-sm sm:text-xs rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
-          >
-            {months.map((month) => (
-              <option key={month} value={month}>
-                {month}
-              </option>
-            ))}
-          </select>
+
+      {filterType === "month" ? (
+        <div className="flex flex-wrap -mx-2 mb-4">
+          <div className="w-full sm:w-1/2 px-2">
+            <label
+              htmlFor="start-month-select"
+              className="block mb-2 text-sm sm:text-xs text-white font-medium"
+            >
+              Start Month:
+            </label>
+            <select
+              id="start-month-select"
+              value={startMonth || ""}
+              onChange={(e) => handleMonthChange("start", e.target.value)}
+              className="bg-gray-50 border border-gray-300 text-gray-900 text-sm sm:text-xs rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
+            >
+              {months.map((month) => (
+                <option key={month} value={month}>
+                  {month}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div className="w-full sm:w-1/2 px-2">
+            <label
+              htmlFor="end-month-select"
+              className="block mb-2 text-sm sm:text-xs text-white font-medium"
+            >
+              End Month:
+            </label>
+            <select
+              id="end-month-select"
+              value={endMonth || ""}
+              onChange={(e) => handleMonthChange("end", e.target.value)}
+              className="bg-gray-50 border border-gray-300 text-gray-900 text-sm sm:text-xs rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
+            >
+              {months.map((month) => (
+                <option key={month} value={month}>
+                  {month}
+                </option>
+              ))}
+            </select>
+          </div>
         </div>
-        <div className="w-full sm:w-1/2 px-2">
-          <label
-            htmlFor="end-month-select"
-            className="block mb-2 text-sm sm:text-xs text-white font-medium"
-          >
-            End Month:
-          </label>
-          <select
-            id="end-month-select"
-            value={endMonth}
-            onChange={handleEndMonthChange}
-            className="bg-gray-50 border border-gray-300 text-gray-900 text-sm sm:text-xs rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
-          >
-            {months.map((month) => (
-              <option key={month} value={month}>
-                {month}
-              </option>
-            ))}
-          </select>
+      ) : (
+        <div className="flex flex-wrap -mx-2 mb-4">
+          <div className="w-full sm:w-1/2 px-2">
+            <label
+              htmlFor="time-range-select"
+              className="block mb-2 text-sm sm:text-xs text-white font-medium"
+            >
+              Time Range:
+            </label>
+            <select
+              id="time-range-select"
+              value={selectedTimeRange ? selectedTimeRange.label : ""}
+              onChange={handleTimeRangeChange}
+              className="bg-gray-50 border border-gray-300 text-gray-900 text-sm sm:text-xs rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
+            >
+              <option value="" disabled>Select time range</option>
+              {timeRanges.map((range) => (
+                <option key={range.label} value={range.label}>
+                  {range.label}
+                </option>
+              ))}
+            </select>
+          </div>
         </div>
-      </div>
+      )}
 
       <button
         onClick={fetchDetails}
@@ -232,6 +307,7 @@ const Prediction = () => {
       >
         Fetch Details
       </button>
+
       <div className="mt-4">
         <h3 className="text-lg font-bold mb-2">Map View:</h3>
         <MapContainer
@@ -243,8 +319,8 @@ const Prediction = () => {
             url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
             attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
           />
-          {details.topLatLong &&
-            details.topLatLong.map(
+          {details.allLatLong &&
+            details.allLatLong.map(
               (latLong, index) =>
                 selectedCrimeTypes[latLong.crimeType] && (
                   <React.Fragment key={index}>
