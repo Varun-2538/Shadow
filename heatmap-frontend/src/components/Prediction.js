@@ -200,7 +200,7 @@ const Prediction = () => {
     // Post request to get detailed analysis
     setShowProgressBar(true);
     axios
-      .post("http://localhost:8000/spatial_analysis", {
+      .post("http://localhost:8000/crime_prediction", {
         analysis_text: analysis.trim(),
         district: selectedDistrict,
         police_station: selectedUnit,
@@ -232,10 +232,6 @@ const Prediction = () => {
   const totalCases = details.topCrimes
     ? details.topCrimes.reduce((total, crime) => total + crime.freq, 0)
     : 0;
-
-  const fetchAndDisplayReasoning = () => {
-    // Logic for fetching and displaying reasoning can be added here
-  };
 
   return (
     <div className="min-h-screen container bg-gradient-to-b from-indigo-950 via-gray-800 to-stone-950 text-white mx-auto px-4 pt-4 sm:px-2">
