@@ -15,7 +15,7 @@ Shadow is a comprehensive web application that enables law enforcement agencies 
    - Python: `cd models && pip install -r requirements.txt`
 3. Start the development server:
    - Backend: `node server.js`
-   - Python: `python app.py`
+   - Python: `python app.py`/`uvicorn app:app --reload`
    - Frontend: `npm start`
 4. Open your web browser and navigate to `http://localhost:3000` to access the Predictive Crime Analysis application.
 
