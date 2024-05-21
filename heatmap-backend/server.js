@@ -48,7 +48,7 @@ app.get("/api/districts", async (req, res) => {
   }
 });
 
-const entriesFilePath = path.join(__dirname, "dataset","entries.csv");
+const entriesFilePath = path.join(__dirname, "dataset", "entries.csv");
 
 // Function to write data to CSV file
 const writeDataToCSV = (data) => {
@@ -163,25 +163,6 @@ app.get("/api/crime-by-month/:district/:unit", async (req, res) => {
   res.json(sortedMonths);
 });
 
-// app.get("/api/crime-by-year/:district/:unit", async (req, res) => {
-//   const { district, unit } = req.params;
-//   const data = await readCSV("district_name", district);
-//   const filteredData = data.filter(d => d.unitname === unit);
-
-//   const yearCounts = filteredData.reduce((acc, row) => {
-//     const year = row.Offence_From_Date_only.split('-')[0]; // Assumes YYYY-MM-DD format
-//     acc[year] = (acc[year] || 0) + 1;
-//     return acc;
-//   }, {});
-
-//   const sortedYears = Object.keys(yearCounts).map(year => ({
-//     year,
-//     count: yearCounts[year]
-//   })).sort((a, b) => a.year - b.year); // Ensure the years are ordered
-
-//   res.json(sortedYears);
-// });
-
 app.get("/api/crime-by-week/:district/:unit", async (req, res) => {
   const { district, unit } = req.params;
   const data = await readCSV("district_name", district);
@@ -265,11 +246,21 @@ app.post("/api/details", async (req, res) => {
     const topCrimes = getTopOccurrences(filteredData, "Crime_Type");
     const topMonths = getTopOccurrences(filteredData, "month");
 
+    // Get top accused demographics
+    const accusedAge = getTopOccurrences(filteredData, "accused_age", 3);
+    const accusedCaste = getTopOccurrences(filteredData, "accused_caste", 3);
+    const accusedProfession = getTopOccurrences(filteredData, "accused_profession", 3);
+
     const details = {
       allLatLong,
       topCrimeGroups,
       topCrimes,
       topMonths,
+      demographics: {
+        accusedAge,
+        accusedCaste,
+        accusedProfession
+      }
     };
 
     res.json(details);
@@ -278,9 +269,6 @@ app.post("/api/details", async (req, res) => {
     res.status(500).send("Error fetching details from CSV");
   }
 });
-
-
-
 
 // Endpoint to process data and return frequency of each value for every field
 app.post("/api/data-frequency", async (req, res) => {
@@ -314,6 +302,7 @@ app.post("/api/data-frequency", async (req, res) => {
   }
 });
 
-app.listen(5000, () => {
-  console.log("Server running on port 5000");
+const port = process.env.PORT || 5000;
+app.listen(port, () => {
+  console.log(`Server running on port ${port}`);
 });

@@ -123,6 +123,24 @@ const Prediction = () => {
       .catch((error) => console.error("Error fetching details:", error));
   };
 
+  // Helper function to calculate top occurrences
+  const getTopOccurrences = (data, key, count = 10) => {
+    const frequency = {};
+    data.forEach((item) => {
+      const value = item[key];
+      if (value && value.trim() !== "" && !/^[-,\s]*$/.test(value)) {
+        if (!frequency[value]) {
+          frequency[value] = 0;
+        }
+        frequency[value] += 1;
+      }
+    });
+    return Object.entries(frequency)
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, count)
+      .map(([value, freq]) => ({ value, freq }));
+  };
+
   // Generate analysis text based on the fetched data
   const generateAnalysisText = () => {
     if (!details || Object.keys(details).length === 0) {
@@ -134,9 +152,7 @@ const Prediction = () => {
 
     const {
       allLatLong = [],
-      topCrimeGroups = [],
-      topCrimes = [],
-      topMonths = [],
+      topCrimes = []
     } = details;
 
     const formatTopItems = (items) =>
@@ -146,14 +162,20 @@ const Prediction = () => {
             .join(", ")
         : "No data";
 
-    const analysisText = `
-      Top Latitude-Longitude pairs: ${formatTopItems(allLatLong)}
-      Top Crime Groups: ${formatTopItems(topCrimeGroups)}
-      Top Crimes: ${formatTopItems(topCrimes)}
-      Top Crime Months: ${formatTopItems(topMonths)}
-    `;
+    const getCrimeSpecificDemographics = (crimeType, key) => {
+      const crimeSpecificData = allLatLong.filter(latLong => latLong.crimeType === crimeType);
+      return getTopOccurrences(crimeSpecificData, key, 3);
+    };
 
-    setAnalysisText(analysisText.trim());
+    const analysis = topCrimes.map((crime, index) => {
+      const ageAnalysis = formatTopItems(getCrimeSpecificDemographics(crime.value, 'accused_age'));
+      const casteAnalysis = formatTopItems(getCrimeSpecificDemographics(crime.value, 'accused_caste'));
+      const professionAnalysis = formatTopItems(getCrimeSpecificDemographics(crime.value, 'accused_profession'));
+
+      return `${index + 1}. For the selected ${filterType === "time" ? `time range ${selectedTimeRange.label}` : `month range ${startMonth}-${endMonth}`}, there were ${crime.freq} ${crime.value} cases recorded where accused demographics are: Accused age: ${ageAnalysis}, Accused caste: ${casteAnalysis}, Accused profession: ${professionAnalysis}`;
+    }).join("<br /><br />");
+
+    setAnalysisText(analysis.trim());
   };
 
   // Handle crime type checkbox change
@@ -357,7 +379,7 @@ const Prediction = () => {
       )}
       <div className="mt-4">
         <h3 className="text-lg font-bold">Analysis Result:</h3>
-        <p>{analysisText || 'Click "Get Analysis Text" to view the result.'}</p>
+        <p dangerouslySetInnerHTML={{ __html: analysisText || 'Click "Get Analysis Text" to view the result.' }} />
         <h3 className="text-lg font-bold">Prediction and Deployment plan for Top 10 crime :</h3>
         <ul>
           {details.topCrimes &&
