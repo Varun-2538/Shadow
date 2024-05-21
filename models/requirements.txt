@@ -1,7 +1,8 @@
 huggingface_hub
-flask
-flask_cors
+fastapi 
+uvicorn
 pandas
 numpy
 subprocess.run
 gunicorn
+python-dotenv

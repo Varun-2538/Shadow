@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 
 const Radio = () => {
-  const [selectedPage, setSelectedPage] = useState('spatial'); // default page
+  const [selectedPage, setSelectedPage] = useState(); // default page
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -11,14 +11,14 @@ const Radio = () => {
     navigate(`/${event.target.value}`);
   };
 
-  if (location.pathname === "/") {
+  if (location.pathname === "/" || location.pathname === "/Spatial") {
     return null;
   }
 
   return (
     <div className="flex justify-center mt-8 mb-2 space-x-2">
       <div className="bg-white rounded-lg shadow-md p-6 w-full max-w-md">
-        <div className="flex items-cente">
+        <div className="flex items-center">
           <input
             type="radio"
             name="radio-btn"

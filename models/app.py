@@ -1,14 +1,25 @@
 import os
 import pandas as pd
-from flask import Flask, request, jsonify
-from flask_cors import CORS
-from analysis_model import generate_crime_analysis
+from fastapi import FastAPI, HTTPException, Request
+from fastapi.middleware.cors import CORSMiddleware
+from pydantic import BaseModel
+from spatial import generate_spatial_analysis
+from beatwise import generate_beatwise_analysis
+from prediction import generate_crime_prediction
+from deployment import generate_deployment_plan
+import traceback
 
-# Create Flask app instance
-app = Flask(__name__)
+# Create FastAPI app instance
+app = FastAPI()
 
 # Enable CORS for all routes and domains
-CORS(app)
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 # Get the project directory
 project_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))  # Get the parent directory
@@ -17,17 +28,27 @@ project_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))  # Get
 csv_file_path = os.path.join(project_dir, 'models', 'dataset', 'updated_ml_model_ready_dataset.csv')
 
 # Load crime data from CSV
-df = pd.read_csv(csv_file_path)
+df = pd.read_csv(csv_file_path, low_memory=False)
+
+# Print column names for debugging
+# print("Column names:", df.columns)
+
 # Filter rows with zero latitude or longitude (optional, adjust for your data)
-df = df[(df['latitude'] != 0) & (df['longitude'] != 0)]
+if 'latitude' in df.columns and 'longitude' in df.columns:
+    df = df[(df['latitude'] != 0) & (df['longitude'] != 0)]
+else:
+    raise KeyError("The required columns 'latitude' and 'longitude' are not present in the CSV file")
+
+class AnalysisRequest(BaseModel):
+    analysis_text: str
+    district: str
+    police_station: str = None
+    unitname: str = None
+    beat_name: str = None
 
 # API endpoint for retrieving crime data (GET request)
-@app.route('/data', methods=['GET'])
-def get_data():
-    # Extract pagination parameters from the query string
-    page = request.args.get('page', default=1, type=int)
-    per_page = request.args.get('per_page', default=100, type=int)
-
+@app.get("/data")
+async def get_data(page: int = 1, per_page: int = 100):
     # Calculate start and end index for data slice based on pagination
     start = (page - 1) * per_page
     end = start + per_page
@@ -41,34 +62,93 @@ def get_data():
             if pd.isnull(value):
                 record[key] = None
 
-    # Return JSON response containing the data
-    return jsonify(data)
+    return data
 
-# API endpoint for generating crime analysis (POST request)
-@app.route('/crime_analysis', methods=['POST'])
-def crime_analysis():
+# API endpoint for generating spatial analysis (POST request)
+@app.post("/spatial_analysis")
+async def spatial_analysis(request: AnalysisRequest):
     try:
-        data = request.json
-        app.logger.debug('Received data: %s', data)  # or use print(f"Received data: {data}")
-
-        analysis_text = data.get('analysis_text', '')
-        district = data.get('district', '')
-        police_station = data.get('police_station', '')
+        analysis_text = request.analysis_text
+        district = request.district
+        police_station = request.police_station
 
         if not analysis_text:
-            return jsonify({'error': 'Analysis text is required'}), 400
+            raise HTTPException(status_code=400, detail="Analysis text is required")
         
-        print("Received analysis text:", analysis_text)
-        # Generate crime analysis using LLM function
-
-        crime_analysis = generate_crime_analysis(analysis_text, district, police_station, data)
-        print("Returning analysis result:", crime_analysis)
-
-
-        return jsonify({'analysis': crime_analysis}), 200
+        spatial_analysis_result = generate_spatial_analysis(analysis_text, district, police_station, request.dict())
+        return {"analysis": spatial_analysis_result}
     except Exception as e:
-        return jsonify({'error': str(e)}), 500
+        traceback_str = traceback.format_exc()
+        return {"error": str(e), "traceback": traceback_str}
 
-# Run the Flask app in debug mode on port 8000
-if __name__ == '__main__':
-    app.run(debug=True, port=8000)
+# API endpoint for generating beatwise analysis (POST request)
+@app.post("/beatwise_analysis")
+async def beatwise_analysis(request: AnalysisRequest):
+    try:
+        analysis_text = request.analysis_text
+        district = request.district
+        unitname = request.unitname
+        beat_name = request.beat_name
+
+        if not analysis_text:
+            raise HTTPException(status_code=400, detail="Analysis text is required")
+        
+        beatwise_analysis_result = generate_beatwise_analysis(analysis_text, district, unitname, beat_name, request.dict())
+        return {"analysis": beatwise_analysis_result}
+    except Exception as e:
+        traceback_str = traceback.format_exc()
+        return {"error": str(e), "traceback": traceback_str}
+    
+# API endpoint for generating crime prediction (POST request)
+@app.post("/crime_prediction")
+async def crime_prediction(request: AnalysisRequest):
+    try:
+        analysis_text = request.analysis_text
+        district = request.district
+        unitname = request.unitname
+        
+        if not analysis_text:
+            raise HTTPException(status_code=400, detail="Analysis text is required")
+        
+        crime_prediction_result = generate_crime_prediction(analysis_text, district, unitname, request.dict())
+        return {"analysis": crime_prediction_result}
+    except Exception as e:
+        traceback_str = traceback.format_exc()
+        return {"error": str(e), "traceback": traceback_str}
+    
+#API endpoint for generating deployment plan (POST Request)
+@app.post("deployment_plan")
+async def deployment_plan(request: AnalysisRequest):
+    try:
+        analysis_text = request.analysis_text
+        district = request.district
+        unitname = request.unitname
+        
+        if not analysis_text:
+            raise HTTPException(status_code=400, detail = "Analysis text is required")
+        
+        deployment_plan_result = generate_deployment_plan(analysis_text, district, unitname, request.dict())
+        return {"analysis": deployment_plan_result}
+    except Exception as e:
+        traceback_str = traceback.format_exc()
+        return {"error": str[e], "traceback": traceback_str}
+
+# API endpoint for reading CSV (GET request)
+@app.get("/read_csv")
+async def read_csv():
+    try:
+        # Read the CSV data
+        with open(csv_file_path, 'r') as csv_file:
+            reader = pd.read_csv(csv_file)
+            data = reader.to_dict(orient='records')
+        data = [row for row in data if not '0' in row.values()]
+
+        return data
+    except Exception as e:
+        traceback_str = traceback.format_exc()
+        return {"error": str(e), "traceback": traceback_str}
+
+# Run the FastAPI app in debug mode on port 8000
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run(app, host="0.0.0.0", port=8000, log_level="debug")
