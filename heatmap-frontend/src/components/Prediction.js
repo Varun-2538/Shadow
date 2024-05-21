@@ -45,7 +45,7 @@ const Prediction = () => {
   // Fetch districts
   useEffect(() => {
     axios
-      .get("http://localhost:5000/api/districts")
+      .get("https://gallants-ksp-1-6oyx.onrender.com/api/districts")
       .then((response) => {
         if (Array.isArray(response.data)) {
           setDistricts(response.data);
@@ -59,7 +59,7 @@ const Prediction = () => {
   useEffect(() => {
     if (selectedDistrict) {
       axios
-        .get(`http://localhost:5000/api/units/${selectedDistrict}`)
+        .get(`https://gallants-ksp-1-6oyx.onrender.com/api/units/${selectedDistrict}`)
         .then((response) => {
           setUnits(response.data);
           setSelectedUnit(response.data[0] || "");
@@ -115,7 +115,7 @@ const Prediction = () => {
     }
 
     axios
-      .post("http://localhost:5000/api/details", params)
+      .post("https://gallants-ksp-1-6oyx.onrender.com/api/details", params)
       .then((response) => {
         console.log(response.data);
         setDetails(response.data);

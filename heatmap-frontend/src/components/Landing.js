@@ -9,7 +9,7 @@ export default function Landing() {
     navigate("/Spatial");
   };
 
-  axios.get('http://localhost:8000/read_csv')
+  axios.get('https://gallants-ksp-3wep.onrender.com/read_csv')
   .then(response => {
     console.log(response.data);
   })

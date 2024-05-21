@@ -6,7 +6,13 @@ const fs = require("fs");
 const path = require("path");
 const app = express();
 
-app.use(cors());
+// Configure CORS for production (update your allowed origins as needed)
+const corsOptions = {
+  origin: ['https://gallants-ksp-2.onrender.com'], // Replace with your actual frontend URL for production
+  optionsSuccessStatus: 200 // For legacy browser support
+};
+
+app.use(cors(corsOptions));
 app.use(express.json());
 app.use(bodyParser.json());
 

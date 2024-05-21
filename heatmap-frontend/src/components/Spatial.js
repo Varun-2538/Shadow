@@ -42,7 +42,7 @@ const Spatial = () => {
 
   useEffect(() => {
     axios
-      .get("http://localhost:5000/api/districts")
+      .get("https://gallants-ksp-1-6oyx.onrender.com/api/districts")
       .then((response) => {
         if (Array.isArray(response.data)) {
           setDistricts(response.data);
@@ -55,7 +55,7 @@ const Spatial = () => {
   useEffect(() => {
     if (selectedDistrict) {
       axios
-        .get(`http://localhost:5000/api/units/${selectedDistrict}`)
+        .get(`https://gallants-ksp-1-6oyx.onrender.com/api/units/${selectedDistrict}`)
         .then((response) => {
           setUnits(response.data);
           setSelectedUnit(response.data[0] || "");
@@ -81,7 +81,7 @@ const Spatial = () => {
   const handleSubmit = () => {
     setShowSubmitProgressBar(true);
     axios
-      .post("http://localhost:5000/api/data-frequency", {
+      .post("https://gallants-ksp-1-6oyx.onrender.com/api/data-frequency", {
         selectedDistrict,
         selectedUnit,
       })
@@ -254,7 +254,7 @@ const Spatial = () => {
   const fetchAndDisplayAnalysis = () => {
     setShowProgressBar(true);
     axios
-      .post("http://localhost:8000/spatial_analysis", {
+      .post("https://gallants-ksp-3wep.onrender.com/spatial_analysis", {
         analysis_text: formattedAnalysisText,
         district: selectedDistrict,
         police_station: selectedUnit,

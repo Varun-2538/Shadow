@@ -10,7 +10,7 @@ const HeatmapLayer = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await fetch('http://localhost:8000/data');
+        const response = await fetch('https://gallants-ksp-3wep.onrender.com/data');
         const data = await response.json();
         const points = data.map(item => [item.latitude, item.longitude, 8]); // Assuming intensity is 1 for all points
         // Log points to the console (can be removed after verification)

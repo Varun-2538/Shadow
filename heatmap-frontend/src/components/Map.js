@@ -97,8 +97,8 @@ function Map() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const allegedResponse = await axios.get('http://localhost:5000/api/allegedEntries');
-        const provenResponse = await axios.get('http://localhost:5000/api/provenEntries');
+        const allegedResponse = await axios.get('https://gallants-ksp-1-6oyx.onrender.com/api/allegedEntries');
+        const provenResponse = await axios.get('https://gallants-ksp-1-6oyx.onrender.com/api/provenEntries');
         setAllegedEntries(allegedResponse.data);
         setProvenEntries(provenResponse.data);
       } catch (error) {
@@ -114,7 +114,7 @@ function Map() {
 
     try {
       if (selectedEntry) {
-        await axios.put(`http://localhost:5000/api/entries/${selectedEntry.id}`, newEntry);
+        await axios.put(`https://gallants-ksp-1-6oyx.onrender.com/api/entries/${selectedEntry.id}`, newEntry);
         if (mapType === "alleged") {
           setAllegedEntries(allegedEntries.map(entry => entry.id === selectedEntry.id ? newEntry : entry));
         } else {
@@ -122,7 +122,7 @@ function Map() {
         }
         setSelectedEntry(null);
       } else {
-        await axios.post('http://localhost:5000/api/entries', newEntry);
+        await axios.post('https://gallants-ksp-1-6oyx.onrender.com/api/entries', newEntry);
         if (mapType === "alleged") {
           setAllegedEntries([...allegedEntries, newEntry]);
         } else {

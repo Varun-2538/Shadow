@@ -27,7 +27,7 @@ const TemporalAnalysis = () => {
 
   useEffect(() => {
     axios
-      .get("http://localhost:5000/api/districts")
+      .get("https://gallants-ksp-1-6oyx.onrender.com/api/districts")
       .then((response) => {
         setDistricts(response.data);
         if (response.data.length > 0) {
@@ -40,7 +40,7 @@ const TemporalAnalysis = () => {
   useEffect(() => {
     if (selectedDistrict) {
       axios
-        .get(`http://localhost:5000/api/units/${selectedDistrict}`)
+        .get(`https://gallants-ksp-1-6oyx.onrender.com/api/units/${selectedDistrict}`)
         .then((response) => {
           setUnits(response.data);
           if (response.data.length > 0) {
@@ -58,7 +58,7 @@ const TemporalAnalysis = () => {
     if (selectedDistrict && selectedUnit) {
       axios
         .get(
-          `http://localhost:5000/api/crime-by-time/${selectedDistrict}/${selectedUnit}`
+          `https://gallants-ksp-1-6oyx.onrender.com/api/crime-by-time/${selectedDistrict}/${selectedUnit}`
         )
         .then((response) => {
           const newData = response.data;
@@ -94,7 +94,7 @@ const TemporalAnalysis = () => {
     if (selectedDistrict && selectedUnit) {
       axios
         .get(
-          `http://localhost:5000/api/crime-by-month/${selectedDistrict}/${selectedUnit}`
+          `https://gallants-ksp-1-6oyx.onrender.com/api/crime-by-month/${selectedDistrict}/${selectedUnit}`
         )
         .then((response) => {
           const newData = response.data;
@@ -130,7 +130,7 @@ const TemporalAnalysis = () => {
     if (selectedDistrict && selectedUnit) {
       axios
         .get(
-          `http://localhost:5000/api/crime-by-week/${selectedDistrict}/${selectedUnit}`
+          `https://gallants-ksp-1-6oyx.onrender.com/api/crime-by-week/${selectedDistrict}/${selectedUnit}`
         )
         .then((response) => {
           const newData = response.data;

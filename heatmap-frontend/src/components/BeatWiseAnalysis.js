@@ -32,7 +32,7 @@ const BeatWiseAnalysis = () => {
 
   useEffect(() => {
     axios
-      .get("http://localhost:5000/api/districts")
+      .get("https://gallants-ksp-1-6oyx.onrender.com/api/districts")
       .then((response) => {
         setDistricts(response.data);
         setSelectedDistrict(response.data[0] || "");
@@ -43,7 +43,7 @@ const BeatWiseAnalysis = () => {
   useEffect(() => {
     if (selectedDistrict) {
       axios
-        .get(`http://localhost:5000/api/units/${selectedDistrict}`)
+        .get(`https://gallants-ksp-1-6oyx.onrender.com/api/units/${selectedDistrict}`)
         .then((response) => {
           setUnits(response.data);
           setSelectedUnit(response.data[0] || "");
@@ -55,7 +55,7 @@ const BeatWiseAnalysis = () => {
   useEffect(() => {
     if (selectedUnit) {
       axios
-        .get(`http://localhost:5000/api/beats/${selectedUnit}`)
+        .get(`https://gallants-ksp-1-6oyx.onrender.com/api/beats/${selectedUnit}`)
         .then((response) => {
           setBeats(response.data);
           setSelectedBeat(response.data[0] || "");
@@ -69,7 +69,7 @@ const BeatWiseAnalysis = () => {
     if (selectedBeat) {
       axios
         .get(
-          `http://localhost:5000/api/data-by-beat/${encodeURIComponent(
+          `https://gallants-ksp-1-6oyx.onrender.com/api/data-by-beat/${encodeURIComponent(
             selectedBeat
           )}`
         )
@@ -252,7 +252,7 @@ const BeatWiseAnalysis = () => {
   const fetchAndDisplayAnalysis = () => {
     setShowAnalysisProgressBar(true);
     axios
-      .post("http://localhost:8000/beatwise_analysis", {
+      .post("https://gallants-ksp-3wep.onrender.com/beatwise_analysis", {
         analysis_text: analysisText, // Correct variable name for the analysis text
         district: selectedDistrict,
         unit: selectedUnit,
