@@ -6,6 +6,7 @@ from pydantic import BaseModel
 from spatial import generate_spatial_analysis
 from beatwise import generate_beatwise_analysis
 from prediction import generate_crime_prediction
+from deployment import generate_deployment_plan
 import traceback
 
 # Create FastAPI app instance
@@ -114,6 +115,23 @@ async def crime_prediction(request: AnalysisRequest):
     except Exception as e:
         traceback_str = traceback.format_exc()
         return {"error": str(e), "traceback": traceback_str}
+    
+#API endpoint for generating deployment plan (POST Request)
+@app.post("deployment_plan")
+async def deployment_plan(request: AnalysisRequest):
+    try:
+        analysis_text = request.analysis_text
+        district = request.district
+        unitname = request.unitname
+        
+        if not analysis_text:
+            raise HTTPException(status_code=400, detail = "Analysis text is required")
+        
+        deployment_plan_result = generate_deployment_plan(analysis_text, district, unitname, request.dict())
+        return {"analysis": deployment_plan_result}
+    except Exception as e:
+        traceback_str = traceback.format_exc()
+        return {"error": str[e], "traceback": traceback_str}
 
 # API endpoint for reading CSV (GET request)
 @app.get("/read_csv")

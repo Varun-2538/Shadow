@@ -29,16 +29,16 @@ def format_prompt_for_model(user_prompt, district, unitname, data):
     """
     # Create prompt sections for system context and user context
     system_context_prompt = (
-        "As an expert crime analyst, delve deeply into the relationships and interconnections between various crime-related fields such as victim demographics (sex, caste, address, profession), accused demographics (sex, caste, address, profession), total crime frequency in an area, latitude, longitude, and time of occurrence (day/week/month or month range)."
-        "Explore how aspects like the location (latitude and longitude), the nature of the crime (crime type), the characteristics of victims and accused (demographics), and the time of occurrence intersect and influence one another. Uncover how these factors might contribute to specific crime trends or hotspots."
-        "Consider how socio-economic conditions, cultural dynamics, law enforcement practices, or other contextual factors such as festivals could be shaping these patterns. Weave together these different threads, offering insights that explain why these correlations exist and how they contribute to the overall crime landscape."
-        "Pay particular attention to how different sections of the analysis are interconnected. For example, explore how the location, crime type, and time of occurrence relate to the victim and accused demographics, and vice versa. Reveal the hidden patterns that emerge when these fields are considered in conjunction with one another."
-        "Additionally, make crime predictions for specific areas based on the identified correlations and patterns. These predictions should consider factors such as victim and accused demographics, crime types, locations, and either a month range or a time range, as well as any potential influences from festivals or other events."
-        "If the victim or accused count for specific demographic groups is dangerously high or common, highlight this as a potential risk factor or concern in your analysis."
+        "As an expert crime analyst, focus on dissecting the relationships and interactions among various crime-related aspects such as victim and accused demographics (sex, caste, address, profession), total crime frequency in an area, geographic details (latitude and longitude), and time of occurrence (day, week, or month)."
+        "Investigate how factors like crime locations, crime types, demographics, and timing interplay and influence each other, leading to certain crime patterns or hotspots."
+        "Examine the role of socio-economic conditions, cultural factors, and law enforcement practices in shaping these patterns, while also considering how events like festivals may impact crime rates. Highlight the connections between location, crime type, and timing in relation to the demographics of victims and accused."
+        "Unveil the underlying patterns that emerge when these elements are analyzed together."
+        "Based on your analysis, develop a deployment plan for law enforcement to effectively reduce crime, emphasizing time-specific strategies tailored to the frequency and nature of crimes observed."
+        "For instance, suggest increasing night patrols in areas with frequent night-time crimes, or adjusting officer deployment during festivals in regions with heightened crime rates during these periods."
         "DO NOT EXCEED MORE THAN 500 WORDS"
     )
     user_context_prompt = (
-        f"I am providing you with data on various crime-related fields in the {district} district and {unitname} unit name, along with either a month range or a time range. Please provide an analysis on this data and identify any potential connections or correlations between these fields, as per the guidelines provided in the system context prompt. Based on your analysis, make crime predictions for specific areas considering the given month range or time range."
+        f"I am providing you with data on various crime-related fields in the {district} district and {unitname} unit name, along with either a month range or a time range. Please provide an analysis on this data and identify any potential connections or correlations between these fields, as per the guidelines provided in the system context prompt. Based on your analysis, make deployment plans for specific areas considering the given month range or time range and the crime frequency."
         f"The data is as follows:\n\n{data}"
     )
 
@@ -47,7 +47,7 @@ def format_prompt_for_model(user_prompt, district, unitname, data):
     return combined_prompt
 
 
-def generate_crime_prediction(analysis_text, district, unitname, data):
+def generate_deployment_plan(analysis_text, district, unitname, data):
     """
     Generates text using the loaded model, with options for controlling the output.
 
