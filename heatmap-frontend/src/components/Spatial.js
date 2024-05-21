@@ -10,6 +10,7 @@ import HeatmapLayer from "./HeatmapLayer";
 const Spatial = () => {
   const [districts, setDistricts] = useState([]);
   const [showProgressBar, setShowProgressBar] = useState(false);
+  const [showSubmitProgressBar, setShowSubmitProgressBar] = useState(false);
   const [units, setUnits] = useState([]);
   const [selectedDistrict, setSelectedDistrict] = useState("");
   const [selectedUnit, setSelectedUnit] = useState("");
@@ -76,6 +77,7 @@ const Spatial = () => {
   };
 
   const handleSubmit = () => {
+    setShowSubmitProgressBar(true);
     axios
       .post("http://localhost:5000/api/data-frequency", {
         selectedDistrict,
@@ -85,8 +87,12 @@ const Spatial = () => {
         setFrequencyData(response.data);
         const newText = generateAnalysisText(response.data);
         setFormattedAnalysisText(newText);
+        setShowSubmitProgressBar(false);
       })
-      .catch((error) => console.error("Error posting data:", error));
+      .catch((error) => {
+        console.error("Error posting data:", error);
+        setShowSubmitProgressBar(false);
+      });
   };
 
   // Utility function to format field names
@@ -271,9 +277,9 @@ const Spatial = () => {
 
   return (
     <div className="container bg-gradient-to-b from-indigo-950 via-gray-800 to-stone-950 text-white mx-auto px-4 pt-4 sm:px-2">
-      <h2 className="text-2xl sm:text-xl font-bold mb-2">Spatial Analysis</h2>
-      <p className="mb-4 pb-4 text-sm sm:text-xs">
-        Lorem Ipsum hey this is spatial
+      <h2 className="text-3xl pt-1 font-bold mb-2">Spatial Analysis</h2>
+      <p className="mb-4 pb-4 text-lg ">
+        Mapping Crime Hotspots for Strategic Policing
       </p>
       <div className="flex flex-wrap -mx-2 mb-4">
         <div className="w-full sm:w-1/2 px-2">
@@ -296,7 +302,7 @@ const Spatial = () => {
             ))}
           </select>
         </div>
-        <div className="w-full sm:w-1/2 px-2">
+        <div className="w-full sm:w-1/2 px=2">
           <label
             htmlFor="unit-select"
             className="block mb-2 text-sm sm:text-xs font-medium text-white"
@@ -321,6 +327,17 @@ const Spatial = () => {
       >
         Submit
       </button>
+      {showSubmitProgressBar && (
+        <ProgressBar
+          visible={true}
+          height="80"
+          width="80"
+          color="#4fa94d"
+          ariaLabel="progress-bar-loading"
+          wrapperStyle={{}}
+          wrapperClass=""
+        />
+      )}
       <div className="mt-4" style={{ height: "400px" }}>
         <MapContainer
           center={defaultPosition}
@@ -367,8 +384,8 @@ const Spatial = () => {
       )}
 
       <div className="mt-4 pb-16">
-        <h3 className="text-lg sm:text-md font-bold">Analysis Result:</h3>
-        <p className="text-sm sm:text-xs">
+        <h3 className="text-lg sm:text-md font-bold pb-4">Analysis Result:</h3>
+        <p className="text-lg">
           {analysisResult || "Click 'Get Analysis' to view the result."}
         </p>
       </div>

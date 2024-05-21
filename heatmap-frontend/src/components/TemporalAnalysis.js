@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import { Line, Bar, Pie } from "react-chartjs-2";
+import { Line } from "react-chartjs-2";
 import "chart.js/auto";
+import { ProgressBar } from "react-loader-spinner";
 
 const TemporalAnalysis = () => {
   const [districts, setDistricts] = useState([]);
@@ -20,6 +21,9 @@ const TemporalAnalysis = () => {
     labels: [],
     datasets: [],
   });
+  const [showHourProgressBar, setShowHourProgressBar] = useState(false);
+  const [showMonthProgressBar, setShowMonthProgressBar] = useState(false);
+  const [showWeekProgressBar, setShowWeekProgressBar] = useState(false);
 
   useEffect(() => {
     axios
@@ -50,86 +54,110 @@ const TemporalAnalysis = () => {
   }, [selectedDistrict]);
 
   const handleFetchData = () => {
+    setShowHourProgressBar(true);
     if (selectedDistrict && selectedUnit) {
       axios
         .get(
           `http://localhost:5000/api/crime-by-time/${selectedDistrict}/${selectedUnit}`
         )
         .then((response) => {
-          setTimeData(response.data);
-          const data = {
-            labels: response.data.map((d) => d.hour),
-            datasets: [
-              {
-                label: "Number of Crimes by Hour",
-                data: response.data.map((d) => d.count),
-                backgroundColor: "rgba(255, 99, 132, 0.2)",
-                borderColor: "rgba(255, 99, 132, 1)",
-                borderWidth: 2,
-                fill: false,
-                tension: 0.4,
-              },
-            ],
-          };
-          setChartData(data);
+          const newData = response.data;
+          if (JSON.stringify(newData) !== JSON.stringify(timeData)) {
+            setTimeData(newData);
+            const data = {
+              labels: newData.map((d) => d.hour),
+              datasets: [
+                {
+                  label: "Number of Crimes by Hour",
+                  data: newData.map((d) => d.count),
+                  backgroundColor: "rgba(255, 99, 132, 0.2)",
+                  borderColor: "rgba(255, 99, 132, 1)",
+                  borderWidth: 2,
+                  fill: false,
+                  tension: 0.4,
+                },
+              ],
+            };
+            setChartData(data);
+          }
+          setShowHourProgressBar(false);
         })
-        .catch((error) => console.error("Error fetching time data:", error));
+        .catch((error) => {
+          console.error("Error fetching time data:", error);
+          setShowHourProgressBar(false);
+        });
     }
   };
 
   const handleFetchMonthData = () => {
+    setShowMonthProgressBar(true);
     if (selectedDistrict && selectedUnit) {
       axios
         .get(
           `http://localhost:5000/api/crime-by-month/${selectedDistrict}/${selectedUnit}`
         )
         .then((response) => {
-          setMonthData(response.data);
-          const data = {
-            labels: response.data.map((d) => `${d.month}`),
-            datasets: [
-              {
-                label: "Number of Crimes by Month",
-                data: response.data.map((d) => d.count),
-                backgroundColor: "rgba(54, 162, 235, 0.2)",
-                borderColor: "rgba(54, 162, 235, 1)",
-                borderWidth: 2,
-                fill: false,
-                tension: 0.4,
-              },
-            ],
-          };
-          setMonthChartData(data);
+          const newData = response.data;
+          if (JSON.stringify(newData) !== JSON.stringify(monthData)) {
+            setMonthData(newData);
+            const data = {
+              labels: newData.map((d) => `${d.month}`),
+              datasets: [
+                {
+                  label: "Number of Crimes by Month",
+                  data: newData.map((d) => d.count),
+                  backgroundColor: "rgba(54, 162, 235, 0.2)",
+                  borderColor: "rgba(54, 162, 235, 1)",
+                  borderWidth: 2,
+                  fill: false,
+                  tension: 0.4,
+                },
+              ],
+            };
+            setMonthChartData(data);
+          }
+          setShowMonthProgressBar(false);
         })
-        .catch((error) => console.error("Error fetching month data:", error));
+        .catch((error) => {
+          console.error("Error fetching month data:", error);
+          setShowMonthProgressBar(false);
+        });
     }
   };
 
   const handleFetchWeekData = () => {
+    setShowWeekProgressBar(true);
     if (selectedDistrict && selectedUnit) {
       axios
         .get(
           `http://localhost:5000/api/crime-by-week/${selectedDistrict}/${selectedUnit}`
         )
         .then((response) => {
-          setWeekData(response.data);
-          const data = {
-            labels: response.data.map((d) => `Week ${d.week}`),
-            datasets: [
-              {
-                label: "Number of Crimes by Week",
-                data: response.data.map((d) => d.count),
-                backgroundColor: "rgba(153, 102, 255, 0.2)",
-                borderColor: "rgba(153, 102, 255, 1)",
-                borderWidth: 2,
-                fill: false,
-                tension: 0.4,
-              },
-            ],
-          };
-          setWeekChartData(data);
+          const newData = response.data;
+          if (JSON.stringify(newData) !== JSON.stringify(weekData)) {
+            setWeekData(newData);
+            const data = {
+              labels: newData.map((d) => `Week ${d.week}`),
+              datasets: [
+                {
+                  label: "Number of Crimes by Week",
+                  data: newData.map((d) => d.count),
+                  backgroundColor: "rgba(153, 102, 255, 0.2)",
+                  borderColor: "rgba(153, 102, 255, 1)",
+                  borderWidth: 2,
+                  fill: false,
+                  tension: 0.4,
+                },
+              ],
+            };
+            setWeekChartData(data);
+          }
+          setShowWeekProgressBar(false);
         })
-        .catch((error) => console.error("Error fetching week data:", error));
+        .catch((error) => {
+          console.error("Error fetching week data:", error);
+          setShowWeekProgressBar(false);
+        });
     }
   };
 
@@ -158,8 +186,13 @@ const TemporalAnalysis = () => {
   );
 
   return (
-    <div className="min-h-screen container bg-gradient-to-b from-indigo-950 via-gray-800 to-stone-950 text-white mx-auto px-4 pt-4 sm:px-2">
-      <h1 className="text-2xl font-bold mb-4">Temporal Analysis of Crimes</h1>
+    <div className="min-h-screen container bg-gradient-to-b from-indigo-950 via-gray-800 to-stone-950 text-white mx-auto px-4 pt-4">
+      <h2 className="text-3xl pt-1 font-bold mb-1">
+        Temporal Analysis of Crimes
+      </h2>
+      <p className="pb-7 text-lg ">
+        Strategic Insights for Improved Police Patrolling
+      </p>
       <div className="flex flex-wrap -mx-2 mb-4">
         <div className="w-full sm:w-1/2 px-2">
           <label
@@ -210,18 +243,51 @@ const TemporalAnalysis = () => {
         >
           Fetch Hourly Data
         </button>
+        {showHourProgressBar && (
+          <ProgressBar
+            visible={true}
+            height="80"
+            width="80"
+            color="#4fa94d"
+            ariaLabel="progress-bar-loading"
+            wrapperStyle={{}}
+            wrapperClass=""
+          />
+        )}
         <button
           onClick={handleFetchMonthData}
           className="mx-2 px-4 py-2 bg-green-500 text-white rounded"
         >
           Fetch Monthly Data
         </button>
+        {showMonthProgressBar && (
+          <ProgressBar
+            visible={true}
+            height="80"
+            width="80"
+            color="#4fa94d"
+            ariaLabel="progress-bar-loading"
+            wrapperStyle={{}}
+            wrapperClass=""
+          />
+        )}
         <button
           onClick={handleFetchWeekData}
           className="mx-2 px-4 py-2 bg-purple-500 text-white rounded"
         >
           Fetch Weekly Data
         </button>
+        {showWeekProgressBar && (
+          <ProgressBar
+            visible={true}
+            height="80"
+            width="80"
+            color="#4fa94d"
+            ariaLabel="progress-bar-loading"
+            wrapperStyle={{}}
+            wrapperClass=""
+          />
+        )}
       </div>
       {chartData.labels.length > 0 &&
         renderCharts(chartData, "Hourly Crime Data")}
