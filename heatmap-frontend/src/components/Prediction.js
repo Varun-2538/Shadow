@@ -376,7 +376,7 @@ const Prediction = () => {
         <h3 className="text-lg font-bold mb-2">Map View:</h3>
         <MapContainer
           center={[14.5204, 75.7224]}
-          zoom={10}
+          zoom={6}
           style={{ height: "400px", width: "100%" }}
         >
           <TileLayer
