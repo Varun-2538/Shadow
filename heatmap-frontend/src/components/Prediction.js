@@ -1,3 +1,5 @@
+
+
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import {
@@ -37,7 +39,7 @@ const Prediction = () => {
   const [selectedCrimeTypes, setSelectedCrimeTypes] = useState({});
   const [showProgressBar, setShowProgressBar] = useState(false);
   const [analysisResult, setAnalysisResult] = useState("");
-  const [analysisText, setAnalysisText] = useState("");
+  const [analysisText, setAnalysisText] = useState(""); 
   const [showReasoningButton, setShowReasoningButton] = useState(false);
 
   const timeRanges = [
@@ -46,12 +48,10 @@ const Prediction = () => {
     { label: "2-6pm", start: "14:00:00", end: "18:00:00" },
     { label: "6-10pm", start: "18:00:00", end: "22:00:00" },
     { label: "10pm-2am", start: "22:00:00", end: "02:00:00" },
-    { label: "2-6am", start: "02:00:00", end: "06:00:00" }
+    { label: "2-6am", start: "02:00:00", end: "06:00:00" },
   ];
 
-  const buttonCondition =
-    details.allLatLong &&
-    details.allLatLong.length > 0;
+  const buttonCondition = details.allLatLong && details.allLatLong.length > 0;
 
   // Fetch districts
   useEffect(() => {
@@ -96,7 +96,9 @@ const Prediction = () => {
   };
 
   const handleTimeRangeChange = (event) => {
-    const selectedRange = timeRanges.find(range => range.label === event.target.value);
+    const selectedRange = timeRanges.find(
+      (range) => range.label === event.target.value
+    );
     setSelectedTimeRange(selectedRange);
     setFilterType("time");
     setStartMonth(null);
@@ -112,9 +114,10 @@ const Prediction = () => {
 
   // Fetch details based on selected district, unit, and time/month range
   const fetchDetails = () => {
+    setShowProgressBar(true);
     const params = {
       district: selectedDistrict,
-      unit: selectedUnit
+      unit: selectedUnit,
     };
 
     if (filterType === "time" && selectedTimeRange) {
@@ -130,8 +133,14 @@ const Prediction = () => {
       .then((response) => {
         console.log(response.data);
         setDetails(response.data);
+        generateAnalysisText(response.data);
+        setShowProgressBar(false);
+        setShowReasoningButton(true);
       })
-      .catch((error) => console.error("Error fetching details:", error));
+      .catch((error) => {
+        console.error("Error fetching details:", error);
+        setShowProgressBar(false);
+      });
   };
 
   // Helper function to calculate top occurrences
@@ -158,49 +167,36 @@ const Prediction = () => {
       console.error("No details available or details are empty");
       return;
     }
-
+  
     console.log("Details received:", details);
-
-    const { allLatLong = [], topCrimes = [] } = details;
-
+  
+    const {
+      allLatLong = [],
+      topCrimes = []
+    } = details;
+  
     const formatTopItems = (items) =>
       items.length > 0
         ? items
             .map((item) => `${item.value} (${item.freq} occurrences)`)
             .join(", ")
         : "No data";
-
+  
     const getCrimeSpecificDemographics = (crimeType, key) => {
-      const crimeSpecificData = allLatLong.filter(
-        (latLong) => latLong.crimeType === crimeType
-      );
+      const crimeSpecificData = allLatLong.filter(latLong => latLong.crimeType === crimeType);
       return getTopOccurrences(crimeSpecificData, key, 3);
     };
-
-    const analysis = topCrimes
-      .map((crime, index) => {
-        const ageAnalysis = formatTopItems(
-          getCrimeSpecificDemographics(crime.value, "accused_age")
-        );
-        const casteAnalysis = formatTopItems(
-          getCrimeSpecificDemographics(crime.value, "accused_caste")
-        );
-        const professionAnalysis = formatTopItems(
-          getCrimeSpecificDemographics(crime.value, "accused_profession")
-        );
-
-        return `${index + 1}. For the selected ${
-          filterType === "time"
-            ? `time range ${selectedTimeRange.label}`
-            : `month range ${startMonth}-${endMonth}`
-        }, there were ${crime.freq} ${
-          crime.value
-        } cases recorded where accused demographics are: Accused age: ${ageAnalysis}, Accused caste: ${casteAnalysis}, Accused profession: ${professionAnalysis}`;
-      })
-      .join("<br /><br />");
-
+  
+    const analysis = topCrimes.map((crime, index) => {
+      const ageAnalysis = formatTopItems(getCrimeSpecificDemographics(crime.value, 'accused_age'));
+      const casteAnalysis = formatTopItems(getCrimeSpecificDemographics(crime.value, 'accused_caste'));
+      const professionAnalysis = formatTopItems(getCrimeSpecificDemographics(crime.value, 'accused_profession'));
+  
+      return `${index + 1}. For the selected ${filterType === "time" ? `time range ${selectedTimeRange.label}` : `month range ${startMonth}-${endMonth}`}, there were ${crime.freq} ${crime.value} cases recorded where accused demographics are: Accused age: ${ageAnalysis}, Accused caste: ${casteAnalysis}, Accused profession: ${professionAnalysis}`;
+    }).join("<br /><br />");
+  
     setAnalysisText(analysis.trim());
-
+  
     // Post request to get detailed analysis
     setShowProgressBar(true);
     axios
@@ -222,36 +218,7 @@ const Prediction = () => {
         console.error("Error fetching analysis:", error);
       });
   };
-
-    console.log("Details received:", details);
-
-    const {
-      allLatLong = [],
-      topCrimes = []
-    } = details;
-
-    const formatTopItems = (items) =>
-      items.length > 0
-        ? items
-            .map((item) => `${item.value} (${item.freq} occurrences)`)
-            .join(", ")
-        : "No data";
-
-    const getCrimeSpecificDemographics = (crimeType, key) => {
-      const crimeSpecificData = allLatLong.filter(latLong => latLong.crimeType === crimeType);
-      return getTopOccurrences(crimeSpecificData, key, 3);
-    };
-
-    const analysis = topCrimes.map((crime, index) => {
-      const ageAnalysis = formatTopItems(getCrimeSpecificDemographics(crime.value, 'accused_age'));
-      const casteAnalysis = formatTopItems(getCrimeSpecificDemographics(crime.value, 'accused_caste'));
-      const professionAnalysis = formatTopItems(getCrimeSpecificDemographics(crime.value, 'accused_profession'));
-
-      return `${index + 1}. For the selected ${filterType === "time" ? `time range ${selectedTimeRange.label}` : `month range ${startMonth}-${endMonth}`}, there were ${crime.freq} ${crime.value} cases recorded where accused demographics are: Accused age: ${ageAnalysis}, Accused caste: ${casteAnalysis}, Accused profession: ${professionAnalysis}`;
-    }).join("<br /><br />");
-
-    setAnalysisText(analysis.trim());
-  };
+  
 
   // Handle crime type checkbox change
   const handleCrimeTypeChange = (event, crimeType) => {
@@ -266,31 +233,25 @@ const Prediction = () => {
     ? details.topCrimes.reduce((total, crime) => total + crime.freq, 0)
     : 0;
 
-    return (
+  return (
     <div className="min-h-screen container bg-gradient-to-b from-indigo-950 via-gray-800 to-stone-950 text-white mx-auto px-4 pt-4 sm:px-2">
-      <h2 className="text-3xl pt-1 font-bold mb-4">
-        Crime Prediction Analysis
-      </h2>
-
+      <h2 className="text-3xl pt-1 font-bold mb-4">Crime Prediction Analysis</h2>
+  
       <div className="flex justify-center mb-4">
         <button
           onClick={() => handleFilterTypeChange("month")}
-          className={`bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mr-2 ${
-            filterType === "month" ? "opacity-50" : ""
-          }`}
+          className={`bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mr-2 ${filterType === "month" ? "opacity-50" : ""}`}
         >
           Month Filter
         </button>
         <button
           onClick={() => handleFilterTypeChange("time")}
-          className={`bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded ${
-            filterType === "time" ? "opacity-50" : ""
-          }`}
+          className={`bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded ${filterType === "time" ? "opacity-50" : ""}`}
         >
           Time Range Filter
         </button>
       </div>
-
+  
       <div className="flex flex-wrap -mx-2 mb-4">
         <div className="w-full sm:w-1/2 px-2">
           <label
@@ -334,7 +295,7 @@ const Prediction = () => {
           </select>
         </div>
       </div>
-
+  
       {filterType === "month" ? (
         <div className="flex flex-wrap -mx-2 mb-4">
           <div className="w-full sm:w-1/2 px-2">
@@ -393,9 +354,7 @@ const Prediction = () => {
               onChange={handleTimeRangeChange}
               className="bg-gray-50 border border-gray-300 text-gray-900 text-sm sm:text-xs rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
             >
-              <option value="" disabled>
-                Select time range
-              </option>
+              <option value="" disabled>Select time range</option>
               {timeRanges.map((range) => (
                 <option key={range.label} value={range.label}>
                   {range.label}
@@ -405,14 +364,14 @@ const Prediction = () => {
           </div>
         </div>
       )}
-
+  
       <button
         onClick={fetchDetails}
         className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
       >
         Fetch Details
       </button>
-
+  
       <div className="mt-4">
         <h3 className="text-lg font-bold mb-2">Map View:</h3>
         <MapContainer
@@ -460,7 +419,7 @@ const Prediction = () => {
           Get Prediction
         </button>
       )}
-
+  
       {showProgressBar && (
         <ProgressBar
           visible={true}
@@ -472,7 +431,7 @@ const Prediction = () => {
           wrapperClass=""
         />
       )}
-
+  
       <div className="mt-4">
         {/* <h3 className="text-lg font-bold">Analysis Result:</h3>
         <div dangerouslySetInnerHTML={{ __html: analysisText || 'Click "Get Analysis Text" to view the result.' }} /> */}
@@ -480,9 +439,7 @@ const Prediction = () => {
           <h3 className="text-lg font-bold">Detailed Analysis Result:</h3>
           <div>{analysisResult || "Click 'Get Analysis Text' to view the result."}</div>
         </div> */}
-        <h3 className="text-lg font-bold">
-          Prediction and Deployment plan for Top 10 crime :
-        </h3>
+        <h3 className="text-lg font-bold">Prediction and Deployment plan for Top 10 crime :</h3>
         <ul>
           {details.topCrimes &&
             details.topCrimes.map((crime, index) => (
@@ -494,27 +451,19 @@ const Prediction = () => {
                     onChange={(e) => handleCrimeTypeChange(e, crime.value)}
                   />
                   {` ${crime.value} (${(
-                    (crime.freq / totalCases) *
-                    100
-                  ).toFixed(
-                    2
-                  )}% of the police force should get deployed to corresponding latitude and longitude positions show in map to control ${
-                    crime.value
-                  })`}
+                    (crime.freq / totalCases) * 100
+                  ).toFixed(2)}% of the police force should get deployed to corresponding latitude and longitude positions show in map to control ${crime.value})`}
                 </label>
               </li>
             ))}
         </ul>
         <div className="mt-4">
           <h3 className="text-lg font-bold">Detailed Analysis Result:</h3>
-          <div>
-            {analysisResult || "Click 'Get Analysis Text' to view the result."}
-          </div>
+          <div>{analysisResult || "Click 'Get Analysis Text' to view the result."}</div>
         </div>
       </div>
     </div>
   );
-};
+}
 
-export default Prediction;
-export default Prediction;
+  export default Prediction;
