@@ -1,8 +1,16 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import { MapContainer, TileLayer, Marker, Popup, Circle, Tooltip } from "react-leaflet";
+import {
+  MapContainer,
+  TileLayer,
+  Marker,
+  Popup,
+  Circle,
+  Tooltip,
+} from "react-leaflet";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
+import { ProgressBar } from "react-loader-spinner";
 
 // Define the custom marker icon
 const customIcon = new L.Icon({
@@ -12,7 +20,7 @@ const customIcon = new L.Icon({
   popupAnchor: [1, -34], // Point from which the popup should open relative to the iconAnchor
   shadowUrl: require("leaflet/dist/images/marker-shadow.png"),
   shadowSize: [41, 41],
-  shadowAnchor: [12, 41]
+  shadowAnchor: [12, 41],
 });
 
 const Prediction = () => {
@@ -26,8 +34,11 @@ const Prediction = () => {
   const [selectedTimeRange, setSelectedTimeRange] = useState(null);
   const [filterType, setFilterType] = useState("month"); // "month" or "time"
   const [details, setDetails] = useState({});
-  const [analysisText, setAnalysisText] = useState("");
   const [selectedCrimeTypes, setSelectedCrimeTypes] = useState({});
+  const [showProgressBar, setShowProgressBar] = useState(false);
+  const [analysisResult, setAnalysisResult] = useState("");
+  const [analysisText, setAnalysisText] = useState("");
+  const [showReasoningButton, setShowReasoningButton] = useState(false);
 
   const timeRanges = [
     { label: "6-10am", start: "06:00:00", end: "10:00:00" },
@@ -150,6 +161,70 @@ const Prediction = () => {
 
     console.log("Details received:", details);
 
+    const { allLatLong = [], topCrimes = [] } = details;
+
+    const formatTopItems = (items) =>
+      items.length > 0
+        ? items
+            .map((item) => `${item.value} (${item.freq} occurrences)`)
+            .join(", ")
+        : "No data";
+
+    const getCrimeSpecificDemographics = (crimeType, key) => {
+      const crimeSpecificData = allLatLong.filter(
+        (latLong) => latLong.crimeType === crimeType
+      );
+      return getTopOccurrences(crimeSpecificData, key, 3);
+    };
+
+    const analysis = topCrimes
+      .map((crime, index) => {
+        const ageAnalysis = formatTopItems(
+          getCrimeSpecificDemographics(crime.value, "accused_age")
+        );
+        const casteAnalysis = formatTopItems(
+          getCrimeSpecificDemographics(crime.value, "accused_caste")
+        );
+        const professionAnalysis = formatTopItems(
+          getCrimeSpecificDemographics(crime.value, "accused_profession")
+        );
+
+        return `${index + 1}. For the selected ${
+          filterType === "time"
+            ? `time range ${selectedTimeRange.label}`
+            : `month range ${startMonth}-${endMonth}`
+        }, there were ${crime.freq} ${
+          crime.value
+        } cases recorded where accused demographics are: Accused age: ${ageAnalysis}, Accused caste: ${casteAnalysis}, Accused profession: ${professionAnalysis}`;
+      })
+      .join("<br /><br />");
+
+    setAnalysisText(analysis.trim());
+
+    // Post request to get detailed analysis
+    setShowProgressBar(true);
+    axios
+      .post("https://gallants-ksp-3wep.onrender.com/crime_prediction", {
+        analysis_text: analysis.trim(),
+        district: selectedDistrict,
+        police_station: selectedUnit,
+      })
+      .then((response) => {
+        setShowProgressBar(false);
+        const analysis = response.data.analysis;
+        const bulletPoints = analysis
+          .split("\n")
+          .map((point, index) => <li key={index}>{point}</li>);
+        setAnalysisResult(<ul>{bulletPoints}</ul>);
+      })
+      .catch((error) => {
+        setShowProgressBar(false);
+        console.error("Error fetching analysis:", error);
+      });
+  };
+
+    console.log("Details received:", details);
+
     const {
       allLatLong = [],
       topCrimes = []
@@ -191,20 +266,26 @@ const Prediction = () => {
     ? details.topCrimes.reduce((total, crime) => total + crime.freq, 0)
     : 0;
 
-  return (
+    return (
     <div className="min-h-screen container bg-gradient-to-b from-indigo-950 via-gray-800 to-stone-950 text-white mx-auto px-4 pt-4 sm:px-2">
-      <h2 className="text-3xl pt-1 font-bold mb-4">Crime Prediction Analysis</h2>
+      <h2 className="text-3xl pt-1 font-bold mb-4">
+        Crime Prediction Analysis
+      </h2>
 
       <div className="flex justify-center mb-4">
         <button
           onClick={() => handleFilterTypeChange("month")}
-          className={`bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mr-2 ${filterType === "month" ? "opacity-50" : ""}`}
+          className={`bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mr-2 ${
+            filterType === "month" ? "opacity-50" : ""
+          }`}
         >
           Month Filter
         </button>
         <button
           onClick={() => handleFilterTypeChange("time")}
-          className={`bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded ${filterType === "time" ? "opacity-50" : ""}`}
+          className={`bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded ${
+            filterType === "time" ? "opacity-50" : ""
+          }`}
         >
           Time Range Filter
         </button>
@@ -312,7 +393,9 @@ const Prediction = () => {
               onChange={handleTimeRangeChange}
               className="bg-gray-50 border border-gray-300 text-gray-900 text-sm sm:text-xs rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
             >
-              <option value="" disabled>Select time range</option>
+              <option value="" disabled>
+                Select time range
+              </option>
               {timeRanges.map((range) => (
                 <option key={range.label} value={range.label}>
                   {range.label}
@@ -374,13 +457,32 @@ const Prediction = () => {
           onClick={generateAnalysisText}
           className="ml-4 bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded"
         >
-          Get Analysis Text
+          Get Prediction
         </button>
       )}
+
+      {showProgressBar && (
+        <ProgressBar
+          visible={true}
+          height="80"
+          width="80"
+          color="#4fa94d"
+          ariaLabel="progress-bar-loading"
+          wrapperStyle={{}}
+          wrapperClass=""
+        />
+      )}
+
       <div className="mt-4">
-        <h3 className="text-lg font-bold">Analysis Result:</h3>
-        <p dangerouslySetInnerHTML={{ __html: analysisText || 'Click "Get Analysis Text" to view the result.' }} />
-        <h3 className="text-lg font-bold">Prediction and Deployment plan for Top 10 crime :</h3>
+        {/* <h3 className="text-lg font-bold">Analysis Result:</h3>
+        <div dangerouslySetInnerHTML={{ __html: analysisText || 'Click "Get Analysis Text" to view the result.' }} /> */}
+        {/* <div className="mt-4">
+          <h3 className="text-lg font-bold">Detailed Analysis Result:</h3>
+          <div>{analysisResult || "Click 'Get Analysis Text' to view the result."}</div>
+        </div> */}
+        <h3 className="text-lg font-bold">
+          Prediction and Deployment plan for Top 10 crime :
+        </h3>
         <ul>
           {details.topCrimes &&
             details.topCrimes.map((crime, index) => (
@@ -392,15 +494,27 @@ const Prediction = () => {
                     onChange={(e) => handleCrimeTypeChange(e, crime.value)}
                   />
                   {` ${crime.value} (${(
-                    (crime.freq / totalCases) * 100
-                  ).toFixed(2)}% of the police force should get deployed to corresponding latitude and longitude positions show in map to control ${crime.value})`}
+                    (crime.freq / totalCases) *
+                    100
+                  ).toFixed(
+                    2
+                  )}% of the police force should get deployed to corresponding latitude and longitude positions show in map to control ${
+                    crime.value
+                  })`}
                 </label>
               </li>
             ))}
         </ul>
+        <div className="mt-4">
+          <h3 className="text-lg font-bold">Detailed Analysis Result:</h3>
+          <div>
+            {analysisResult || "Click 'Get Analysis Text' to view the result."}
+          </div>
+        </div>
       </div>
     </div>
   );
 };
 
+export default Prediction;
 export default Prediction;
