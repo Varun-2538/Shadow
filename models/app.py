@@ -15,7 +15,7 @@ app = FastAPI()
 # Enable CORS for all routes and domains
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["https://shadow-gallants.vercel.app"],
+    allow_origins=["https://shadow-gallants.vercel.app/"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
