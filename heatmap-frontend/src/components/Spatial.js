@@ -260,29 +260,26 @@ const Spatial = () => {
         police_station: selectedUnit,
       })
       .then((response) => {
-        // Hide progress bar
         setShowProgressBar(false);
-        const analysis = response.data.analysis;
-  
-        if (analysis) {
+        if (response.data && response.data.analysis) {
           // Split the analysis text into bullet points
-          const bulletPoints = analysis
+          const bulletPoints = response.data.analysis
             .split("\n")
             .map((point, index) => <li key={index}>{point}</li>);
           // Set the analysis result with bullet points
           setAnalysisResult(<ul>{bulletPoints}</ul>);
         } else {
-          // Handle the case where analysis is undefined
+          // Handle the case where analysis is undefined or not provided
           setAnalysisResult("No analysis data available.");
         }
       })
       .catch((error) => {
-        // Hide progress bar on error too
         setShowProgressBar(false);
         console.error("Error fetching analysis:", error);
-        setAnalysisResult("Error fetching analysis.");
+        setAnalysisResult("Error fetching analysis: " + error.message);
       });
   };
+  
   
 
   return (
