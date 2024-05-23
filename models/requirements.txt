@@ -6,3 +6,4 @@ numpy
 subprocess.run
 gunicorn
 python-dotenv
+flask
