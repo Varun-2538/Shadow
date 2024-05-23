@@ -8,7 +8,7 @@ const app = express();
 
 // Configure CORS for production (update your allowed origins as needed)
 const corsOptions = {
-  origin: ['https://gallants-ksp-2.onrender.com'], // Replace with your actual frontend URL for production
+  origin: ['https://shadow-gallants.vercel.app'], // Replace with your actual frontend URL for production
   optionsSuccessStatus: 200 // For legacy browser support
 };
 
