@@ -16,20 +16,18 @@ app.use(cors(corsOptions));
 app.use(express.json());
 app.use(bodyParser.json());
 
-// Get the project directory
-const projectDir = path.dirname(path.dirname(path.dirname(__filename)));
+// Get the absolute path to the dataset directory
+const datasetDir = path.join(__dirname, 'dataset');
 
 // Utility function to read CSV and filter based on selection
 const readCSV = (filterColumn = null, filterValue = null) => {
   return new Promise((resolve, reject) => {
     const results = [];
-    const csvFilePath = path.join(
-      projectDir,
-      "Shadow",
-      "heatmap-backend",
-      "dataset",
-      "merged_data_cleaned.csv"
-    );
+    const csvFilePath = path.join(datasetDir, 'merged_data_cleaned.csv');
+    
+    // Debug logging
+    console.log("CSV File Path: ", csvFilePath);
+
     fs.createReadStream(csvFilePath)
       .pipe(csv())
       .on("data", (row) => {
@@ -40,7 +38,10 @@ const readCSV = (filterColumn = null, filterValue = null) => {
       .on("end", () => {
         resolve(results);
       })
-      .on("error", reject);
+      .on("error", (error) => {
+        console.error("Error reading CSV file:", error);
+        reject(error);
+      });
   });
 };
 
@@ -54,7 +55,7 @@ app.get("/api/districts", async (req, res) => {
   }
 });
 
-const entriesFilePath = path.join(__dirname, "dataset", "entries.csv");
+const entriesFilePath = path.join(datasetDir, "entries.csv");
 
 // Function to write data to CSV file
 const writeDataToCSV = (data) => {
