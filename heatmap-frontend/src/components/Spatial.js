@@ -263,19 +263,27 @@ const Spatial = () => {
         // Hide progress bar
         setShowProgressBar(false);
         const analysis = response.data.analysis;
-        // Split the analysis text into bullet points
-        const bulletPoints = analysis
-          .split("\n")
-          .map((point, index) => <li key={index}>{point}</li>);
-        // Set the analysis result with bullet points
-        setAnalysisResult(<ul>{bulletPoints}</ul>);
+  
+        if (analysis) {
+          // Split the analysis text into bullet points
+          const bulletPoints = analysis
+            .split("\n")
+            .map((point, index) => <li key={index}>{point}</li>);
+          // Set the analysis result with bullet points
+          setAnalysisResult(<ul>{bulletPoints}</ul>);
+        } else {
+          // Handle the case where analysis is undefined
+          setAnalysisResult("No analysis data available.");
+        }
       })
       .catch((error) => {
         // Hide progress bar on error too
         setShowProgressBar(false);
         console.error("Error fetching analysis:", error);
+        setAnalysisResult("Error fetching analysis.");
       });
   };
+  
 
   return (
     <div className="min-h-screen container bg-gradient-to-b from-indigo-950 via-gray-800 to-stone-950 text-white mx-auto px-4 pt-4 sm:px-2">
