@@ -7,3 +7,4 @@ subprocess.run
 gunicorn
 python-dotenv
 flask
+flask_cors
