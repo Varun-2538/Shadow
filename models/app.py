@@ -150,7 +150,9 @@ async def read_csv():
         return {"error": str(e), "traceback": traceback_str}
 
 # Run the FastAPI app in debug mode on port 8000
+# Run the FastAPI app in debug mode on port 8000
 if __name__ == "__main__":
     import uvicorn
     port = int(os.environ.get("PORT", 8000))
-uvicorn.run(app, host="0.0.0.0", port=port, log_level="debug")
+    uvicorn.run(app, host="0.0.0.0", port=port, log_level="debug")
+
