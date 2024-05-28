@@ -8,6 +8,7 @@ from beatwise import generate_beatwise_analysis
 from prediction import generate_crime_prediction
 from deployment import generate_deployment_plan
 import traceback
+import uvicorn
 
 # Create FastAPI app instance
 app = FastAPI()
