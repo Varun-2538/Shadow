@@ -373,7 +373,7 @@ const Prediction = () => {
       </button>
   
       <div className="mt-4">
-        <h3 className="text-lg font-bold mb-2">Map View:</h3>
+        <h3 className="text-lg font-bold mb-2">Map View: Check box to get over map prediction</h3>
         <MapContainer
           center={[14.5204, 75.7224]}
           zoom={6}
